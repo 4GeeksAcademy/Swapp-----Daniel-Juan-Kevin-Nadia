@@ -1,0 +1,21 @@
+.logo {
+  width: 200px;
+  height: 150px;
+}
+.mujer-radio {
+  border-radius: 0;
+}
+.label-hombre,
+.label-mujer,
+.label-personalizado {
+  padding-right: 10px;
+}
+.btn-main1 {
+  background-color: #ff7517;
+  color: #3e3939;
+}
+.btn-main2 {
+  background-color: #f6f4f4;
+  border-color: #ff7517;
+  color: #3e3939;
+}
