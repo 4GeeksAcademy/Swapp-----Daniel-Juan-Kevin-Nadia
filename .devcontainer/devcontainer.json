@@ -1,5 +1,5 @@
 {
-	"name": "swappTemplate",
+	"name": "swapp",
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
@@ -37,5 +37,5 @@
 	"containerEnv": {
 		"CHOKIDAR_USEPOLLING": "true"
 	},
-	"postCreateCommand": "sh .devcontainer/post_create.sh"
+	"postCreateCommand": "zsh .devcontainer/cfg.sh"
 }
