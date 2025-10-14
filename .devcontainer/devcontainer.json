@@ -22,9 +22,9 @@
 				"christian-kohler.npm-intellisense"
 			],
 			"settings": {
-				"python.linting.enabled": true,
-				"python.linting.flake8Enabled": true,
-				"python.formatting.provider": "black",
+				// "python.linting.enabled": true,
+				// "python.linting.flake8Enabled": true,
+				// "python.formatting.provider": "black",
 				// "python-envs.defaultEnvManager": "ms-python.python:pipenv",
 				"editor.formatOnSave": true
 			}
