@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/swapp_logo.svg'
-import './App.css'
+import viteLogo from '/logo.webp'
+import '../styles/App.css'
 
 export default function App() {
   const [count, setCount] = useState(0)
@@ -11,9 +10,6 @@ export default function App() {
       <div>
         <a href="#" target="_blank">
           <img src={viteLogo} className="logo" alt="Swapp logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
       <h1>Swapp</h1>

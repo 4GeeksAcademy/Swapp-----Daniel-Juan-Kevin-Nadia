@@ -1,5 +1,5 @@
 {
-	"name": "swappTemplate",
+	"name": "swapp",
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
@@ -7,14 +7,14 @@
 		"vscode": {
 			"extensions": [
 				// --- Backend ---
-				"ms-python.python",
-				"ms-python.vscode-pylance",
-				"LittleFoxTeam.vscode-python-test-adapter",
-				"humao.rest-client",
-				"esbenp.prettier-vscode",
-				"ms-python.pylint",
-				"ms-python.flake8",
-				"oderwat.indent-rainbow",
+				// "ms-python.python",
+				// "ms-python.vscode-pylance",
+				// "LittleFoxTeam.vscode-python-test-adapter",
+				// "humao.rest-client",
+				// "esbenp.prettier-vscode",
+				// "ms-python.pylint",
+				// "ms-python.flake8",
+				// "oderwat.indent-rainbow",
 				// --- Frontend ---
 				"dsznajder.es7-react-js-snippets",
 				"formulahendry.auto-rename-tag",
@@ -25,7 +25,7 @@
 				"python.linting.enabled": true,
 				"python.linting.flake8Enabled": true,
 				"python.formatting.provider": "black",
-				"python-envs.defaultEnvManager": "ms-python.python:pipenv",
+				// "python-envs.defaultEnvManager": "ms-python.python:pipenv",
 				"editor.formatOnSave": true
 			}
 		}
@@ -37,5 +37,5 @@
 	"containerEnv": {
 		"CHOKIDAR_USEPOLLING": "true"
 	},
-	"postCreateCommand": "sh .devcontainer/post_create.sh"
+	"postCreateCommand": "zsh .devcontainer/cfg.sh"
 }
