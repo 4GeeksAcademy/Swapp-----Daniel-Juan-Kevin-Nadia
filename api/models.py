@@ -1,7 +1,7 @@
 """
     Models of Swapp
 """
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -22,8 +22,8 @@ class Usuario(db.Model):
     genero = db.Column(db.String(20))
     foto_perfil = db.Column(db.String(255))
     descripcion = db.Column(db.Text)
-    fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
     estado = db.Column(db.Boolean, default=True)
+    fecha_registro = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     habilidades = db.relationship(
         "Habilidad",
@@ -39,6 +39,23 @@ class Usuario(db.Model):
 
     def __repr__(self):
         return f"<Usuario {self.nombre} {self.apellido}>"
+
+    def to_dict(self):
+        """
+            Seralize the attr of Usuario
+        """
+        return {
+            "id_usuario": self.id_usuario,
+            "nombre": self.nombre,
+            "apellido": self.apellido,
+            "correo_electronico": self.correo_electronico,
+            "fecha_nacimiento": self.fecha_nacimiento,
+            "foto_perfil": self.foto_perfil,
+            "genero": self.genero,
+            "descripcion": self.descripcion,
+            "estado": self.estado,
+            "fecha_registro": self.fecha_registro
+        }
 
 
 class Categoria(db.Model):

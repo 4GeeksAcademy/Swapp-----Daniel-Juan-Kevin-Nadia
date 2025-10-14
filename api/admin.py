@@ -4,12 +4,11 @@
 import os
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from .models import db
-from .models import Usuario
-from .models import Categoria
-from .models import Habilidad
-from .models import UsuarioHabilidad
-from .models import Mensaje
+from models import db
+from models import Usuario
+from models import Categoria
+from models import Habilidad
+from models import Mensaje
 
 
 def setup_admin(app):
@@ -20,5 +19,4 @@ def setup_admin(app):
     admin.add_view(ModelView(Usuario, db.session))
     admin.add_view(ModelView(Categoria, db.session))
     admin.add_view(ModelView(Habilidad, db.session))
-    admin.add_view(ModelView(UsuarioHabilidad, db.session))
     admin.add_view(ModelView(Mensaje, db.session))

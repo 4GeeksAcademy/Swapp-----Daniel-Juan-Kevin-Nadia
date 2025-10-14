@@ -1,0 +1,54 @@
+### Obtener la lista de los Usuarios (GET)
+GET http://localhost:5000/api/usuarios
+Accept: application/json
+
+###
+
+### Obtener Usuario por ID (GET)
+GET http://localhost:5000/api/usuarios/1
+Accept: application/json
+
+###
+
+### Añadir un Usuario (POST)
+POST http://localhost:5000/api/usuarios
+Content-Type: application/json
+Accept: application/json
+
+{
+    "nombre": "Ramon",
+    "apellido": "Ramirez",
+    "correo_electronico": "ramon.ramirez@example.com",
+    "fecha_nacimiento": "1997-10-14",
+    "contrasena": "123456789",
+    "foto_perfil": "...",
+    "genero": "masculino",
+    "descripcion": "...",
+    "estado": false,
+    "fecha_registro": "2025-10-14 22:50:16"
+}
+
+###
+
+### Actualizar datos de usuario (PUT)
+PUT http://localhost:5000/api/usuarios/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "nombre": "Ramon",
+    "apellido": "Ramirez",
+    "correo_electronico": "ramon.ramirez@example.com",
+    "fecha_nacimiento": "1997-10-14",
+    "contrasena": "123456789",
+    "foto_perfil": "...",
+    "genero": "masculino",
+    "descripcion": "...",
+    "estado": false,
+}
+
+###
+
+### Borrar/Eliminar un Usuario (DELETE)
+DELETE http://localhost:5000/api/usuarios/1
+Accept: application/json
