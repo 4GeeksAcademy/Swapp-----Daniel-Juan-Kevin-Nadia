@@ -13,7 +13,6 @@ def obtener_usuarios():
         Obtener Usuarios
     """
     users = Usuario.query.all()
-    print(users)
     return jsonify([u.to_dict() for u in users])
 
 
