@@ -1,4 +1,5 @@
-import "./App.css";
+import "../styles/Navbar.css";
+
 function Navbar() {
   return (
     <>
@@ -8,7 +9,7 @@ function Navbar() {
             className="navbar-brand d-flex  align-items-center logo-container"
             href="#"
           >
-            <img className="logo" src="logo.webp" />
+            <img className="logo" src="logo swapp.webp" />
           </a>
 
           <form className="d-flex flex-grow-1 mx-3" role="search">

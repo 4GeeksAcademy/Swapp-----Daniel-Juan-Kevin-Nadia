@@ -1,0 +1,23 @@
+.carousel-item {
+  background-color: #f6f4f4;
+  height: 500px;
+}
+.carousel-item img {
+  width: 600px;
+  height: 100%;
+  object-fit: contain;
+  object-position: right;
+}
+.slide-text {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3e3939;
+  padding: 0.5rem;
+  max-width: 40%;
+}
+
+/* Posiciones personalizadas */
+.slide-text.left {
+  left: 3%;
+}

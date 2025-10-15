@@ -1,0 +1,9 @@
+.logo-container-footer {
+  width: 150px;
+  height: 80px;
+}
+.logo {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
