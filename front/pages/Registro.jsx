@@ -1,5 +1,6 @@
 import "../assets/styles/Registro.css";
 import React, { useState } from "react";
+import { registrarUsuario } from "../services/api";
 
 function Registro() {
   const [formData, setFormData] = useState({
@@ -28,6 +29,34 @@ function Registro() {
     }));
   };
 
+  const handleSubmit = async(e) =>{
+    e.preventDefault()
+
+    try{
+      const data = registrarUsuario(formData)
+      console.log(data);
+      alert("Resgitro exitoso!")
+    } catch (error){
+       alert("Hubo un error al registrar!")
+    }
+
+    setFormData({
+      nombre: "",
+      apellidos: "",
+      dia: "",
+      mes: "",
+      anio: "",
+      genero: "",
+      habilidad: "",
+      descripcion: "",
+      email: "",
+      contrasena: "",
+      aceptaTerminos: false,
+    })
+
+  }
+
+
   return (
     <div className="container">
       <div className="row d-flex justify-content-center">
@@ -36,10 +65,11 @@ function Registro() {
             <img className="logo-registro" src="logo swapp.webp"></img>
           </div>
 
-          <form className="text-start">
+          <form className="text-start" onSubmit={handleSubmit}>
             <h5 className="text-start my-3">Únete a Swapp!</h5>
             <div className="d-flex gap-2">
               <input
+                name="nombre"
                 onChange={handleChange}
                 value={formData.nombre}
                 type="text"
@@ -50,6 +80,7 @@ function Registro() {
               />
 
               <input
+                name="apellidos"
                 onChange={handleChange}
                 value={formData.apellidos}
                 type="text"
@@ -237,6 +268,7 @@ function Registro() {
 
             <div className="form-group mt-3">
               <input
+                name="email"
                 onChange={handleChange}
                 value={formData.email}
                 type="email"
@@ -248,6 +280,7 @@ function Registro() {
             </div>
             <div className="form-group">
               <input
+                name="contrasena"
                 onChange={handleChange}
                 value={formData.contrasena}
                 type="password"
