@@ -1,4 +1,5 @@
 import "../styles/Navbar.css";
+import { Link } from "react-router-dom";
 
 function Navbar() {
   return (
@@ -9,7 +10,7 @@ function Navbar() {
             className="navbar-brand d-flex  align-items-center logo-container"
             href="#"
           >
-            <img className="logo" src="logo swapp.webp" />
+            <img className="logo-navbar" src="logo swapp.webp" />
           </a>
 
           <form className="d-flex flex-grow-1 mx-3" role="search">
@@ -25,9 +26,9 @@ function Navbar() {
           </form>
           {/* <h5>Swapp, donde todo tiene otro valor.</h5> */}
           <div className="d-flex">
-            <button className="btn btn-main1 me-2" type="submit">
+            <Link to="/registro" className="btn btn-main1 me-2" type="submit">
               Regístrate
-            </button>
+            </Link>
             <button className="btn btn-main1" type="submit">
               Inicia sesión
             </button>

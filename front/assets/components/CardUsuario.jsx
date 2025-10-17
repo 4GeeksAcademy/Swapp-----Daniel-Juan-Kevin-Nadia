@@ -16,11 +16,11 @@ function CardUsuario() {
   return (
     <>
       <div className="container-fluid mt-5">
-        <h3 className="text-center">Recomendados</h3>
+        <h3 className="text-center texto-recomendados">Recomendados</h3>
         <div className="row mt-5">
           {usuarios.map((usuario) => (
-            <div className="col-md-4 mb-4" key={usuario.id}>
-              <div className="card  h-100">
+            <div className="col-md-4 mb-4 " key={usuario.id}>
+              <div className="card  h-100 mx-2" >
                 <div className="card-header d-flex justify-content-between">
                   <img
                     src={usuario.foto_perfil || "No hay foto"}
@@ -35,7 +35,7 @@ function CardUsuario() {
                   <h5 className="card-title  text-center">
                     {usuario.nombre} {usuario.apellidos}
                   </h5>
-                  <p className="card-text  text-center">
+                  <p className="card-text  text-center text-limit ">
                     {usuario.descripcion || "Sin descripción"}
                   </p>
                 </div>

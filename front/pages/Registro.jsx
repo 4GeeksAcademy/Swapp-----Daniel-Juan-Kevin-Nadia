@@ -1,4 +1,4 @@
-import "./styles/Registro.css";
+import "../assets/styles/Registro.css";
 import React, { useState } from "react";
 
 function Registro() {
@@ -33,7 +33,7 @@ function Registro() {
       <div className="row d-flex justify-content-center">
         <div className="col-6">
           <div className="d-flex justify-content-center align-items-center">
-            <img className="logo" src="logo.webp"></img>
+            <img className="logo-registro" src="logo swapp.webp"></img>
           </div>
 
           <form className="text-start">

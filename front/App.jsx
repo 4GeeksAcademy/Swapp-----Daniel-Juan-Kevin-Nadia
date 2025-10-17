@@ -1,16 +1,16 @@
 import "./assets/styles/App.css";
-import Navbar from "./assets/components/Navbar";
-import Footer from "./assets/components/Footer";
-import Carousel from "./assets/components/Carousel";
-import CardUsuario from "./assets/components/CardUsuario";
+import { Routes, Route } from "react-router-dom";
+
+import Home from "./pages/Home";
+import Registro from "./pages/Registro";
 
 export default function App() {
   return (
     <>
-      <Navbar></Navbar>
-      <Carousel></Carousel>
-      <CardUsuario></CardUsuario>
-      <Footer></Footer>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/registro" element={<Registro />} />
+      </Routes>
     </>
   );
 }

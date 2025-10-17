@@ -6,7 +6,7 @@ function Footer() {
       <div className="container-fluid mt-5">
         <div className="row links-footer">
           <div className="col-2  logo-container-footer">
-            <img className="logo" src="logo swapp.webp"></img>
+            <img className="logo-footer" src="logo swapp.webp"></img>
           </div>
           <div className="col-3">
             <h5>Swapp</h5>
