@@ -58,3 +58,32 @@ def crear_usuario():
     return jsonify(
         {"mensaje": "Usuario creado", "id":
             usr.id_usuario}), 201
+
+
+@usuarios.route('/api/usuarios/<int:id_usuario>', methods=['PUT'])
+def actualizar_usuario(id_usuario):
+    """
+        Actualizar usuario
+    """
+    actualizar = Usuario.query.get_or_404(id_usuario)
+    data = request.get_json()
+    print(data)
+
+    actualizar.nombre = data.get('nombre', actualizar.nombre)
+    actualizar.apellido = data.get('apellido', actualizar.apellido)
+    actualizar.contrasena = data.get('contrasena', actualizar.contrasena)
+    actualizar.descripcion = data.get('descripcion', actualizar.descripcion)
+    if 'fecha_nacimiento' in data:
+        actualizar.fecha_nacimiento = datetime.strptime(
+            data['fecha_nacimiento'], "%Y-%m-%d"
+        ).date()
+    actualizar.genero = data.get('genero', actualizar.genero)
+    actualizar.correo_electronico = data.get(
+        'correo_electronico', actualizar.correo_electronico)
+    actualizar.foto_perfil = data.get(
+        'foto_perfil', actualizar.foto_perfil)
+    actualizar.estado = data.get('estado', actualizar.estado)
+
+    db.session.commit()
+    return jsonify({"mensaje": "Usuario actualizado", "actualizado":
+                    actualizar.to_dict()}), 200

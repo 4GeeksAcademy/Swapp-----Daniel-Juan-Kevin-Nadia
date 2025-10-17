@@ -16,39 +16,38 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "nombre": "Ramon",
+    "nombre": "loquita",
     "apellido": "Ramirez",
-    "correo_electronico": "pepino.ramirez@example.com",
+    "correo_electronico": "diego.ramirez@example.com",
     "fecha_nacimiento": "1997-10-14",
     "contrasena": "123456789",
     "foto_perfil": "...",
     "genero": "masculino",
     "descripcion": "...",
     "estado": false,
-    "fecha_registro": "2025-10-14 22:50:16"
 }
 
 ###
 
 ### Actualizar datos de usuario (PUT)
-PUT http://localhost:5000/api/usuarios/1
+PUT http://localhost:5000/api/usuarios/3
 Content-Type: application/json
 Accept: application/json
 
 {
-    "nombre": "Ramon",
+    "nombre": "diego",
     "apellido": "Ramirez",
-    "correo_electronico": "ramon.ramirez@example.com",
+    "correo_electronico": "molo.ramirez@example.com",
     "fecha_nacimiento": "1997-10-14",
     "contrasena": "123456789",
     "foto_perfil": "...",
     "genero": "masculino",
     "descripcion": "...",
-    "estado": false,
+    "estado": false
 }
 
 ###
 
 ### Borrar/Eliminar un Usuario (DELETE)
-DELETE http://localhost:5000/api/usuarios/1
+DELETE http://localhost:5000/api/usuarios/2
 Accept: application/json
