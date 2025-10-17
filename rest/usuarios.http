@@ -18,7 +18,7 @@ Accept: application/json
 {
     "nombre": "Ramon",
     "apellido": "Ramirez",
-    "correo_electronico": "ramon.ramirez@example.com",
+    "correo_electronico": "pepino.ramirez@example.com",
     "fecha_nacimiento": "1997-10-14",
     "contrasena": "123456789",
     "foto_perfil": "...",
