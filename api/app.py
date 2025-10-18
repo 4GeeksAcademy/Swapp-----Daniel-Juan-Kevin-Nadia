@@ -48,4 +48,3 @@ def sitemap():
 
 
 app.register_blueprint(usuarios)
-
