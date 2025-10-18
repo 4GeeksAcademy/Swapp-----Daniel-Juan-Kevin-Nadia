@@ -11,6 +11,8 @@ from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db
 from urls.usuario import usuarios
+from urls.habilidades import habilidades
+
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -48,3 +50,4 @@ def sitemap():
 
 
 app.register_blueprint(usuarios)
+app.register_blueprint(habilidades)

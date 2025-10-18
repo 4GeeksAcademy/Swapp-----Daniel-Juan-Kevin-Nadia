@@ -94,6 +94,18 @@ class Habilidad(db.Model):
     def __repr__(self):
         return f"<Habilidad {self.nombre_habilidad}>"
 
+    def to_dict(self):
+        """
+            Seralize the attr of Habilidad
+        """
+        return {
+            "id_habilidad": self.id_habilidad,
+            "nombre_habilidad": self.nombre_habilidad,
+            "descripcion": self.descripcion,
+            "categoria_nombre": self.id_categoria.nombre_categoria
+            if self.categoria else None
+        }
+
 
 class UsuarioHabilidad(db.Model):
     """
