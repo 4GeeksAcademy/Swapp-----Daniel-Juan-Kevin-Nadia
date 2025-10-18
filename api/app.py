@@ -3,6 +3,7 @@
     Loading the DB and Adding the endpoints
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 from flask import Flask, jsonify
 from flask_migrate import Migrate
@@ -11,6 +12,7 @@ from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db
 from urls.usuario import usuarios
+from flask_jwt_extended import JWTManager
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -28,11 +30,13 @@ else:
 print(f" * Base de datos usada: {DB_URL}")
 app.config["SQLALCHEMY_DATABASE_URI"] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=6)
 
 MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
 setup_admin(app)
+jwt = JWTManager(app)
 
 
 @app.errorhandler(APIException)

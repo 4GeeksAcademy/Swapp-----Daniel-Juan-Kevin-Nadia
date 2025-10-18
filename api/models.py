@@ -3,6 +3,7 @@
 """
 from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
 
@@ -17,13 +18,27 @@ class Usuario(db.Model):
     nombre = db.Column(db.String(100), nullable=False)
     apellido = db.Column(db.String(100), nullable=False)
     correo_electronico = db.Column(db.String(150), unique=True, nullable=False)
-    contrasena = db.Column(db.String(255), nullable=False)
+    _contrasena = db.Column("contrasena", db.String(255), nullable=False)
     fecha_nacimiento = db.Column(db.Date)
     genero = db.Column(db.String(20))
     foto_perfil = db.Column(db.String(255))
     descripcion = db.Column(db.Text)
     estado = db.Column(db.Boolean, default=True)
     fecha_registro = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+
+    @property
+    def contrasena(self):
+        """No se puede obtener la contraseña"""
+        raise AttributeError("La contraseña no es un atributo legible")
+
+    @contrasena.setter
+    def contrasena(self, contrasena):
+        """Establecer una contraseña"""
+        self._contrasena = generate_password_hash(contrasena)
+
+    def verificar_contrasena(self, contrasena):
+        """Verificar la contraseña"""
+        return check_password_hash(self._contrasena, contrasena)
 
     habilidades = db.relationship(
         "Habilidad",
@@ -127,7 +142,7 @@ class Mensaje(db.Model):
         "usuarios.id_usuario", onupdate="CASCADE",
         ondelete="CASCADE"), nullable=False)
     contenido = db.Column(db.Text, nullable=False)
-    fecha_envio = db.Column(db.DateTime, default=datetime.utcnow)
+    fecha_envio = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     visto = db.Column(db.Boolean, default=False)
 
     emisor = db.relationship(

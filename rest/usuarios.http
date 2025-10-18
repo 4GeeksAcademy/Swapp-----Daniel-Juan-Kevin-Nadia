@@ -16,21 +16,21 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "nombre": "loquita",
-    "apellido": "Ramirez",
-    "correo_electronico": "diego.ramirez@example.com",
-    "fecha_nacimiento": "1997-10-14",
-    "contrasena": "123456789",
+    "nombre": "Pedro",
+    "apellido": "Cisneros",
+    "correo_electronico": "pedro.cisneros@example.com",
+    "fecha_nacimiento": "1998-10-14",
+    "contrasena": "abc&123456789",
     "foto_perfil": "...",
     "genero": "masculino",
-    "descripcion": "...",
-    "estado": false,
+    "descripcion": "Me defino como un hombre proactivo",
+    "estado": false
 }
 
 ###
 
 ### Actualizar datos de usuario (PUT)
-PUT http://localhost:5000/api/usuarios/3
+PUT http://localhost:5000/api/usuarios/5
 Content-Type: application/json
 Accept: application/json
 
@@ -51,3 +51,22 @@ Accept: application/json
 ### Borrar/Eliminar un Usuario (DELETE)
 DELETE http://localhost:5000/api/usuarios/2
 Accept: application/json
+
+###
+
+### Verificar Autorización (GET)
+GET http://localhost:5000/api/autorizacion
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MDgwMTk4NCwianRpIjoiYWNkN2YyOTYtYjIxZC00ZGVlLWJkYjMtN2VjNzMwMWFkZWYzIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6InBlZHJvLmNpc25lcm9zQGV4YW1wbGUuY29tIiwibmJmIjoxNzYwODAxOTg0LCJjc3JmIjoiODU4YzYyMDMtMjMyMS00Y2MzLTlkNmQtYjNmNTE1OWE1ZmE5IiwiZXhwIjoxNzYwODIzNTg0fQ.09QiNhK0-uVrI-HF1Fo6M37msIkqX8wiPNk4uwIs_2k
+Accept: application/json
+
+###
+
+### Solicitar Autorización (POST)
+POST http://localhost:5000/api/autorizar
+Content-Type: application/json
+Accept: application/json
+
+{
+    "correo_electronico": "pedro.cisneros@example.com",
+    "contrasena": "abc&123456789"
+}
