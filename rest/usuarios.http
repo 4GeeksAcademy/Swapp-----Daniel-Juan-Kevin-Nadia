@@ -35,7 +35,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "nombre": "diego",
+    "nombre": "marta",
     "apellido": "Ramirez",
     "correo_electronico": "molo.ramirez@example.com",
     "fecha_nacimiento": "1997-10-14",
