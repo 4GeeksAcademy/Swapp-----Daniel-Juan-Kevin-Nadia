@@ -8,4 +8,8 @@ body {
   /* width: 100%; */
   margin: 0 auto;
   /* padding: 2rem; */
+  --naranja: #ff7517;
+  --gris-oscuro: #3e3939;
+  --oscuro: #2c2727;
+  --claro: #f6f4f4;
 }

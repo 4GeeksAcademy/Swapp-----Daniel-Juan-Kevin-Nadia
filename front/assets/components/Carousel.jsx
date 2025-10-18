@@ -3,7 +3,7 @@ import "../styles/Carousel.css";
 function Carousel() {
   return (
     <>
-      <div className="container-fluid mt-5">
+      <div className="container-fluid mt-3">
         <div className="row">
           <div className="col">
             <div
