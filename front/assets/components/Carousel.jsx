@@ -20,7 +20,7 @@ function Carousel() {
                     alt="Imagen 1"
                   />
                   <div className="slide-text left">
-                    <h3>Intercambia tiempo, no dinero</h3>
+                    <h3 className="fw-bold">Intercambia tiempo, no dinero.</h3>
                     <br></br>
                     <p className="fs-5">
                       En <strong>Swapp</strong>, compartes lo que sabes y
@@ -36,7 +36,9 @@ function Carousel() {
                     alt="Imagen 2"
                   />
                   <div className="slide-text left">
-                    <h3>Aprende enseñando, enseña aprendiendo</h3>
+                    <h3 className="fw-bold">
+                      Aprende enseñando, enseña aprendiendo.
+                    </h3>
                     <br></br>
                     <p className="fs-5">
                       Conecta con personas de todo el mundo y <br></br>{" "}
@@ -52,13 +54,13 @@ function Carousel() {
                     alt="Imagen 3"
                   />
                   <div className="slide-text left">
-                    <h3>Únete al trueque del conocimiento</h3>
+                    <h3 className="fw-bold">
+                      Únete al trueque del conocimiento!
+                    </h3>
                     <br></br>
                     <p className="fs-5">
                       Crea tu perfil, comparte tus habilidades, descubre nuevas
                       pasiones y haz tu primer <strong>Swapp</strong> hoy.
-                      <br />
-                      #ComparteTuTalento
                     </p>
                   </div>
                 </div>

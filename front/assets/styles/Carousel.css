@@ -17,7 +17,45 @@
   max-width: 40%;
 }
 
-/* Posiciones personalizadas */
 .slide-text.left {
   left: 3%;
+}
+
+@media (max-width: 768px) {
+  .carousel-item {
+    height: auto;
+    overflow: visible;
+  }
+
+  .carousel-item img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  .slide-text {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    max-width: 100%;
+
+    margin-top: 1rem;
+    padding: 0 1rem;
+    z-index: 1;
+    color: #3e3939;
+  }
+
+  .slide-text.left {
+    left: auto;
+  }
+
+  .slide-text h3 {
+    font-size: 20px;
+  }
+  .slide-text p {
+    font-size: 8px;
+    line-height: 1.2;
+  }
 }
