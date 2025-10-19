@@ -1,6 +1,7 @@
-.logo {
+.logo-registro{
   width: 200px;
-  height: 150px;
+  height: 100px;
+  object-fit: contain;
 }
 .mujer-radio {
   border-radius: 0;

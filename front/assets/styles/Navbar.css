@@ -1,0 +1,100 @@
+.logo-container {
+  width: 200px;
+  height: 80px;
+}
+.logo-navbar {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+.input-group input {
+  border-color: var(--naranja);
+}
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+  border-color: var(--naranja);
+  box-shadow: 0 0 6px var(--naranja);
+}
+
+.btn-main1 {
+  background-color: var(--naranja);
+  color: var(--gris-oscuro);
+}
+.btn-main2 {
+  background-color: var(--claro);
+  border-color: var(--naranja);
+  color: var(--gris-oscuro);
+}
+.offcanvas-header {
+  padding: 6px 12px;
+}
+.offcanvas-title {
+  padding: 6px 12px;
+}
+.offcanvas-body {
+  padding: 0 16px;
+}
+.offcanvas-body ul.list-unstyled li {
+  margin-bottom: 8px; /* espacio entre categorías */
+}
+
+.offcanvas-body ul.list-unstyled li a,
+.navbar-nav li a,
+.boton-hamburguer {
+  display: block;
+  padding: 8px 12px; /* espacio interno */
+  color: #333; /* color de texto */
+  text-decoration: none; /* quitar subrayado */
+  border-radius: 5px; /* bordes redondeados */
+  transition: background-color 0.2s;
+}
+
+.offcanvas-body ul.list-unstyled li a:hover,
+.navbar-nav li a:hover,
+.boton-hamburguer {
+  background-color: #f0f0f0; /* fondo al pasar el mouse */
+  padding-left: 16px; /* efecto de sangría al hover */
+}
+
+.offcanvas.no-scroll .offcanvas-body {
+  overflow-y: hidden !important;
+}
+
+/* 🔹 Si quieres que el offcanvas nunca sobrepase la altura de la ventana */
+.offcanvas.no-scroll {
+  max-height: 100vh;
+}
+
+/* 🔹 Opcional: si quieres permitir que el contenido haga scroll cuando sea demasiado largo, pero sin mostrar la barra visible */
+.offcanvas.no-scroll .offcanvas-body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE y Edge */
+}
+
+.offcanvas.no-scroll .offcanvas-body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+@media (max-width: 576px) {
+  .logo-container {
+    width: 100px;
+    height: 50px;
+  }
+
+  .navbar-nav {
+    display: none;
+  }
+  .navbar .btn.btn-outline-secondary {
+    height: 42px;
+    width: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 🔹 Ajusta margen entre el buscador y el botón */
+  .navbar .input-group {
+    flex: 1;
+  }
+}
