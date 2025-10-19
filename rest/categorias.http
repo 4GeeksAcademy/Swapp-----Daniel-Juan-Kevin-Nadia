@@ -1,0 +1,37 @@
+### Obtener todas las categorías (GET)
+GET http://localhost:5000/api/categorias
+Accept: application/json
+
+###
+
+### Obtener una categoría por ID (GET)
+GET http://localhost:5000/api/categorias/1
+Accept: application/json
+
+###
+
+### Crear una categoría (POST)
+POST http://localhost:5000/api/categorias
+Content-Type: application/json
+Accept: application/json
+
+{
+    "nombre_categoria": "Cocinero"
+}
+
+###
+
+### Actualizar una categoría (PUT)
+PUT http://localhost:5000/api/categorias/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "nombre_categoria": "Ingeniero"
+}
+
+###
+
+### Eliminar una categoría (DELETE)
+DELETE http://localhost:5000/api/categorias/2
+Accept: application/json

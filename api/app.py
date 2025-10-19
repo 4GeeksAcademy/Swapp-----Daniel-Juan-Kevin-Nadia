@@ -11,9 +11,10 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db
-from urls.usuario import usuarios
 from flask_jwt_extended import JWTManager
+from urls.usuario import usuarios
 from urls.habilidades import habilidades
+from urls.categorias import categorias
 
 
 app = Flask(__name__)
@@ -55,3 +56,4 @@ def sitemap():
 
 app.register_blueprint(usuarios)
 app.register_blueprint(habilidades)
+app.register_blueprint(categorias)

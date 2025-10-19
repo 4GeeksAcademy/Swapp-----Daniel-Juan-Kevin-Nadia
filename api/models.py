@@ -75,7 +75,7 @@ class Usuario(db.Model):
 
 class Categoria(db.Model):
     """
-        Model: Categorias
+            Model: Categorias
     """
     __tablename__ = "categorias"
 
@@ -86,6 +86,12 @@ class Categoria(db.Model):
 
     def __repr__(self):
         return f"<Categoria {self.nombre_categoria}>"
+
+    def to_dict(self):
+        return {
+            "id_categoria": self.id_categoria,
+            "nombre_categoria": self.nombre_categoria
+            }
 
 
 class Habilidad(db.Model):
