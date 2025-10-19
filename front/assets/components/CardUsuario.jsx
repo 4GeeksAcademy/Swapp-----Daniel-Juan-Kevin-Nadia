@@ -8,7 +8,7 @@ function CardUsuario() {
     fetch("https://68e8dfb5f2707e6128cc97d2.mockapi.io/api/usuario")
       .then((res) => res.json())
       .then((data) => {
-        setUsuarios(data.slice(0, 6));
+        setUsuarios(data.slice(0, 8));
       })
       .catch((err) => console.error("Error al cargar usuarios:", err));
   }, []);
@@ -19,8 +19,8 @@ function CardUsuario() {
         <h3 className="text-center texto-recomendados">Recomendados</h3>
         <div className="row mt-5">
           {usuarios.map((usuario) => (
-            <div className="col-md-4 mb-4 " key={usuario.id}>
-              <div className="card  h-100 mx-2" >
+            <div className="col-md-3 mb-4 " key={usuario.id}>
+              <div className="card  h-100 mx-2">
                 <div className="card-header d-flex justify-content-between">
                   <img
                     src={usuario.foto_perfil || "No hay foto"}
@@ -43,6 +43,7 @@ function CardUsuario() {
             </div>
           ))}
         </div>
+        <hr></hr>
       </div>
     </>
   );
