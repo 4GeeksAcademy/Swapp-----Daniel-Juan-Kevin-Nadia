@@ -1,0 +1,89 @@
+:root {
+  --naranja: #ff7517;
+  --gris-oscuro: #3e3939;
+  --oscuro: #2c2727;
+  --claro: #f6f4f4;
+}
+
+/* --- Caja general --- */
+.login-page {
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--claro);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
+
+/* --- Caja principal --- */
+.login-box {
+  background-color: var(--claro);
+  border: 3px solid var(--oscuro);
+  border-radius: 15px;
+  width: 80%;
+  max-width: 850px;
+  min-height: 80vh;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+  padding: 50px 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+
+/* --- Logo y título --- */
+.login-logo {
+  width: 280px;
+  height: auto;
+  display: block;
+  margin: 0 auto 10px auto;
+}
+
+.login-title {
+  color: var(--naranja);
+  font-size: 1.8rem;
+  margin-bottom: 25px;
+}
+
+/* --- Inputs --- */
+.login-input {
+  width: 100%;
+  max-width: 600px;
+  border: 2px solid #000;
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  background-color: white;
+  transition: 0.3s ease;
+}
+
+.login-input:focus {
+  border-color: var(--naranja);
+  box-shadow: 0 0 5px var(--naranja);
+}
+
+/* --- Botón --- */
+.login-btn {
+  background-color: var(--naranja);
+  color: var(--gris-oscuro);
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  padding: 10px 0;
+  font-size: 1rem;
+  width: 100%;
+  max-width: 600px;
+  transition: 0.3s ease;
+  margin-top: 10px;
+}
+
+.login-btn:hover {
+  background-color: var(--gris-oscuro);
+  color: var(--claro);
+  cursor: pointer;
+}
