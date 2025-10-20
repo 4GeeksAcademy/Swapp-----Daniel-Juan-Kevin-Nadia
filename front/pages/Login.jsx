@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "../assets/styles/Login.css"; // ✅ ruta corregida
+// import "bootstrap/dist/css/bootstrap.min.css";
+// import "../assets/styles/Login.css"; // ✅ ruta corregida
 import Navbar from "../assets/components/Navbar"; // ✅ se agrega la Navbar global
 import Footer from "../assets/components/Footer"; // ✅ se agrega el Footer global
 
@@ -86,14 +86,15 @@ const Login = () => {
             </div>
 
             {/* Error */}
-            {error && <div className="login-error text-danger mb-3">{error}</div>}
+            {error && (
+              <div className="login-error text-danger mb-3">{error}</div>
+            )}
 
             {/* Botón */}
             <button type="submit" className="btn login-btn fw-bold">
               Iniciar sesión
             </button>
           </form>
-
         </div>
       </div>
 
