@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-// import "bootstrap/dist/css/bootstrap.min.css";
-// import "../assets/styles/Login.css"; // ✅ ruta corregida
+import "../assets/styles/Login.css"; // ✅ ruta corregida
 import Navbar from "../assets/components/Navbar"; // ✅ se agrega la Navbar global
 import Footer from "../assets/components/Footer"; // ✅ se agrega el Footer global
 
