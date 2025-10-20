@@ -1,7 +1,26 @@
 import "../styles/Navbar.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function Navbar() {
+  const [usuario, setUsuario] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const usuarioGuardado = localStorage.getItem("usuario");
+    if (usuarioGuardado) {
+      setUsuario(JSON.parse(usuarioGuardado));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    const confirmLogout = window.confirm("¿Deseas cerrar sesión?");
+    if (confirmLogout) {
+      localStorage.removeItem("usuario");
+      setUsuario(null);
+      navigate("/login");
+    }
+  };
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary mt-2 p-0">
@@ -10,7 +29,11 @@ function Navbar() {
             className="navbar-brand d-flex  align-items-center logo-container"
             href="#"
           >
-            <img className="logo-navbar" src="logo swapp.webp" />
+            <img
+              className="logo-navbar"
+              src="logo swapp.webp"
+              alt="logo Swapp"
+            />
           </a>
 
           <div className="d-flex flex-grow-1 align-items-center mx-3 position-relative">
@@ -40,7 +63,7 @@ function Navbar() {
 
           {/* <h5>Swapp, donde todo tiene otro valor.</h5> */}
           <div className="d-flex">
-            <Link
+            {/* <Link
               to="/registro"
               className="btn btn-main1 d-none d-lg-flex me-2"
               type="submit"
@@ -49,11 +72,48 @@ function Navbar() {
             </Link>
             <button className="btn btn-main1 d-none d-lg-flex" type="submit">
               Inicia sesión
-            </button>
+            </button> */}
+            {usuario ? (
+              <>
+                <Link
+                  to="/perfil"
+                  className="btn btn-main2 d-none d-lg-flex me-2"
+                  type="button"
+                >
+                  Perfil
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-main1 d-none d-lg-flex"
+                  type="button"
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/registro"
+                  className="btn btn-main1 d-none d-lg-flex me-2"
+                  type="button"
+                >
+                  Regístrate
+                </Link>
+                <Link
+                  to="/login"
+                  className="btn btn-main1 d-none d-lg-flex"
+                  type="button"
+                >
+                  Iniciar sesión
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
       <hr></hr>
+
+      {/* ***************** SEGUNDA NAVBAR ********************** */}
       <nav className="navbar navbar-expand-lg navbar-light bg-light p-0">
         <div className="container-fluid">
           <button
@@ -106,7 +166,7 @@ function Navbar() {
           ></button>
         </div>
         <div className="offcanvas-body">
-          <div className="d-flex justify-content-center d-lg-none mb-3">
+          {/* <div className="d-flex justify-content-center d-lg-none mb-3">
             <Link
               to="/registro"
               className="btn btn-main1 boton-registro me-2"
@@ -117,7 +177,45 @@ function Navbar() {
             <button className="btn btn-main1 boton-inicio" type="submit">
               Inicia sesión
             </button>
+          </div> */}
+          <div className="d-flex justify-content-center d-lg-none mb-3">
+            {usuario ? (
+              <>
+                <Link
+                  to="/perfil"
+                  className="btn btn-main2 boton-registro me-2"
+                  type="button"
+                >
+                  Perfil
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="btn btn-main1 boton-inicio"
+                  type="button"
+                >
+                  Cerrar sesión
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/registro"
+                  className="btn btn-main1 boton-registro me-2"
+                  type="button"
+                >
+                  Regístrate
+                </Link>
+                <Link
+                  to="/login"
+                  className="btn btn-main1 boton-inicio"
+                  type="button"
+                >
+                  Iniciar sesión
+                </Link>
+              </>
+            )}
           </div>
+
           <ul className="list-unstyled">
             <li>
               <a href="#">
