@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import "../assets/styles/Login.css";
-import Navbar from "../assets/components/Navbar";
-import Footer from "../assets/components/Footer";
 
 const Login = () => {
   const [correo, setCorreo] = useState("");
@@ -49,56 +47,81 @@ const Login = () => {
   };
 
   return (
-    <>
-      <Navbar />
-
-      <div className="login-page">
-        <div className="login-box container">
-          <div className="text-center mb-4">
-            <img src="logoSF.png" alt="Swapp" className="login-logo" />
-            <h2 className="login-title fw-bold">Iniciar Sesión</h2>
+    <div className="login-page-swapp container-fluid">
+      <div className="row justify-content-center align-items-center">
+        {/* Columna izquierda - Logo */}
+        <div className="col-12 col-md-5 d-flex flex-column justify-content-center align-items-center mb-5 mb-md-0">
+          <div className="logo-login-container">
+            <img src="logo swapp.webp" alt="Swapp" className="logo-login" />
           </div>
+          <h4 className="slogan-login">¡Donde todo, tiene otro valor!</h4>
+        </div>
 
-          <form onSubmit={handleSubmit} className="text-center">
-            {/* Correo */}
-            <div className="mb-3">
-              <label className="form-label">Correo electrónico</label>
-              <input
-                type="email"
-                className="form-control login-input"
-                placeholder="Ingresa tu correo"
-                value={correo}
-                onChange={(e) => setCorreo(e.target.value)}
+        {/* Columna derecha - Formulario */}
+        <div className="col-12 col-md-7 d-flex justify-content-center">
+          <div className="login-box-swapp">
+            <h5 className="form-title-login fw-bold mb-3">
+              Inicia sesión en <span className="text-naranja">Swapp</span>
+            </h5>
+
+            {/* Botón Google */}
+            <button type="button" className="btn-google-swapp mb-3 w-100 d-flex align-items-center justify-content-center gap-2">
+              <img
+                src="https://www.svgrepo.com/show/475656/google-color.svg"
+                alt="Google logo"
+                width="20"
+                height="20"
               />
-            </div>
-
-            {/* Contraseña */}
-            <div className="mb-3">
-              <label className="form-label">Contraseña</label>
-              <input
-                type="password"
-                className="form-control login-input"
-                placeholder="Ingresa tu contraseña"
-                value={contrasena}
-                onChange={(e) => setContrasena(e.target.value)}
-              />
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="login-error text-danger mb-3">{error}</div>
-            )}
-
-            {/* Botón */}
-            <button type="submit" className="btn login-btn fw-bold">
-              Iniciar sesión
+              Iniciar sesión con Google
             </button>
-          </form>
+
+            <form onSubmit={handleSubmit}>
+              {/* Correo */}
+              <div className="mb-3">
+                <label className="form-label">Correo electrónico</label>
+                <input
+                  type="email"
+                  className="form-control login-input-swapp"
+                  placeholder="Ingresa tu correo"
+                  value={correo}
+                  onChange={(e) => setCorreo(e.target.value)}
+                />
+              </div>
+
+              {/* Contraseña */}
+              <div className="mb-3">
+                <label className="form-label">Contraseña</label>
+                <input
+                  type="password"
+                  className="form-control login-input-swapp"
+                  placeholder="Ingresa tu contraseña"
+                  value={contrasena}
+                  onChange={(e) => setContrasena(e.target.value)}
+                />
+              </div>
+
+              {error && (
+                <div className="login-error-swapp text-danger mb-3">
+                  {error}
+                </div>
+              )}
+
+              {/* Botón principal */}
+              <button type="submit" className="btn-login-swapp fw-bold w-100">
+                Iniciar sesión
+              </button>
+            </form>
+
+            <p className="mt-3 text-center">
+              ¿No tienes cuenta?{" "}
+              <a href="/registro" className="enlace-login-swapp">
+                Regístrate aquí
+              </a>
+            </p>
+          </div>
         </div>
       </div>
-
-      <Footer />
-    </>
+    </div>
   );
 };
 
