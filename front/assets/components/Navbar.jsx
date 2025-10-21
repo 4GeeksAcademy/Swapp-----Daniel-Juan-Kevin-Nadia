@@ -26,7 +26,7 @@ function Navbar() {
       <nav className="navbar navbar-expand-lg bg-body-tertiary mt-2 p-0">
         <div className="container-fluid  d-flex justify-content-center align-items-center">
           <a
-            className="navbar-brand d-flex  align-items-center logo-container"
+            className="navbar-brand d-flex  align-items-center logo-navbar-container"
             href="#"
           >
             <img
