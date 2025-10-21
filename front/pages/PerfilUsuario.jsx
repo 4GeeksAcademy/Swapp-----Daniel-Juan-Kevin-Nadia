@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 function PerfilUsuario() {
   const [usuario, setUsuario] = useState(null);
