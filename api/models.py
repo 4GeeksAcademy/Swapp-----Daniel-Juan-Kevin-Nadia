@@ -88,6 +88,9 @@ class Categoria(db.Model):
         return f"<Categoria {self.nombre_categoria}>"
 
     def to_dict(self):
+        """
+            Serialize the attrs of Categoria
+        """
         return {
             "id_categoria": self.id_categoria,
             "nombre_categoria": self.nombre_categoria
@@ -172,3 +175,20 @@ class Mensaje(db.Model):
 
     def __repr__(self):
         return f"<Mensaje de {self.id_emisor} a {self.id_receptor}>"
+
+    def to_dict(self, excluye=None):
+        """
+            Serialize attrs of Mensaje
+        """
+        serial = {
+            "id_mensaje": self.id_mensaje,
+            "id_emisor": self.id_emisor,
+            "id_receptor": self.id_receptor,
+            "contenido": self.contenido,
+            "fecha_envio": self.fecha_envio,
+            "visto": self.visto
+        }
+        if excluye:
+            for key in excluye:
+                serial.pop(key, None)
+        return serial

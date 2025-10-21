@@ -1,0 +1,48 @@
+### Listar Mensajes enviados (GET)
+GET http://localhost:5000/api/mensajes/1/recibidos
+Accept: application/json
+
+###
+
+### Listar Mensajes recibidos (GET)
+GET http://localhost:5000/api/mensajes/1/enviados
+Accept: application/json
+
+###
+
+### Obtener un Mensaje por Id (GET)
+GET http://localhost:5000/api/mensajes/1
+Accept: application/json
+
+###
+
+### Añadir un Mensaje (POST)
+POST http://localhost:5000/api/mensajes
+Content-Type: application/json
+Accept: application/json
+
+{
+    "contenido": "Bien, Hasta ahora",
+    "id_emisor": 1,
+    "id_receptor": 2
+}
+
+###
+
+### Actualizar el contenido de un Mensaje (PUT)
+PUT http://localhost:5000/api/mensajes/7
+Content-Type: application/json
+Accept: application/json
+
+{
+    "contenido": "Goodbye!",
+    "visto": true
+}
+
+###
+
+### Borrar/Eliminar un Mensaje (DELETE)
+DELETE http://localhost:5000/api/mensajes/7
+Accept: application/json
+
+###
