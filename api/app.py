@@ -15,6 +15,7 @@ from flask_jwt_extended import JWTManager
 from urls.usuario import usuarios
 from urls.habilidades import habilidades
 from urls.categorias import categorias
+from urls.mensaje import mensajes
 
 
 app = Flask(__name__)
@@ -57,3 +58,4 @@ def sitemap():
 app.register_blueprint(usuarios)
 app.register_blueprint(habilidades)
 app.register_blueprint(categorias)
+app.register_blueprint(mensajes)
