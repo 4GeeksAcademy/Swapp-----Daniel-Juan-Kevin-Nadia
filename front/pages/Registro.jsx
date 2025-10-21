@@ -29,15 +29,15 @@ function Registro() {
     }));
   };
 
-  const handleSubmit = async(e) =>{
-    e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    try{
-      const data = registrarUsuario(formData)
+    try {
+      const data = registrarUsuario(formData);
       console.log(data);
-      alert("Resgitro exitoso!")
-    } catch (error){
-       alert("Hubo un error al registrar!")
+      alert("Resgitro exitoso!");
+    } catch (error) {
+      alert("Hubo un error al registrar!");
     }
 
     setFormData({
@@ -52,28 +52,30 @@ function Registro() {
       email: "",
       contrasena: "",
       aceptaTerminos: false,
-    })
-
-  }
-
+    });
+  };
 
   return (
     <div className="container">
       <div className="row d-flex justify-content-center">
-        <div className="col-6">
-          <div className="d-flex justify-content-center align-items-center">
+        <div className="col-5 d-flex flex-column justify-content-center align-items-center mb-5">
+          <div className="logo-registro-container d-flex justify-content-start">
             <img className="logo-registro" src="logo swapp.webp"></img>
           </div>
-
+          <h4 className="fw-medium">¡Donde todo, tiene otro valor!</h4>
+        </div>
+        <div className="col-7 form-container d-flex flex-column justify-content-center align-items-center">
           <form className="text-start" onSubmit={handleSubmit}>
-            <h5 className="text-start my-3">Únete a Swapp!</h5>
+            <h5 className="form-title text-start fw-bold my-3">
+              Únete a Swapp!
+            </h5>
             <div className="d-flex gap-2">
               <input
                 name="nombre"
                 onChange={handleChange}
                 value={formData.nombre}
                 type="text"
-                className="form-control"
+                className="form-control registro-input"
                 id="nombre"
                 aria-describedby="emailHelp"
                 placeholder="Nombre"
@@ -84,19 +86,19 @@ function Registro() {
                 onChange={handleChange}
                 value={formData.apellidos}
                 type="text"
-                className="form-control flex-grow-1"
+                className="form-control registro-input flex-grow-1"
                 id="apellidos"
                 aria-describedby=""
                 placeholder="Apellidos"
               />
             </div>
-            <div className="">
+            <div className="mt-1">
               <label htmlFor="fecha-nacimiento" className="form-label">
                 Fecha de nacimiento
               </label>
               <div className="d-flex" style={{ gap: "12px" }}>
                 <select
-                  className="form-select"
+                  className="form-select registro-input"
                   style={{ width: "80px" }}
                   onChange={handleChange}
                   value={formData.dia}
@@ -112,7 +114,7 @@ function Registro() {
                 </select>
 
                 <select
-                  className="form-select"
+                  className="form-select registro-input"
                   style={{ width: "90px" }}
                   onChange={handleChange}
                   value={formData.mes}
@@ -141,7 +143,7 @@ function Registro() {
                 </select>
 
                 <select
-                  className="form-select"
+                  className="form-select registro-input"
                   style={{ width: "90px" }}
                   onChange={handleChange}
                   value={formData.anio}
@@ -161,13 +163,14 @@ function Registro() {
               </div>
             </div>
 
-            <div className="mt-2">
+            <div className="  mt-1">
               <label className="form-label">Género</label>
               <div className="d-flex justify-content-center align-items-center">
                 <div className="input-group ">
                   <div className="input-group-prepend ">
                     <div className=" mujer-radio">
                       <input
+                        className="form-check-input"
                         onChange={handleChange}
                         checked={formData.genero === "mujer"}
                         value="mujer"
@@ -186,6 +189,7 @@ function Registro() {
                   <div className="input-group-prepend ">
                     <div className="hombre-radio">
                       <input
+                        className="form-check-input"
                         onChange={handleChange}
                         checked={formData.genero === "hombre"}
                         type="radio"
@@ -204,6 +208,7 @@ function Registro() {
                   <div className="input-group-prepend ">
                     <div className="personalizado-radio">
                       <input
+                        className="form-check-input"
                         onChange={handleChange}
                         checked={formData.genero === "personalizado"}
                         type="radio"
@@ -220,12 +225,12 @@ function Registro() {
                 </div>
               </div>
 
-              <div className="input-group my-3">
+              <div className="input-group my-2">
                 <div className="input-group-prepend">
                   <label htmlFor="inputGroupSelect01">Habilidades</label>
                 </div>
                 <select
-                  className="form-select"
+                  className="form-select registro-input mt-1"
                   style={{ width: "100%" }}
                   name="habilidad"
                   onChange={handleChange}
@@ -253,9 +258,9 @@ function Registro() {
                   <option value="otros">Otros / Misceláneos</option>
                 </select>
               </div>
-              <div className="">
+              <div className=" mt-1">
                 <textarea
-                  className="form-control"
+                  className="form-control registro-input "
                   id="descripcion"
                   name="descripcion"
                   onChange={handleChange}
@@ -266,30 +271,31 @@ function Registro() {
               </div>
             </div>
 
-            <div className="form-group mt-3">
+            <div className="form-group mt-2">
               <input
                 name="email"
                 onChange={handleChange}
                 value={formData.email}
                 type="email"
-                className="form-control"
+                className="form-control registro-input"
                 id="email"
                 aria-describedby="emailHelp"
                 placeholder="Correo electrónico"
               />
             </div>
-            <div className="form-group">
+            <div className="form-group mt-2">
               <input
                 name="contrasena"
                 onChange={handleChange}
                 value={formData.contrasena}
                 type="password"
-                className="form-control"
+                className="form-control registro-input
+                "
                 id="contrasena"
                 placeholder="Contraseña"
               />
             </div>
-            <div className="form-group form-check">
+            <div className="form-group form-check mt-2">
               <input
                 onChange={handleChange}
                 name="aceptaTerminos"
@@ -304,7 +310,7 @@ function Registro() {
               </label>
             </div>
             <div className="d-flex justify-content-center">
-              <button type="submit" className="btn btn-main1 mt-3">
+              <button type="submit" className="btn btn-main1 my-3">
                 Registrate
               </button>
             </div>

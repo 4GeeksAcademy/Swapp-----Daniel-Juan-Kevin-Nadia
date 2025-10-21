@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
+<<<<<<< HEAD
+=======
+// import "bootstrap/dist/css/bootstrap.min.css";
+>>>>>>> origin/frontend
 
 function PerfilUsuario() {
   const [usuario, setUsuario] = useState(null);
@@ -39,14 +43,17 @@ function PerfilUsuario() {
   const handleGuardar = async () => {
     try {
       // Validar campos obligatorios
-      if (!formData.nombre || !formData.apellidos || !formData.correo_electronico) {
+      if (
+        !formData.nombre ||
+        !formData.apellidos ||
+        !formData.correo_electronico
+      ) {
         alert("Por favor completa todos los campos obligatorios.");
         return;
       }
 
       let fechaFinal = formData.fecha_nacimiento;
       if (formData.dia && formData.mes && formData.anio) {
-
         if (!formData.dia || !formData.mes || !formData.anio) {
           alert("Por favor selecciona día, mes y año.");
           return;
@@ -134,16 +141,18 @@ function PerfilUsuario() {
 
             <div className="perfil-secciones mt-4">
               <button
-                className={`list-group-item ${seccionActiva === "datos" ? "active" : ""
-                  }`}
+                className={`list-group-item ${
+                  seccionActiva === "datos" ? "active" : ""
+                }`}
                 onClick={() => setSeccionActiva("datos")}
               >
                 Datos Personales
               </button>
               <div className="perfil-divider"></div>
               <button
-                className={`list-group-item ${seccionActiva === "habilidades" ? "active" : ""
-                  }`}
+                className={`list-group-item ${
+                  seccionActiva === "habilidades" ? "active" : ""
+                }`}
                 onClick={() => setSeccionActiva("habilidades")}
               >
                 Habilidades
@@ -312,7 +321,9 @@ function PerfilUsuario() {
                     <button
                       type="button"
                       className="btn btn-lg perfil-accion-btn"
-                      onClick={editando ? handleGuardar : () => setEditando(true)}
+                      onClick={
+                        editando ? handleGuardar : () => setEditando(true)
+                      }
                     >
                       {editando ? "Guardar Cambios" : "Editar Información"}
                     </button>

@@ -1,7 +1,35 @@
-.logo-registro{
-  width: 200px;
+body {
+  background-color: var(--claro);
+}
+.form-title {
+  color: var(--naranja);
+}
+.logo-registro-container {
+  width: 500px;
   height: 100px;
+}
+
+.logo-registro {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
+}
+.registro-input {
+  width: 100%;
+  max-width: 600px;
+  border: 1.5px solid var(--gris-oscuro);
+  border-radius: 6px;
+  padding: 5px;
+  font-size: 1rem;
+  background-color: white;
+  transition: 0.3s ease;
+}
+.form-container {
+  background-color: white;
+  border: 2px solid var(--claro);
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+  padding: 0;
 }
 .mujer-radio {
   border-radius: 0;
@@ -12,11 +40,12 @@
   padding-right: 10px;
 }
 .btn-main1 {
-  background-color: #ff7517;
-  color: #3e3939;
+  background-color: var(--naranja);
+  color: white;
+  font-weight: bold;
 }
-.btn-main2 {
-  background-color: #f6f4f4;
-  border-color: #ff7517;
-  color: #3e3939;
+
+.form-check-input:checked {
+  background-color: var(--naranja);
+  border-color: var(--naranja);
 }
