@@ -21,6 +21,7 @@ function Navbar() {
       navigate("/login");
     }
   };
+
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary mt-2 p-0">
@@ -31,7 +32,7 @@ function Navbar() {
           >
             <img
               className="logo-navbar"
-              src="logo swapp.webp"
+              src="/logo swapp.webp"
               alt="logo Swapp"
             />
           </a>
@@ -63,16 +64,6 @@ function Navbar() {
 
           {/* <h5>Swapp, donde todo tiene otro valor.</h5> */}
           <div className="d-flex">
-            {/* <Link
-              to="/registro"
-              className="btn btn-main1 d-none d-lg-flex me-2"
-              type="submit"
-            >
-              Regístrate
-            </Link>
-            <button className="btn btn-main1 d-none d-lg-flex" type="submit">
-              Inicia sesión
-            </button> */}
             {usuario ? (
               <>
                 <Link
@@ -127,12 +118,23 @@ function Navbar() {
           </button>
           <ul className="navbar-nav me-auto mb-2 mb-lg-0 ms-5">
             <li className="nav-item me-3">
-              <a className="active" aria-current="page" href="#">
+              <a
+                className="active"
+                aria-current="page"
+                href="#"
+                // onClick={() => handleClickCategoria(educacion)}
+              >
                 Educación y Tutorías
               </a>
             </li>
             <li className="nav-item me-3">
-              <a href="#">Tecnología y Programación</a>
+              <a
+                href="#"
+                // onClick={() => handleClickCategoria(tecnologia)}
+              >
+                {" "}
+                Tecnología y Programación
+              </a>
             </li>
 
             <li className="nav-item me-3">
@@ -166,18 +168,6 @@ function Navbar() {
           ></button>
         </div>
         <div className="offcanvas-body">
-          {/* <div className="d-flex justify-content-center d-lg-none mb-3">
-            <Link
-              to="/registro"
-              className="btn btn-main1 boton-registro me-2"
-              type="submit"
-            >
-              Regístrate
-            </Link>
-            <button className="btn btn-main1 boton-inicio" type="submit">
-              Inicia sesión
-            </button>
-          </div> */}
           <div className="d-flex justify-content-center d-lg-none mb-3">
             {usuario ? (
               <>

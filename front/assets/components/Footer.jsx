@@ -9,7 +9,7 @@ function Footer() {
             <div className="col-12 logo-container-footer ">
               <img
                 className="logo-footer "
-                src="logo swapp.webp"
+                src="/logo swapp.webp"
                 alt="logo"
               ></img>
             </div>
@@ -17,7 +17,7 @@ function Footer() {
           <div className=" col-md-2 d-none d-lg-flex logo-container-footer ">
             <img
               className="logo-footer img-fluid"
-              src="logo swapp.webp"
+              src="/logo swapp.webp"
               alt="logo"
             ></img>
           </div>
