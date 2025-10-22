@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
-// import "bootstrap/dist/css/bootstrap.min.css";
 
 function PerfilUsuario() {
   const [usuario, setUsuario] = useState(null);
@@ -138,18 +137,16 @@ function PerfilUsuario() {
 
             <div className="perfil-secciones mt-4">
               <button
-                className={`list-group-item ${
-                  seccionActiva === "datos" ? "active" : ""
-                }`}
+                className={`list-group-item ${seccionActiva === "datos" ? "active" : ""
+                  }`}
                 onClick={() => setSeccionActiva("datos")}
               >
                 Datos Personales
               </button>
               <div className="perfil-divider"></div>
               <button
-                className={`list-group-item ${
-                  seccionActiva === "habilidades" ? "active" : ""
-                }`}
+                className={`list-group-item ${seccionActiva === "habilidades" ? "active" : ""
+                  }`}
                 onClick={() => setSeccionActiva("habilidades")}
               >
                 Habilidades
