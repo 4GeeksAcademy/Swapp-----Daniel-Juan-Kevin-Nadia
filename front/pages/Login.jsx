@@ -52,7 +52,7 @@ const Login = () => {
         {/* Columna izquierda - Logo */}
         <div className="col-12 col-md-5 d-flex flex-column justify-content-center align-items-center mb-5 mb-md-0">
           <div className="logo-login-container">
-            <img src="logo swapp.webp" alt="Swapp" className="logo-login" />
+            <img src="/swapp sin fondo.webp" alt="Swapp" className="logo-login" />
           </div>
           <h4 className="slogan-login">¡Donde todo, tiene otro valor!</h4>
         </div>
