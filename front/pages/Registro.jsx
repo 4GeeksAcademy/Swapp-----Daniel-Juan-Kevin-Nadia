@@ -60,7 +60,7 @@ function Registro() {
       <div className="row d-flex justify-content-center">
         <div className="col-5 d-flex flex-column justify-content-center align-items-center mb-5">
           <div className="logo-registro-container d-flex justify-content-start">
-            <img className="logo-registro" src="logo swapp.webp"></img>
+            <img className="logo-registro" src="swapp sin fondo.webp"></img>
           </div>
           <h4 className="fw-medium">¡Donde todo, tiene otro valor!</h4>
         </div>
