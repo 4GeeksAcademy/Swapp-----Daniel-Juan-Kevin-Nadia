@@ -8,6 +8,8 @@ function PerfilUsuario() {
   const [seccionActiva, setSeccionActiva] = useState("datos");
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({});
+  const [editandoHabilidades, setEditandoHabilidades] = useState(false);
+  const [nuevaHabilidad, setNuevaHabilidad] = useState({ nombre: "", descripcion: "" });
 
   useEffect(() => {
     const usuarioLocal = JSON.parse(localStorage.getItem("usuario"));
@@ -38,12 +40,7 @@ function PerfilUsuario() {
 
   const handleGuardar = async () => {
     try {
-      // Validar campos obligatorios
-      if (
-        !formData.nombre ||
-        !formData.apellidos ||
-        !formData.correo_electronico
-      ) {
+      if (!formData.nombre || !formData.apellidos || !formData.correo_electronico) {
         alert("Por favor completa todos los campos obligatorios.");
         return;
       }
@@ -55,10 +52,9 @@ function PerfilUsuario() {
           return;
         }
 
-        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(
-          2,
-          "0"
-        )}-${String(formData.dia).padStart(2, "0")}`;
+        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(2, "0")}-${String(
+          formData.dia
+        ).padStart(2, "0")}`;
       }
 
       const { dia, mes, anio, ...dataSinCamposExtra } = formData;
@@ -109,6 +105,40 @@ function PerfilUsuario() {
     }
   };
 
+  // === NUEVO: manejar habilidades ===
+  const handleAgregarHabilidad = () => {
+    if (!nuevaHabilidad.nombre.trim()) {
+      alert("Por favor escribe el nombre de la habilidad.");
+      return;
+    }
+    const nuevasHabilidades = [
+      ...(usuario.habilidades || []),
+      { nombre: nuevaHabilidad.nombre, descripcion: nuevaHabilidad.descripcion },
+    ];
+    setUsuario({ ...usuario, habilidades: nuevasHabilidades });
+    setNuevaHabilidad({ nombre: "", descripcion: "" });
+  };
+
+  const handleGuardarHabilidades = async () => {
+    try {
+      const response = await fetch(
+        `https://68e8dfb5f2707e6128cc97d2.mockapi.io/api/usuario/${usuario.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...usuario }),
+        }
+      );
+      const actualizado = await response.json();
+      setUsuario(actualizado);
+      setEditandoHabilidades(false);
+      alert("✅ Habilidades guardadas correctamente");
+    } catch (error) {
+      console.error("Error al guardar habilidades:", error);
+      alert("❌ No se pudieron guardar las habilidades");
+    }
+  };
+
   if (!usuario) return <p className="text-center mt-5">Cargando perfil...</p>;
 
   return (
@@ -137,8 +167,7 @@ function PerfilUsuario() {
 
             <div className="perfil-secciones mt-4">
               <button
-                className={`list-group-item ${seccionActiva === "datos" ? "active" : ""
-                  }`}
+                className={`list-group-item ${seccionActiva === "datos" ? "active" : ""}`}
                 onClick={() => setSeccionActiva("datos")}
               >
                 Datos Personales
@@ -154,14 +183,14 @@ function PerfilUsuario() {
             </div>
 
             <div className="perfil-footer mt-auto text-center">
-              <img src="logoSF.png" alt="Swapp" className="perfil-logo mt-4" />
+              <img src="/logoSF.png" alt="Swapp" className="perfil-logo mt-4" />
             </div>
           </div>
 
           {/* Contenido principal */}
           <div className="col-12 col-md-8 perfil-content p-4">
             {seccionActiva === "datos" ? (
-              <div>
+              <>
                 <h2 className="text-dark fw-bold mb-4 text-center">
                   Datos Personales
                 </h2>
@@ -323,14 +352,88 @@ function PerfilUsuario() {
                     </button>
                   </div>
                 </form>
-              </div>
+              </>
             ) : (
-              <div className="text-center">
-                <h2 className="fw-bold mb-3">Habilidades</h2>
-                <p className="text-muted">
-                  Aquí pronto podrás agregar, editar o eliminar tus habilidades.
-                </p>
-              </div>
+              <>
+                <h2 className="fw-bold mb-4 text-center">Habilidades</h2>
+                {!editandoHabilidades ? (
+                  <>
+                    {usuario.habilidades && usuario.habilidades.length > 0 ? (
+                      <ul className="habilidades-lista">
+                        {usuario.habilidades.map((hab, index) => (
+                          <li key={index}>
+                            <strong>{hab.nombre}</strong> —{" "}
+                            {hab.descripcion || "Sin descripción"}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted">
+                        Aún no has agregado habilidades.
+                      </p>
+                    )}
+                    <button
+                      className="btn perfil-accion-btn mt-3"
+                      onClick={() => setEditandoHabilidades(true)}
+                    >
+                      ✏️ Editar habilidades
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <div className="mb-3 text-start">
+                      <label className="form-label">Nueva habilidad</label>
+                      <input
+                        type="text"
+                        className="form-control mb-2"
+                        placeholder="Nombre de la habilidad"
+                        value={nuevaHabilidad.nombre}
+                        onChange={(e) =>
+                          setNuevaHabilidad({
+                            ...nuevaHabilidad,
+                            nombre: e.target.value,
+                          })
+                        }
+                      />
+                      <textarea
+                        className="form-control mb-2"
+                        placeholder="Descripción"
+                        value={nuevaHabilidad.descripcion}
+                        onChange={(e) =>
+                          setNuevaHabilidad({
+                            ...nuevaHabilidad,
+                            descripcion: e.target.value,
+                          })
+                        }
+                      />
+                      <button
+                        className="btn btn-editar-foto"
+                        onClick={handleAgregarHabilidad}
+                      >
+                        ➕ Agregar habilidad
+                      </button>
+                    </div>
+
+                    {usuario.habilidades && usuario.habilidades.length > 0 && (
+                      <ul className="habilidades-lista mt-3">
+                        {usuario.habilidades.map((hab, index) => (
+                          <li key={index}>
+                            <strong>{hab.nombre}</strong> —{" "}
+                            {hab.descripcion || "Sin descripción"}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    <button
+                      className="btn perfil-accion-btn mt-4"
+                      onClick={handleGuardarHabilidades}
+                    >
+                      💾 Guardar cambios
+                    </button>
+                  </>
+                )}
+              </>
             )}
           </div>
         </div>

@@ -23,6 +23,14 @@
   align-items: center;
 }
 
+.perfil-avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
 .perfil-avatar {
   width: 120px;
   height: 120px;
@@ -49,6 +57,10 @@
   transition: all 0.3s ease;
 }
 
+.btn-editar-foto {
+  margin-top: 25px;
+}
+
 .perfil-secciones button.active,
 .perfil-secciones button:hover {
   background-color: var(--naranja);
@@ -70,8 +82,8 @@
 }
 
 .perfil-logo {
-  width: 180px;
-  height: 80px;
+  width: 240px;
+  height: 120px;
   object-fit: contain;
   filter: brightness(0) invert(1);
   transition: transform 0.3s ease, filter 0.3s ease;
@@ -153,4 +165,37 @@
 .btn-editar-foto:hover {
   background-color: #e96c0f;
   transform: translateY(-2px);
+}
+
+.habilidades-contenedor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.habilidad-card {
+  background-color: #fff;
+  border: 2px solid var(--naranja);
+  border-radius: 12px;
+  padding: 1.2rem;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.08);
+  text-align: left;
+}
+
+.habilidad-nombre h5 {
+  color: var(--naranja);
+  font-weight: 600;
+}
+
+.habilidad-descripcion p {
+  color: var(--gris);
+  margin: 0.5rem 0 0;
+}
+
+.perfil-content .perfil-accion-btn {
+  display: block;
+  margin: 0 auto;
 }
