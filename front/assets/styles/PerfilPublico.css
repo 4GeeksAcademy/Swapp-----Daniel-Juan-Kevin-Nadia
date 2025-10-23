@@ -51,11 +51,11 @@
 /* === Botón "Contactar" === */
 .btn-contactar {
   background-color: var(--naranja);
-  color: var(--gris);
+  color: var(--claro);
   border: none;
   margin-top: 40px;
   font-weight: 600;
-  padding: 8px 20px;
+  padding: 10px 25px;
   border-radius: 8px;
   font-size: 15px;
   cursor: pointer;
