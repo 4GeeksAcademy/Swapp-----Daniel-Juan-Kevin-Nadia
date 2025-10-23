@@ -64,7 +64,7 @@
 .perfil-secciones button.active,
 .perfil-secciones button:hover {
   background-color: var(--naranja);
-  color: var(--gris);
+  color: var(--claro);
   border-radius: 6px;
 }
 
@@ -127,7 +127,7 @@
 /* === Botones === */
 .perfil-accion-btn {
   background-color: var(--naranja);
-  color: var(--gris);
+  color: var(--claro);
   border: none;
   border-radius: 8px;
   padding: 10px 25px;
@@ -151,7 +151,7 @@
 .btn-editar-foto {
   display: inline-block;
   background-color: var(--naranja);
-  color: var(--gris);
+  color: var(--claro);
   border: none;
   font-weight: 600;
   padding: 6px 18px;
