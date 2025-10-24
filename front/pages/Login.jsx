@@ -36,7 +36,6 @@ const Login = () => {
 
       if (usuario) {
         localStorage.setItem("usuario", JSON.stringify(usuario));
-        alert(`👋 Bienvenido ${usuario.nombre} ${usuario.apellidos}`);
         window.location.href = "/perfil";
       } else {
         setError("Correo o contraseña incorrectos.");

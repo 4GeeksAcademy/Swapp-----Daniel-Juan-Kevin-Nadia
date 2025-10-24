@@ -69,7 +69,7 @@ function PerfilPublico() {
                         </div>
 
                         <div className="perfil-publico-footer mt-auto text-center">
-                            <img src="/logoSF.png" alt="Swapp" className="perfil-publico-logo mt-4" />
+                            <img src="/swapp sin fondo.webp" alt="Swapp" className="perfil-publico-logo mt-4" />
                         </div>
                     </div>
 

@@ -183,7 +183,7 @@ function PerfilUsuario() {
             </div>
 
             <div className="perfil-footer mt-auto text-center">
-              <img src="/logoSF.png" alt="Swapp" className="perfil-logo mt-4" />
+              <img src="/swapp sin fondo.webp" alt="Swapp" className="perfil-logo mt-4" />
             </div>
           </div>
 
