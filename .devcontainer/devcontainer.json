@@ -14,12 +14,12 @@
 				"esbenp.prettier-vscode",
 				"ms-python.pylint",
 				"ms-python.flake8",
-				"oderwat.indent-rainbow" //,
+				"oderwat.indent-rainbow",
 				// --- Frontend ---
-				// "dsznajder.es7-react-js-snippets",
-				// "formulahendry.auto-rename-tag",
-				// "planbcoding.vscode-react-refactor",
-				// "christian-kohler.npm-intellisense"
+				"dsznajder.es7-react-js-snippets",
+				"formulahendry.auto-rename-tag",
+				"planbcoding.vscode-react-refactor",
+				"christian-kohler.npm-intellisense"
 			],
 			"settings": {
 				"python.linting.enabled": true,

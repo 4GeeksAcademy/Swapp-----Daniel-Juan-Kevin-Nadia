@@ -16,12 +16,12 @@ else
 fi
 
 # --- Node / Frontend ---
-# echo "  ¡Instalando dependencias Node!"
-# if [ -f package.json ]; then
-#   npm install
-# else
-#   echo "  ¡No se encontró package.json!"
-# fi
+echo "  ¡Instalando dependencias Node!"
+if [ -f package.json ]; then
+  npm install
+else
+  echo "  ¡No se encontró package.json!"
+fi
 
 # --- Ohmyzsh ---
 export RUNZSH=no
