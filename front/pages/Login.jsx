@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../assets/styles/Login.css";
+import { Link } from "react-router";
 
 const Login = () => {
   const [correo, setCorreo] = useState("");
@@ -50,9 +51,11 @@ const Login = () => {
       <div className="row justify-content-center align-items-center">
         {/* Columna izquierda - Logo */}
         <div className="col-12 col-md-5 d-flex flex-column justify-content-center align-items-center mb-5 mb-md-0">
-          <div className="logo-login-container">
-            <img src="/swapp sin fondo.webp" alt="Swapp" className="logo-login" />
-          </div>
+
+          <Link className="logo-login-container" to="/" >
+            <img src="logo swapp.webp" alt="Swapp" className="logo-login"  />
+          </Link>
+
           <h4 className="slogan-login">¡Donde todo, tiene otro valor!</h4>
         </div>
 

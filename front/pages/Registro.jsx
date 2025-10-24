@@ -1,6 +1,7 @@
 import "../assets/styles/Registro.css";
 import React, { useState } from "react";
 import { registrarUsuario } from "../services/api";
+import { Link } from "react-router";
 
 function Registro() {
   const [formData, setFormData] = useState({
@@ -57,14 +58,15 @@ function Registro() {
 
   return (
     <div className="container">
-      <div className="row d-flex justify-content-center">
-        <div className="col-5 d-flex flex-column justify-content-center align-items-center mb-5">
-          <div className="logo-registro-container d-flex justify-content-start">
+      <div className="row d-flex flex-column flex-lg-row justify-content-center">
+        <div className="col-12 col-lg-5 header-responsive d-flex flex-column justify-content-center align-items-center mb-5">
+          <Link className="logo-registro-container d-flex justify-content-start" to="/">
+       
             <img className="logo-registro" src="swapp sin fondo.webp"></img>
-          </div>
+          </Link>
           <h4 className="fw-medium">¡Donde todo, tiene otro valor!</h4>
         </div>
-        <div className="col-7 form-container d-flex flex-column justify-content-center align-items-center">
+        <div className="col-12 col-lg-7 px-2 form-container d-flex justify-content-center  align-items-center">
           <form className="text-start" onSubmit={handleSubmit}>
             <h5 className="form-title text-start fw-bold my-3">
               Únete a Swapp!
