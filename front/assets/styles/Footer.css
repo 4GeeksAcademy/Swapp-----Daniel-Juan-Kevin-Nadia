@@ -1,0 +1,10 @@
+.logo-container-footer {
+  width: 150px;
+  height: 80px;
+  object-fit: contain;
+}
+.logo-footer {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}

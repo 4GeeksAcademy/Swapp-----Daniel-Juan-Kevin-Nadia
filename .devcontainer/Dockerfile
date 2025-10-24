@@ -8,6 +8,10 @@ RUN apk add --no-cache \
     sqlite sqlite-libs sqlite-dev \
     cargo rust \
     git curl xsel \
-    nodejs npm
+    nodejs npm \
+    zsh font-noto-emoji
+
+RUN sed -i 's|^root:.*:/bin/ash$|root:x:0:0:root:/root:/bin/zsh|' /etc/passwd
+RUN sed -i 's|^root:.*:/bin/sh$|root:x:0:0:root:/root:/bin/zsh|' /etc/passwd
 
 WORKDIR /workspaces

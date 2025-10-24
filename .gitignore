@@ -81,3 +81,6 @@ dist-ssr
 *.sln
 *.sw?
 *-lock.json
+
+diagrams/
+migrations/

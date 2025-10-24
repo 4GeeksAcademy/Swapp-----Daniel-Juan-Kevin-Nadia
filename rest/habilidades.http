@@ -1,0 +1,48 @@
+
+###Obtener las habilidades de los usuasrios
+GET http://localhost:5000/api/habilidades
+Accept: application/json
+###
+
+
+
+### Obtener una habilidad
+GET http://localhost:5000/api/habilidades/5
+Accept: application/json
+###
+
+
+###Crear una habilidad
+POST http://localhost:5000/api/habilidades
+Content-Type: application/json
+Accept: application/json
+
+{
+    "nombre_habilidad": "Limpiador de baños",
+    "descripcion": "limpio baños y soy el exito",
+    "id_categoria": 9
+}
+
+###
+
+
+
+###Cambiar habilidad
+PUT http://localhost:5000/api/habilidades/7
+Content-Type: application/json
+Accept: application/json
+
+{
+    "nombre_habilidad": "gigolo",
+    "descripcion": "se de ordenadores",
+    "id_categoria": 2
+}
+
+###
+
+
+### 
+DELETE http://localhost:5000/api/habilidades/2
+Accept: application/json
+
+###
