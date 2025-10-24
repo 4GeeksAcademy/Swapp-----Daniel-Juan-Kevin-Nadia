@@ -106,7 +106,6 @@ class Habilidad(db.Model):
     id_habilidad = db.Column(db.Integer, primary_key=True)
     nombre_habilidad = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.Text)
-    categoria_nombre = db.Column(db.String(100))
     id_categoria = db.Column(db.Integer, db.ForeignKey(
         "categorias.id_categoria", onupdate="CASCADE", ondelete="SET NULL"))
 
@@ -125,9 +124,7 @@ class Habilidad(db.Model):
         return {
             "id_habilidad": self.id_habilidad,
             "nombre_habilidad": self.nombre_habilidad,
-            "descripcion": self.descripcion,
-            "categoria_nombre": self.id_categoria.nombre_categoria
-            if self.categoria else None
+            "descripcion": self.descripcion
         }
 
 
