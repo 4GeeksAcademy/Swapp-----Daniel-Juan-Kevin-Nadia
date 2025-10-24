@@ -6,18 +6,18 @@ CATEGORIAS_Y_HABILIDADES = {
     "Sostenibilidad y Medio Ambiente": [
         "Reciclaje y compostaje",
         "Huertos urbanos",
-        "Energías renovables",
+        "Energias renovables",
         "Educación ambiental",
         "Moda sostenible",
-        "Productos ecológicos DIY",
+        "Productos ecologicos DIY",
     ],
     "Entretenimiento y Cultura": [
         "Actuación / teatro",
         "Organización de eventos",
         "Juegos de mesa / rol",
-        "Cine / análisis de películas",
-        "Espectáculos en vivo",
-        "Animación infantil",
+        "Cine / analisis de peliculas",
+        "Espectaculos en vivo",
+        "Animacion infantil",
     ],
     "Viajes y Estilo de Vida": [
         "Planificación de viajes",
@@ -42,10 +42,10 @@ CATEGORIAS_Y_HABILIDADES = {
         "Motivación personal",
         "Asesoría vocacional",
     ],
-    "Misceláneos": [
+    "Miscelaneos": [
         "Voluntariado",
         "Asesoría legal básica",
-        "Apoyo psicológico (no profesional)",
+        "Apoyo psicologico (no profesional)",
         "Servicios comunitarios",
         "Asistencia virtual",
         "Tareas domésticas",
