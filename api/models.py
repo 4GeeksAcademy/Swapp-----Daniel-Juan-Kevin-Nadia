@@ -3,6 +3,7 @@
 """
 from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint, Enum
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
@@ -23,7 +24,11 @@ class Usuario(db.Model):
     genero = db.Column(db.String(20))
     foto_perfil = db.Column(db.String(255))
     descripcion = db.Column(db.Text)
-    estado = db.Column(db.Boolean, default=True)
+    estado = db.Column(
+        Enum("ausente", "en-linea", "ocupado", name="estado_usuario"),
+        default="ausente",
+        nullable=False)
+    acepta_terminos = db.Column(db.Boolean, default=False, nullable=False)
     fecha_registro = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     @property
@@ -40,6 +45,16 @@ class Usuario(db.Model):
         """Verificar la contraseña"""
         return check_password_hash(self._contrasena, contrasena)
 
+    @property
+    def puntos(self):
+        """Devuelve la media de puntos recibidos por el Usuario"""
+        if not self.puntuaciones_recibidas:
+            return 0
+        return sum(
+            p.puntos
+            for p in self.puntuaciones_recibidas
+            ) / len(self.puntuaciones_recibidas)
+
     habilidades = db.relationship(
         "Habilidad",
         secondary="usuarios_habilidades",
@@ -51,6 +66,19 @@ class Usuario(db.Model):
     mensajes_recibidos = db.relationship(
         "Mensaje", foreign_keys="Mensaje.id_receptor",
         back_populates="receptor", cascade="all, delete-orphan")
+
+    puntuaciones_dadas = db.relationship(
+        "Puntuacion",
+        foreign_keys="Puntuacion.id_puntuador",
+        back_populates="puntuador",
+        cascade="all, delete-orphan"
+    )
+    puntuaciones_recibidas = db.relationship(
+        "Puntuacion",
+        foreign_keys="Puntuacion.id_puntuado",
+        back_populates="puntuado",
+        cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<Usuario {self.nombre} {self.apellido}>"
@@ -69,6 +97,7 @@ class Usuario(db.Model):
             "genero": self.genero,
             "descripcion": self.descripcion,
             "estado": self.estado,
+            "puntuacion": self.puntos,
             "fecha_registro": self.fecha_registro
         }
 
@@ -189,3 +218,53 @@ class Mensaje(db.Model):
             for key in excluye:
                 serial.pop(key, None)
         return serial
+
+
+class Puntuacion(db.Model):
+    """
+        Model: Puntuaciones
+    """
+    __tablename__ = "puntuaciones"
+
+    id_puntuacion = db.Column(db.Integer, primary_key=True)
+    id_puntuador = db.Column(db.Integer, db.ForeignKey(
+        "usuarios.id_usuario", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False)
+    id_puntuado = db.Column(db.Integer, db.ForeignKey(
+        "usuarios.id_usuario", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False)
+
+    puntos = db.Column(db.Float, nullable=False)
+    comentario = db.Column(db.Text, nullable=True)
+    fecha_registro = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+
+    puntuador = db.relationship(
+        "Usuario", foreign_keys=[id_puntuador],
+        back_populates="puntuaciones_dadas")
+    puntuado = db.relationship(
+        "Usuario", foreign_keys=[id_puntuado],
+        back_populates="puntuaciones_recibidas")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "id_puntuador",
+            "id_puntuado",
+            name="uq_puntuador_puntuado"),
+    )
+
+    def __repr__(self):
+        return f"<Puntuacion {self.puntos} de \
+        {self.id_puntuador} a {self.id_puntuado}>"
+
+    def to_dict(self):
+        """
+            Seralize the attr of Puntuacion
+        """
+        return {
+            "id_puntuacion": self.id_puntuacion,
+            "id_puntuador": self.id_puntuador,
+            "id_puntuado": self.id_puntuado,
+            "puntos": self.puntos,
+            "comentario": self.comentario,
+            "creado": self.fecha_registro
+        }
