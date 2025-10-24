@@ -1,0 +1,94 @@
+:root {
+    --naranja: #ff7517;
+    --gris: #3e3939;
+    --oscuro: #2c2727;
+    --claro: #f6f4f4;
+}
+
+/* Fondo */
+.fondo-modal {
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+/* Header */
+.bg-naranja {
+    background-color: var(--naranja) !important;
+    color: white;
+}
+
+/* Fondo claro */
+.fondo-claro {
+    background-color: var(--claro);
+}
+
+/* Lista izquierda */
+.lista-mensajes {
+    min-height: 400px;
+    overflow-y: auto;
+}
+
+.mensaje-item {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.mensaje-item:hover {
+    background-color: #fff5ee;
+}
+
+.mensaje-item.activo {
+    background-color: #ffe6d1;
+    border-left: 4px solid var(--naranja);
+}
+
+/* Detalle derecho */
+.detalle-mensaje {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.texto-mensaje {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.mensaje-recibido {
+    background-color: #f1f0f0;
+    padding: 10px 14px;
+    border-radius: 10px;
+    display: inline-block;
+    max-width: 75%;
+    color: var(--gris);
+}
+
+.mensaje-enviado {
+    background-color: var(--naranja);
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: white;
+    display: inline-block;
+    max-width: 75%;
+}
+
+.estado.leido {
+    color: var(--gris);
+    font-weight: 600;
+}
+
+.estado.no-leido {
+    color: var(--naranja);
+    font-weight: 600;
+}
+
+/* Botón principal */
+.btn-naranja {
+    background-color: var(--naranja);
+    color: #fff;
+    border: none;
+}
+
+.btn-naranja:hover {
+    background-color: #e56710;
+}

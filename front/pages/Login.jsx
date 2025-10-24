@@ -36,7 +36,6 @@ const Login = () => {
 
       if (usuario) {
         localStorage.setItem("usuario", JSON.stringify(usuario));
-        alert(`👋 Bienvenido ${usuario.nombre} ${usuario.apellidos}`);
         window.location.href = "/perfil";
       } else {
         setError("Correo o contraseña incorrectos.");
@@ -52,9 +51,11 @@ const Login = () => {
       <div className="row justify-content-center align-items-center">
         {/* Columna izquierda - Logo */}
         <div className="col-12 col-md-5 d-flex flex-column justify-content-center align-items-center mb-5 mb-md-0">
+
           <Link className="logo-login-container" to="/" >
             <img src="logo swapp.webp" alt="Swapp" className="logo-login"  />
           </Link>
+
           <h4 className="slogan-login">¡Donde todo, tiene otro valor!</h4>
         </div>
 
