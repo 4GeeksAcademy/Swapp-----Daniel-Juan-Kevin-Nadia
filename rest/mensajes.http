@@ -22,7 +22,7 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "contenido": "Bien, Hasta ahora",
+    "contenido": "Nada!",
     "id_emisor": 1,
     "id_receptor": 2
 }
@@ -30,12 +30,11 @@ Accept: application/json
 ###
 
 ### Actualizar el contenido de un Mensaje (PUT)
-PUT http://localhost:5000/api/mensajes/7
+PUT http://localhost:5000/api/mensajes/3
 Content-Type: application/json
 Accept: application/json
 
 {
-    "contenido": "Goodbye!",
     "visto": true
 }
 

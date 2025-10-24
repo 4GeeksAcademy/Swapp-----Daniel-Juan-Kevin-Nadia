@@ -24,7 +24,9 @@ Accept: application/json
     "foto_perfil": "...",
     "genero": "masculino",
     "descripcion": "Me defino como un hombre proactivo",
-    "estado": false
+    "id_habilidad": 2,
+    "estado": "en-linea",
+    "acepta_terminos": true
 }
 
 ###

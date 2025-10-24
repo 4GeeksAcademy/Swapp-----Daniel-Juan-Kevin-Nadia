@@ -40,7 +40,7 @@ def crear_categoria():
     try:
         db.session.commit()
     except IntegrityError:
-        db.session.rollback() 
+        db.session.rollback()
         return jsonify({"Error": "La categoria ya existe"}), 400
 
     return jsonify({"mensaje": "Categoría creada con éxito",

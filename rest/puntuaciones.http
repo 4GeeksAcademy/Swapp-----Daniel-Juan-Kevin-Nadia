@@ -1,0 +1,35 @@
+### Obtener una Puntuacion por ID (GET)
+GET http://localhost:5000/api/puntuaciones/1
+Accept: application/json
+
+###
+
+### Hacer una Puntuación (POST)
+POST http://localhost:5000/api/puntuaciones
+Content-Type: application/json
+Accept: application/json
+
+{
+    "puntuador": 1,
+    "puntuado": 1,
+    "puntos": 4,
+    "comentario": 4
+}
+
+###
+
+### Actualizar una Puntuación (PUT)
+PUT http://localhost:5000/api/puntuaciones/1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "puntos": 4,
+    "comentario": 4
+}
+
+###
+
+### Eliminar una Puntuación (DELETE)
+DELETE http://localhost:5000/api/puntuaciones/2
+Accept: application/json

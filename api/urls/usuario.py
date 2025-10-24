@@ -3,7 +3,7 @@
 """
 from datetime import datetime
 from flask import Blueprint, jsonify, request
-from models import db, Usuario
+from models import db, Usuario, Habilidad
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -73,8 +73,20 @@ def crear_usuario():
     """
         Crear Usuario
     """
-    data = request.get_json()
+    data = request.get_json() or {}
     try:
+        habilidad = Habilidad.query.get(data["id_habilidad"])
+
+        if not data:
+            return jsonify({
+                "msj": "Parametros vacios"
+            }), 400
+
+        if not habilidad:
+            return jsonify({
+                "msj": "Habilidad no Existente"
+            }), 400
+
         fecha_nacimiento = datetime.strptime(
             data['fecha_nacimiento'], "%Y-%m-%d").date()
         usr = Usuario(
@@ -83,7 +95,9 @@ def crear_usuario():
             contrasena=data['contrasena'],
             fecha_nacimiento=fecha_nacimiento,
             genero=data['genero'], foto_perfil=data['foto_perfil'],
-            descripcion=data['descripcion'], estado=data['estado'])
+            descripcion=data['descripcion'], estado=data['estado'],
+            acepta_terminos=data['acepta_terminos'])
+
         db.session.add(usr)
         db.session.commit()
         return jsonify(
