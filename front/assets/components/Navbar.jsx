@@ -26,16 +26,16 @@ function Navbar() {
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary mt-2 p-0">
         <div className="container-fluid  d-flex justify-content-center align-items-center">
-          <a
+          <Link
             className="navbar-brand d-flex  align-items-center logo-navbar-container"
-            href="#"
+            to="/"
           >
             <img
               className="logo-navbar"
               src="/logo swapp.webp"
               alt="logo Swapp"
             />
-          </a>
+          </Link>
 
           <div className="d-flex flex-grow-1 align-items-center mx-3 position-relative">
             <form className="d-flex flex-grow-1 me-2 ms-0" role="search">
@@ -114,9 +114,9 @@ function Navbar() {
             data-bs-target="#categoriasSidebar"
             aria-controls="categoriasSidebar"
           >
-            <i className="fa-solid fa-bars me-1 mt-1"></i> Todas las categorías
+            <i className="fa-solid fa-bars mt-1"></i>Todas las categorías
           </button>
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0 ms-5">
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0 ms-2">
             <li className="nav-item me-3">
               <a
                 className="active"

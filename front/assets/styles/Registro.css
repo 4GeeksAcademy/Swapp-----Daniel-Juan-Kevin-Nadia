@@ -49,3 +49,16 @@ body {
   background-color: var(--naranja);
   border-color: var(--naranja);
 }
+
+@media (max-width: 576px) {
+  .form-container,
+  .logo-registro-container {
+    width: 90%;
+  max-width: 350px;
+  margin: 0 auto;
+  }
+.header-responsive {
+  margin-bottom: 1rem !important;
+}
+
+}
