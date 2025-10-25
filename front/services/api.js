@@ -1,6 +1,6 @@
 export const registrarUsuario = async(formData) =>{
     try {
-      const response = await fetch("https://68e8dfb5f2707e6128cc97d2.mockapi.io/api/usuario",
+      const response = await fetch("http://localhost:5000/api/usuarios",
         {
           method:"POST",
           headers:{ 
