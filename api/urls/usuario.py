@@ -3,7 +3,7 @@
 """
 from datetime import datetime
 from flask import Blueprint, jsonify, request
-from models import db, Usuario, Habilidad
+from api.models import db, Usuario, Habilidad
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_jwt_extended import jwt_required, get_jwt_identity

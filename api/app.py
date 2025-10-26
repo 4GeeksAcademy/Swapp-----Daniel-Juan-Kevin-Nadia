@@ -8,14 +8,14 @@ from pathlib import Path
 from flask import Flask, jsonify
 from flask_migrate import Migrate
 from flask_cors import CORS
-from utils import APIException, generate_sitemap
-from admin import setup_admin
-from models import db
 from flask_jwt_extended import JWTManager
-from urls.usuario import usuarios
-from urls.habilidades import habilidades
-from urls.categorias import categorias
-from urls.mensaje import mensajes
+from api.utils import APIException, generate_sitemap
+from api.admin import setup_admin
+from api.models import db
+from api.urls.usuario import usuarios
+from api.urls.habilidades import habilidades
+from api.urls.categorias import categorias
+from api.urls.mensaje import mensajes
 
 
 app = Flask(__name__)
