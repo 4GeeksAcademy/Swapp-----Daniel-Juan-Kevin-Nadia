@@ -1,7 +1,7 @@
 
 from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, jsonify, request
-from models import db, Categoria
+from api.models import db, Categoria
 
 categorias = Blueprint('categorias', __name__)
 

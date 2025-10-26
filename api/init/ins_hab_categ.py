@@ -1,9 +1,9 @@
-
-from models import db, Categoria, Habilidad
-from app import app
+"""Agregar Categorias y Habilidades"""
+from api.models import db, Categoria, Habilidad
+from api.app import app
 
 CATEGORIAS_Y_HABILIDADES = {
-    "Sostenibilidad y Medio Ambiente": [
+    "Sostenibilidad": [
         "Reciclaje y compostaje",
         "Huertos urbanos",
         "Energias renovables",
@@ -11,22 +11,22 @@ CATEGORIAS_Y_HABILIDADES = {
         "Moda sostenible",
         "Productos ecologicos DIY",
     ],
-    "Entretenimiento y Cultura": [
-        "Actuación / teatro",
+    "Entretenimiento": [
+        "Teatro",
         "Organización de eventos",
-        "Juegos de mesa / rol",
-        "Cine / analisis de peliculas",
+        "Juegos de rol",
+        "Cine",
         "Espectaculos en vivo",
         "Animacion infantil",
     ],
-    "Viajes y Estilo de Vida": [
+    "Estilo de Vida": [
         "Planificación de viajes",
         "Intercambio cultural",
         "Cocina internacional",
         "Fotografía de viajes",
         "Consejos para nómadas digitales",
     ],
-    "Comunicación y Marketing": [
+    "Comunicación": [
         "Creación de contenido",
         "Copywriting",
         "Branding",
@@ -34,7 +34,7 @@ CATEGORIAS_Y_HABILIDADES = {
         "Publicidad digital",
         "Podcasting",
     ],
-    "Desarrollo Personal y Coaching": [
+    "Desarrollo Personal": [
         "Coaching de vida",
         "Mindfulness",
         "Productividad y gestión del tiempo",
@@ -54,6 +54,7 @@ CATEGORIAS_Y_HABILIDADES = {
 
 
 def poblar_datos():
+    """Algoritmo"""
     with app.app_context():
         for nombre_categoria, habilidades in CATEGORIAS_Y_HABILIDADES.items():
             categoria = Categoria.query.filter_by(

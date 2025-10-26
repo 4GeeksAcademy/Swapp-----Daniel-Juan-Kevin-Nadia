@@ -2,7 +2,7 @@
     Mensajes
 """
 from flask import Blueprint, jsonify, request
-from models import db, Mensaje
+from api.models import db, Mensaje
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 mensajes = Blueprint('mensajes', __name__)
