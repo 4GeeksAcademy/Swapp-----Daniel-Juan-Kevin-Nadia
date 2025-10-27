@@ -94,9 +94,10 @@ def crear_usuario():
             correo_electronico=data['correo_electronico'],
             contrasena=data['contrasena'],
             fecha_nacimiento=fecha_nacimiento,
-            genero=data['genero'], foto_perfil=data['foto_perfil'],
-            descripcion=data['descripcion'], estado=data['estado'],
+            genero=data['genero'],
+            descripcion=data['descripcion'],
             acepta_terminos=data['acepta_terminos'])
+        usr.habilidades.append(habilidad)
 
         db.session.add(usr)
         db.session.commit()
