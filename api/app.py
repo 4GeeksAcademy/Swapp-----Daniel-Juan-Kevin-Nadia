@@ -49,7 +49,6 @@ jwt = JWTManager(app)
 @app.errorhandler(APIException)
 def handle_invalid_usage(error):
     """ Handle/serialize errors like a JSON object """
-    return jsonify(error.to_dict()), error.status_code
 
 
 @app.route('/')
