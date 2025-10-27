@@ -16,6 +16,8 @@ from api.urls.usuario import usuarios
 from api.urls.habilidades import habilidades
 from api.urls.categorias import categorias
 from api.urls.mensaje import mensajes
+from authlib.integrations.flask_client import OAuth
+from api.urls.auth import auth
 
 
 app = Flask(__name__)
@@ -36,6 +38,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=6)
 
+
 MIGRATE = Migrate(app, db)
 db.init_app(app)
 CORS(app)
@@ -55,7 +58,19 @@ def sitemap():
     return generate_sitemap(app)
 
 
+oauth = OAuth(app)
+app.oauth = oauth
+oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    server_metadata_url=(
+        "https://accounts.google.com/.well-known/openid-configuration"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    client_kwargs={"scope": "openid email profile"},
+)
+
 app.register_blueprint(usuarios)
 app.register_blueprint(habilidades)
 app.register_blueprint(categorias)
 app.register_blueprint(mensajes)
+app.register_blueprint(auth, url_prefix="/auth")
