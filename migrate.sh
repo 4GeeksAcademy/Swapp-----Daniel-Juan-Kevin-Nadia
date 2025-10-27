@@ -49,7 +49,7 @@ load_data() {
         file_name=$(basename "$file" .py)
         if [[ "$file_name" != "__init__" ]]; then
             echo -e "\e[33mINFO => Ejecutando $file_name.py...\e[0m"
-            pipenv run python -m "api.init.$file_name"
+            pipenv_run python -m "api.init.$file_name"
         fi
     done
     echo -e "\e[32mINFO Datos agregados correctamente!\e[0m"

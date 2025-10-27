@@ -21,11 +21,9 @@ Accept: application/json
     "correo_electronico": "pedro.cisneros@example.com",
     "fecha_nacimiento": "1998-10-14",
     "contrasena": "abc&123456789",
-    "foto_perfil": "...",
     "genero": "masculino",
     "descripcion": "Me defino como un hombre proactivo",
     "id_habilidad": 2,
-    "estado": "en-linea",
     "acepta_terminos": true
 }
 
