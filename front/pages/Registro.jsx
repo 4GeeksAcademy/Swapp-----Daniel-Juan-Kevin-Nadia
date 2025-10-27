@@ -1,28 +1,54 @@
 import "../assets/styles/Registro.css";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { registrarUsuario } from "../services/api";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { env } from "../environ"
 
 function Registro() {
   const [formData, setFormData] = useState({
     nombre: "",
-    apellidos: "",
+    apellido: "",
     dia: "",
     mes: "",
     anio: "",
     genero: "",
-    habilidad: "",
+    id_habilidad: "",
     descripcion: "",
-    email: "",
+    correo_electronico: "",
     contrasena: "",
-    aceptaTerminos: false,
+    acepta_terminos: false,
   });
+  const [habilidades, setHabilidades] = useState([
+    {id_habilidad: 0, nombre_habilidad: "Elige tu Habilidad..."}
+  ])
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const obtenerHabilidades = async () => {
+      const rsp = await fetch(`${env.api}/api/habilidades`);
+      const rst = await rsp.json();
+      
+      if(rst) {
+        setHabilidades([
+          ...habilidades,
+          ...rst
+        ]);
+      }
+    }
+
+    obtenerHabilidades();
+  }, [])
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     const newValue = type === "checkbox" ? checked : value;
 
-    console.log("Campo:", name, "Valor:", newValue);
+    if(formData.dia && formData.mes && formData.anio) {
+      setFormData({
+        ...formData,
+        fecha_nacimiento: `${formData.anio}-${formData.mes}-${formData.dia}`
+      });
+    }
 
     setFormData((prevData) => ({
       ...prevData,
@@ -34,25 +60,28 @@ function Registro() {
     e.preventDefault();
 
     try {
-      const data = registrarUsuario(formData);
-      console.log(data);
-      alert("Resgitro exitoso!");
+      const data = await registrarUsuario(formData);
+
+      if(data) {
+        navigate("/", {replace: true});
+      }
     } catch (error) {
       alert("Hubo un error al registrar!");
     }
 
     setFormData({
       nombre: "",
-      apellidos: "",
+      apellido: "",
       dia: "",
       mes: "",
       anio: "",
+      fecha_nacimiento: "",
       genero: "",
-      habilidad: "",
+      id_habilidad: "",
       descripcion: "",
-      email: "",
+      correo_electronico: "",
       contrasena: "",
-      aceptaTerminos: false,
+      acepta_terminos: false,
     });
   };
 
@@ -84,12 +113,12 @@ function Registro() {
               />
 
               <input
-                name="apellidos"
+                name="apellido"
                 onChange={handleChange}
-                value={formData.apellidos}
+                value={formData.apellido}
                 type="text"
                 className="form-control registro-input flex-grow-1"
-                id="apellidos"
+                id="apellido"
                 aria-describedby=""
                 placeholder="Apellidos"
               />
@@ -234,30 +263,20 @@ function Registro() {
                 <select
                   className="form-select registro-input mt-1"
                   style={{ width: "100%" }}
-                  name="habilidad"
+                  name="id_habilidad"
                   onChange={handleChange}
-                  value={formData.habilidad}
+                  value={formData.id_habilidad}
                   id="inputGroupSelect01"
                 >
-                  <option value="">Elige tu habilidad...</option>
-                  <option value="dibujo">Dibujo y pintura</option>
-                  <option value="tecnologia">Tecnología y Programación</option>
-                  <option value="educacion"> Educación y Tutorías</option>
-                  <option value="musica">Música y Audio</option>
-                  <option value="deporte">Deporte y Bienestar</option>
-                  <option value="moda">Moda, Belleza y Cuidado Personal</option>
-                  <option value="hogar">Hogar y Reparaciones</option>
-                  <option value="mascotas">Mascotas y Animales</option>
-                  <option value="negocios">Negocios y Finanzas</option>
-                  <option value="entretenimiento">
-                    Entretenimiento y Cultura
-                  </option>
-                  <option value="viajes">Viajes y Estilo de Vida</option>
-                  <option value="comunicacion">Comunicación y Marketing</option>
-                  <option value="desarrollo">
-                    Desarrollo Personal y Coaching
-                  </option>
-                  <option value="otros">Otros / Misceláneos</option>
+                  {
+                    habilidades && 
+                    habilidades.map((id_habilidad, id) => (
+                      <option
+                          key={`id_habilidad-${id}`} 
+                          value={id_habilidad?.id_habilidad}
+                      >{id_habilidad?.nombre_habilidad}</option>
+                    ))
+                  }
                 </select>
               </div>
               <div className=" mt-1">
@@ -275,12 +294,12 @@ function Registro() {
 
             <div className="form-group mt-2">
               <input
-                name="email"
+                name="correo_electronico"
                 onChange={handleChange}
-                value={formData.email}
+                value={formData.correo_electronico}
                 type="email"
                 className="form-control registro-input"
-                id="email"
+                id="correo_electronico"
                 aria-describedby="emailHelp"
                 placeholder="Correo electrónico"
               />
@@ -300,11 +319,11 @@ function Registro() {
             <div className="form-group form-check mt-2">
               <input
                 onChange={handleChange}
-                name="aceptaTerminos"
-                checked={formData.aceptaTerminos}
+                name="acepta_terminos"
+                checked={formData.acepta_terminos}
                 type="checkbox"
                 className="form-check-input"
-                id="aceptaTerminos"
+                id="acepta_terminos"
               />
               <label className="form-check-label" htmlFor="exampleCheck1">
                 He leído y acepto las condiciones de uso y política de
