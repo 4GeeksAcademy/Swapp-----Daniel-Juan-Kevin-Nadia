@@ -23,7 +23,7 @@ const GoogleCallback = () => {
     fetchUserData();
   }, []);
 
-  return <p>Conectando con Google... 🔄</p>;
+  return <p>Conectando con Google...</p>;
 };
 
 export default GoogleCallback;
