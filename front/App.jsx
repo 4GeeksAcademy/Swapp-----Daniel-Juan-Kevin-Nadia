@@ -6,6 +6,7 @@ import Registro from "./pages/Registro";
 import Login from "./pages/Login";
 import PerfilUsuario from "./pages/PerfilUsuario";
 import PerfilPublico from "./pages/PerfilPublico";
+import GoogleCallback from "./pages/GoogleCallback.jsx";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/perfil" element={<PerfilUsuario />} />
         <Route path="/usuario/:id" element={<PerfilPublico />} />
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
       </Routes>
     </>
   );

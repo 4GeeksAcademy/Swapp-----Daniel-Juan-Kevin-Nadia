@@ -18,19 +18,19 @@ function Registro() {
     contrasena: "",
     acepta_terminos: false,
   });
-  const [habilidades, setHabilidades] = useState([
-    {id_habilidad: 0, nombre_habilidad: "Elige tu Habilidad..."}
+  const [categorias, setCategorias] = useState([
+    {id_categoria: 0, nombre_categoria: "Elige tu Habilidad..."}
   ])
   const navigate = useNavigate();
 
   useEffect(() => {
     const obtenerHabilidades = async () => {
-      const rsp = await fetch(`${env.api}/api/habilidades`);
+      const rsp = await fetch(`${env.api}/api/categorias`);
       const rst = await rsp.json();
       
       if(rst) {
-        setHabilidades([
-          ...habilidades,
+        setCategorias([
+          ...categorias,
           ...rst
         ]);
       }
@@ -269,12 +269,12 @@ function Registro() {
                   id="inputGroupSelect01"
                 >
                   {
-                    habilidades && 
-                    habilidades.map((id_habilidad, id) => (
+                    categorias && 
+                    categorias.map((category, id) => (
                       <option
-                          key={`id_habilidad-${id}`} 
-                          value={id_habilidad?.id_habilidad}
-                      >{id_habilidad?.nombre_habilidad}</option>
+                          key={`id_categoria-${id}`} 
+                          value={category?.id_categoria}
+                      >{category?.nombre_categoria}</option>
                     ))
                   }
                 </select>
