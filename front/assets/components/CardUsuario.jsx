@@ -1,20 +1,23 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/CardUsuario.css";
+import { env } from "../../environ";
 
 function CardUsuario() {
   const [usuarios, setUsuarios] = useState([]);
+  // const [puntuacion, setPuntuacion] = useState([]);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("https://68e8dfb5f2707e6128cc97d2.mockapi.io/api/usuario")
+    fetch(`${env.api}/api/usuarios`)
       .then((res) => res.json())
       .then((data) => {
         setUsuarios(data.slice(0, 8));
       })
       .catch((err) => console.error("Error al cargar usuarios:", err));
   }, []);
+
   const handleVerPerfil = (id) => {
     navigate(`/usuario/${id}`);
   };
@@ -25,7 +28,7 @@ function CardUsuario() {
         <h3 className="text-center texto-recomendados">Recomendados</h3>
         <div className="row mt-5">
           {usuarios.map((usuario) => (
-            <div className="col-md-3 mb-4 " key={usuario.id}>
+            <div className="col-md-3 mb-4 " key={usuario.id_usuario}>
               <div className="card  h-100 mx-2">
                 <div className="card-header d-flex justify-content-between">
                   <img
@@ -49,19 +52,21 @@ function CardUsuario() {
                     {usuario.descripcion || "Sin descripción"}
                   </p>
                 </div>
-                <div className="d-flex justify-content-between">
+                <div className="d-flex justify-content-between m-2">
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
-                      {[...Array(5)].map((_, i) => (
-                        <i
-                          key={i}
-                          className={`fa-star ${
-                            i < usuario.puntuacion
-                              ? "fa-solid text-warning"
-                              : "fa-regular text-secondary"
-                          }`}
-                        ></i>
-                      ))}
+                      {[1, 2, 3, 4, 5].map((num) => {
+                        const puntuacion = usuario.puntuacion || 0;
+                        let star = " fa-regular fa-star text-secondary";
+                        if (num <= Math.floor(puntuacion)) {
+                          star = "fa-solid fa-star text-warning";
+                        } else if (num - 0.5 <= puntuacion) {
+                          star = "fa-solid fa-star-half-stroke text-warning";
+                        } else if (puntuacion === 0) {
+                          star = " fa-regular fa-star text-secondary";
+                        }
+                        return <i key={num} className={star}></i>;
+                      })}
                     </div>
                   </div>
 
@@ -71,14 +76,17 @@ function CardUsuario() {
                       style={{
                         width: "12px",
                         height: "12px",
-                        backgroundColor: usuario.estado ? "green" : "gray",
+                        backgroundColor:
+                          usuario.estado === "en-linea"
+                            ? "green"
+                            : usuario.estado === "ausente"
+                            ? "grey"
+                            : usuario.estado === "ocupado"
+                            ? "red"
+                            : "lightgray",
                       }}
-                    >
-                      {usuario.estado}
-                    </div>
-                    <p className="">
-                      {usuario.estado ? "En línea" : "Ausente"}
-                    </p>
+                    ></div>
+                    <p> {usuario.estado}</p>
                   </div>
                 </div>
               </div>

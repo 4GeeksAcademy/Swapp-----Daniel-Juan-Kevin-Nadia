@@ -2,7 +2,7 @@ import "../assets/styles/Registro.css";
 import React, { useState, useEffect } from "react";
 import { registrarUsuario } from "../services/api";
 import { Link, useNavigate } from "react-router";
-import { env } from "../environ"
+import { env } from "../environ";
 
 function Registro() {
   const [formData, setFormData] = useState({
@@ -19,34 +19,31 @@ function Registro() {
     acepta_terminos: false,
   });
   const [categorias, setCategorias] = useState([
-    {id_categoria: 0, nombre_categoria: "Elige tu Habilidad..."}
-  ])
+    { id_categoria: 0, nombre_categoria: "Elige tu Habilidad..." },
+  ]);
   const navigate = useNavigate();
 
   useEffect(() => {
     const obtenerHabilidades = async () => {
       const rsp = await fetch(`${env.api}/api/categorias`);
       const rst = await rsp.json();
-      
-      if(rst) {
-        setCategorias([
-          ...categorias,
-          ...rst
-        ]);
+
+      if (rst) {
+        setCategorias([...categorias, ...rst]);
       }
-    }
+    };
 
     obtenerHabilidades();
-  }, [])
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const newValue = type === "checkbox" ? checked : value;
 
-    if(formData.dia && formData.mes && formData.anio) {
+    if (formData.dia && formData.mes && formData.anio) {
       setFormData({
         ...formData,
-        fecha_nacimiento: `${formData.anio}-${formData.mes}-${formData.dia}`
+        fecha_nacimiento: `${formData.anio}-${formData.mes}-${formData.dia}`,
       });
     }
 
@@ -62,8 +59,8 @@ function Registro() {
     try {
       const data = await registrarUsuario(formData);
 
-      if(data) {
-        navigate("/", {replace: true});
+      if (data) {
+        navigate("/", { replace: true });
       }
     } catch (error) {
       alert("Hubo un error al registrar!");
@@ -89,8 +86,10 @@ function Registro() {
     <div className="container">
       <div className="row d-flex flex-column flex-lg-row justify-content-center">
         <div className="col-12 col-lg-5 header-responsive d-flex flex-column justify-content-center align-items-center mb-5">
-          <Link className="logo-registro-container d-flex justify-content-start" to="/">
-       
+          <Link
+            className="logo-registro-container d-flex justify-content-start"
+            to="/"
+          >
             <img className="logo-registro" src="swapp sin fondo.webp"></img>
           </Link>
           <h4 className="fw-medium">¡Donde todo, tiene otro valor!</h4>
@@ -268,15 +267,15 @@ function Registro() {
                   value={formData.id_habilidad}
                   id="inputGroupSelect01"
                 >
-                  {
-                    categorias && 
+                  {categorias &&
                     categorias.map((category, id) => (
                       <option
-                          key={`id_categoria-${id}`} 
-                          value={category?.id_categoria}
-                      >{category?.nombre_categoria}</option>
-                    ))
-                  }
+                        key={`id_categoria-${id}`}
+                        value={category?.id_categoria}
+                      >
+                        {category?.nombre_categoria}
+                      </option>
+                    ))}
                 </select>
               </div>
               <div className=" mt-1">
