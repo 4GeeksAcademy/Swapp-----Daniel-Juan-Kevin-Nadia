@@ -18,8 +18,8 @@ function CardUsuario() {
       .catch((err) => console.error("Error al cargar usuarios:", err));
   }, []);
 
-  const handleVerPerfil = (id) => {
-    navigate(`/usuario/${id}`);
+  const handleVerPerfil = (id_usuario) => {
+    navigate(`/usuario/${id_usuario}`);
   };
 
   return (
@@ -39,7 +39,7 @@ function CardUsuario() {
                   <button
                     className="btn btn-main1 px-4"
                     type="button"
-                    onClick={() => handleVerPerfil(usuario.id)} // ✅ botón redirige
+                    onClick={() => handleVerPerfil(usuario.id_usuario)} // ✅ botón redirige
                   >
                     Ver perfil
                   </button>
