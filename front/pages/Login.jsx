@@ -51,9 +51,8 @@ const Login = () => {
       <div className="row justify-content-center align-items-center">
         {/* Columna izquierda - Logo */}
         <div className="col-12 col-md-5 d-flex flex-column justify-content-center align-items-center mb-5 mb-md-0">
-
-          <Link className="logo-login-container" to="/" >
-            <img src="logo swapp.webp" alt="Swapp" className="logo-login"  />
+          <Link className="logo-login-container" to="/">
+            <img src="logo swapp.webp" alt="Swapp" className="logo-login" />
           </Link>
 
           <h4 className="slogan-login">¡Donde todo, tiene otro valor!</h4>
@@ -67,7 +66,14 @@ const Login = () => {
             </h5>
 
             {/* Botón Google */}
-            <button type="button" className="btn-google-swapp mb-3 w-100 d-flex align-items-center justify-content-center gap-2">
+            <button
+              type="button"
+              className="btn-google-swapp mb-3 w-100 d-flex align-items-center justify-content-center gap-2"
+              onClick={() => {
+                window.location.href =
+                  "http://localhost:5000/auth/google/login?next=/";
+              }}
+            >
               <img
                 src="https://www.svgrepo.com/show/475656/google-color.svg"
                 alt="Google logo"
