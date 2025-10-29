@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilPublico.css";
+import { env } from "../environ"
 
 function PerfilPublico() {
     const { id } = useParams();
@@ -15,7 +16,7 @@ function PerfilPublico() {
         const fetchUsuario = async () => {
             try {
                 const res = await fetch(
-                    `https://68e8dfb5f2707e6128cc97d2.mockapi.io/api/usuario/${id}`
+                    `${env.api}/api/usuarios/${id}`
                 );
                 if (!res.ok) throw new Error("Error al obtener usuario");
                 const data = await res.json();
@@ -56,12 +57,13 @@ function PerfilPublico() {
                     <div className="col-12 col-md-3 perfil-publico-sidebar text-center p-4">
                         <div className="perfil-publico-avatar-container">
                             <img
-                                src={usuario.foto_perfil || "https://via.placeholder.com/150"}
+                                src={usuario.foto_perfil || "/swapp-profile.png"}
                                 alt="Foto de perfil"
                                 className="perfil-publico-avatar mb-3"
+                                style={{objectFit:"cover", objectPosition:"center", aspectRatio:"1/1"}}
                             />
                             <h4 className="perfil-publico-nombre mb-4">
-                                {usuario.nombre} {usuario.apellidos}
+                                {usuario.nombre} {usuario.apellido}
                             </h4>
                             <button className="btn-contactar mb-3" onClick={handleContactar}>
                                 ✉️ Contactar
@@ -82,10 +84,10 @@ function PerfilPublico() {
                                 {usuario.habilidades.map((hab, index) => (
                                     <div key={index} className="habilidad-card">
                                         <div className="habilidad-nombre">
-                                            <h5>{hab.nombre || hab}</h5>
+                                            <h5>{hab?.nombre_habilidad || "Sin nombre"}</h5>
                                         </div>
                                         <div className="habilidad-descripcion">
-                                            <p>{hab.descripcion || "El usuario no ha agregado descripción para esta habilidad."}</p>
+                                            <p>{hab?.descripcion || "Sin descripción"}</p>
                                         </div>
                                     </div>
                                 ))}
