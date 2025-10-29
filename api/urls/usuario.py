@@ -37,8 +37,14 @@ def obtener_usuario(id_usuario):
         Obtener Usuario
     """
     try:
-        usuario = Usuario.query.get_or_404(id_usuario)
-        return jsonify(usuario.to_dict())
+        usuario = Usuario.query.get(id_usuario)
+
+        if not usuario:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        usr = usuario.to_dict()
+        usr["habilidades"] = [h.to_dict() for h in usuario.habilidades]
+        return jsonify(usr), 200
 
     except SQLAlchemyError as e:
         db.session.rollback()

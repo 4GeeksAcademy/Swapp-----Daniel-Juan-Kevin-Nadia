@@ -23,6 +23,10 @@ black = "*"
 flask-jwt-extended = "*"
 authlib = "*"
 
+flask-dance = "*"
+oauthlib = "*"
+requests = "*"
+
 [requires]
 python_version = "3.13"
 
