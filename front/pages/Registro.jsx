@@ -12,6 +12,7 @@ function Registro() {
     mes: "",
     anio: "",
     genero: "",
+    id_categoria: "",
     id_habilidad: "",
     descripcion: "",
     correo_electronico: "",
@@ -21,20 +22,27 @@ function Registro() {
   const [categorias, setCategorias] = useState([
     { id_categoria: 0, nombre_categoria: "Elige tu Habilidad..." },
   ]);
+  const [habilidades, setHabilidades] = useState([
+    { id_habilidad: 0, nombre_habilidad: "Elige tu Habilidad..." },
+  ]);
+  const [showAlerta, setShowAlerta] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const obtenerHabilidades = async () => {
-      const rsp = await fetch(`${env.api}/api/categorias`);
-      const rst = await rsp.json();
-
-      if (rst) {
-        setCategorias([...categorias, ...rst]);
-      }
-    };
-
-    obtenerHabilidades();
+    fetch(`${env.api}/api/categorias`)
+      .then((res) => res.json())
+      .then((data) => setCategorias(data));
   }, []);
+
+  useEffect(() => {
+    if (formData.id_categoria) {
+      fetch(`${env.api}/api/habilidades/categoria/${formData.id_categoria}`)
+        .then((res) => res.json())
+        .then((data) => setHabilidades(data));
+    } else {
+      setHabilidades([]);
+    }
+  }, [formData.id_categoria]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -51,10 +59,29 @@ function Registro() {
       ...prevData,
       [name]: type === "checkbox" ? checked : value,
     }));
+
+    if (name === "id_categoria") {
+      setFormData((prev) => ({
+        ...prev,
+        id_categoria: newValue,
+        id_habilidad: "",
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: newValue,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.acepta_terminos) {
+      setShowAlerta(true);
+      return;
+    }
+    setShowAlerta(false);
 
     try {
       const data = await registrarUsuario(formData);
@@ -257,6 +284,30 @@ function Registro() {
 
               <div className="input-group my-2">
                 <div className="input-group-prepend">
+                  <label htmlFor="inputGroupSelect01">Categorías</label>
+                </div>
+                <select
+                  className="form-select registro-input mt-1"
+                  style={{ width: "100%" }}
+                  name="id_categoria"
+                  onChange={handleChange}
+                  value={formData.id_categoria}
+                  id="selectCategoria"
+                >
+                  {categorias &&
+                    categorias.map((category, id) => (
+                      <option
+                        key={category.id_categoria}
+                        value={category?.id_categoria}
+                      >
+                        {category?.nombre_categoria}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="input-group my-2">
+                <div className="input-group-prepend">
                   <label htmlFor="inputGroupSelect01">Habilidades</label>
                 </div>
                 <select
@@ -265,15 +316,15 @@ function Registro() {
                   name="id_habilidad"
                   onChange={handleChange}
                   value={formData.id_habilidad}
-                  id="inputGroupSelect01"
+                  id="selectHabilidad"
                 >
-                  {categorias &&
-                    categorias.map((category, id) => (
+                  {habilidades &&
+                    habilidades.map((habilidad, id) => (
                       <option
-                        key={`id_categoria-${id}`}
-                        value={category?.id_categoria}
+                        key={`id_habilidad-${id}`}
+                        value={habilidad?.id_habilidad}
                       >
-                        {category?.nombre_categoria}
+                        {habilidad?.nombre_habilidad}
                       </option>
                     ))}
                 </select>
@@ -329,6 +380,11 @@ function Registro() {
                 privacidad de Swapp.
               </label>
             </div>
+            {showAlerta && (
+              <div className="alert alert-danger mt-2 p-1" role="alert">
+                Debes aceptar las condiciones de uso para registrarte.
+              </div>
+            )}
             <div className="d-flex justify-content-center">
               <button type="submit" className="btn btn-main1 my-3">
                 Registrate
