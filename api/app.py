@@ -18,6 +18,7 @@ from api.urls.categorias import categorias
 from api.urls.mensaje import mensajes
 from authlib.integrations.flask_client import OAuth
 from api.urls.auth import auth
+from api.init.usuarios_init import usuarios_prueba
 
 
 app = Flask(__name__)
@@ -44,6 +45,9 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 jwt = JWTManager(app)
+
+with app.app_context():
+    usuarios_prueba()
 
 
 @app.errorhandler(APIException)
