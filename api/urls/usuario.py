@@ -54,6 +54,30 @@ def obtener_usuario(id_usuario):
         }), 500
 
 
+@usuarios.route("/api/usuarios/categoria/<int:id_categoria>", methods=["GET"])
+def usuarios_por_categoria(id_categoria):
+    """
+    Devuelve todos los usuarios que tienen habilidades de una categoría
+    """
+    from api.models import Categoria, Habilidad, Usuario
+
+    categoria = Categoria.query.get_or_404(id_categoria)
+
+    habilidades_ids = [h.id_habilidad for h in categoria.habilidades]
+
+    if not habilidades_ids:
+        return jsonify([]), 200
+    
+    usuarios_categoria = (
+        Usuario.query
+        .join(Usuario.habilidades)
+        .filter(Habilidad.id_habilidad.in_(habilidades_ids))
+        .all()
+    )
+
+    return jsonify([u.to_dict() for u in usuarios_categoria]), 200
+
+
 @usuarios.route('/api/usuarios/<int:id_usuario>', methods=['DELETE'])
 def eliminar_usuario(id_usuario):
     """
