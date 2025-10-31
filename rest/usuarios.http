@@ -29,6 +29,19 @@ Accept: application/json
 
 ###
 
+### Asociar/desasociar una habilidad (POST)
+### Se envia uno de los 2 parametros que son id_habilidad
+POST http://localhost:5000/api/usuarios/1/habilidad
+Content-Type: application/json
+Accept: application/json
+
+{
+    "desasociar": 15,
+    "asociar": 21
+}
+
+###
+
 ### Actualizar datos de usuario (PUT)
 PUT http://localhost:5000/api/usuarios/5
 Content-Type: application/json
