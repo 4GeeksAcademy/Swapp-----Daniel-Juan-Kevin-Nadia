@@ -22,7 +22,6 @@ flake8 = "*"
 black = "*"
 flask-jwt-extended = "*"
 authlib = "*"
-
 flask-dance = "*"
 oauthlib = "*"
 requests = "*"
