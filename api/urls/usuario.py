@@ -184,6 +184,49 @@ def actualizar_usuario(id_usuario):
                         "detalle": str(e)}), 500
 
 
+@usuarios.route('/api/usuarios/<int:id_usuario>/habilidad', methods=["POST"])
+def agregar_habilidad_usuario(id_usuario):
+    """
+        Asociar/Desasociar Habilidades a los Usuarios
+    """
+    data = request.get_json() or {}
+    try:
+        usr = Usuario.query.get(id_usuario)
+        id_habilidad = data.get("asociar") or data.get("desasociar")
+        habilidad = Habilidad.query.get(id_habilidad)
+
+        if not usr or not habilidad:
+            return jsonify({
+                "msj": "El Usuario o Habilidad No Existe"
+            }), 404
+
+        if not data or "asociar" in data and "desasociar" in data:
+            return jsonify({
+                "msj": "Parametros invalidos"
+            }), 401
+
+        if "asociar" in data:
+            usr.habilidades.append(habilidad)
+
+        if "desasociar" in data:
+            usr.habilidades.remove(habilidad)
+
+        user = usr.to_dict()
+        user["habilidades"] = [h.to_dict() for h in usr.habilidades]
+
+        db.session.commit()
+        return jsonify(user), 201
+
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "El correo ya está registrado"}), 400
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": "Error al crear usuario",
+                        "detalle": str(e)}), 500
+
+
 @usuarios.route("/api/autorizar", methods=["POST"])
 def crear_autorizacion():
     """
