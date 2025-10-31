@@ -3,7 +3,7 @@
 """
 from datetime import datetime
 from flask import Blueprint, jsonify, request
-from models import db, Usuario, Habilidad
+from api.models import db, Usuario, Habilidad
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from flask_jwt_extended import create_access_token, create_refresh_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -37,8 +37,14 @@ def obtener_usuario(id_usuario):
         Obtener Usuario
     """
     try:
-        usuario = Usuario.query.get_or_404(id_usuario)
-        return jsonify(usuario.to_dict())
+        usuario = Usuario.query.get(id_usuario)
+
+        if not usuario:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        usr = usuario.to_dict()
+        usr["habilidades"] = [h.to_dict() for h in usuario.habilidades]
+        return jsonify(usr), 200
 
     except SQLAlchemyError as e:
         db.session.rollback()
@@ -46,6 +52,30 @@ def obtener_usuario(id_usuario):
             "error": "Error en la base de datos",
             "detalle": str(e.__dict__.get("orig"))
         }), 500
+
+
+@usuarios.route("/api/usuarios/categoria/<int:id_categoria>", methods=["GET"])
+def usuarios_por_categoria(id_categoria):
+    """
+    Devuelve todos los usuarios que tienen habilidades de una categoría
+    """
+    from api.models import Categoria, Habilidad, Usuario
+
+    categoria = Categoria.query.get_or_404(id_categoria)
+
+    habilidades_ids = [h.id_habilidad for h in categoria.habilidades]
+
+    if not habilidades_ids:
+        return jsonify([]), 200
+    
+    usuarios_categoria = (
+        Usuario.query
+        .join(Usuario.habilidades)
+        .filter(Habilidad.id_habilidad.in_(habilidades_ids))
+        .all()
+    )
+
+    return jsonify([u.to_dict() for u in usuarios_categoria]), 200
 
 
 @usuarios.route('/api/usuarios/<int:id_usuario>', methods=['DELETE'])
@@ -94,9 +124,10 @@ def crear_usuario():
             correo_electronico=data['correo_electronico'],
             contrasena=data['contrasena'],
             fecha_nacimiento=fecha_nacimiento,
-            genero=data['genero'], foto_perfil=data['foto_perfil'],
-            descripcion=data['descripcion'], estado=data['estado'],
+            genero=data['genero'],
+            descripcion=data['descripcion'],
             acepta_terminos=data['acepta_terminos'])
+        usr.habilidades.append(habilidad)
 
         db.session.add(usr)
         db.session.commit()
@@ -150,6 +181,49 @@ def actualizar_usuario(id_usuario):
     except SQLAlchemyError as e:
         db.session.rollback()
         return jsonify({"error": "Error en la base de datos",
+                        "detalle": str(e)}), 500
+
+
+@usuarios.route('/api/usuarios/<int:id_usuario>/habilidad', methods=["POST"])
+def agregar_habilidad_usuario(id_usuario):
+    """
+        Asociar/Desasociar Habilidades a los Usuarios
+    """
+    data = request.get_json() or {}
+    try:
+        usr = Usuario.query.get(id_usuario)
+        id_habilidad = data.get("asociar") or data.get("desasociar")
+        habilidad = Habilidad.query.get(id_habilidad)
+
+        if not usr or not habilidad:
+            return jsonify({
+                "msj": "El Usuario o Habilidad No Existe"
+            }), 404
+
+        if not data or "asociar" in data and "desasociar" in data:
+            return jsonify({
+                "msj": "Parametros invalidos"
+            }), 401
+
+        if "asociar" in data:
+            usr.habilidades.append(habilidad)
+
+        if "desasociar" in data:
+            usr.habilidades.remove(habilidad)
+
+        user = usr.to_dict()
+        user["habilidades"] = [h.to_dict() for h in usr.habilidades]
+
+        db.session.commit()
+        return jsonify(user), 201
+
+    except IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": "El correo ya está registrado"}), 400
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({"error": "Error al crear usuario",
                         "detalle": str(e)}), 500
 
 

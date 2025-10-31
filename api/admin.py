@@ -4,9 +4,9 @@
 import os
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from models import db, Usuario, Categoria
-from models import Habilidad, Mensaje
-from admin_views import UsuarioAdmin  # pyright: ignore[reportMissingImports]
+from .models import db, Usuario, Categoria
+from .models import Habilidad, Mensaje
+from .admin_views import UsuarioAdmin  # pyright: ignore[reportMissingImports]
 
 
 def setup_admin(app):

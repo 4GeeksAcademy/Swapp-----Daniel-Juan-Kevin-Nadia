@@ -3,7 +3,7 @@
 """
 from sqlalchemy.exc import IntegrityError
 from flask import Blueprint, jsonify, request
-from models import db, Habilidad
+from api.models import db, Habilidad
 
 habilidades = Blueprint('habilidades', __name__)
 
@@ -13,9 +13,13 @@ def obtener_habilidades():
     """
         Obtener habilidades
     """
-    habilidades = Habilidad.query.all()
-    return jsonify([s.to_dict() for s in habilidades]), 200
+    skills = Habilidad.query.all()
+    return jsonify([s.to_dict() for s in skills]), 200
 
+@habilidades.route('/api/habilidades/categoria/<int:id_categoria>', methods=['GET'])
+def obtener_habilidades_por_categoria(id_categoria):
+    habilidades_categoria = Habilidad.query.filter_by(id_categoria=id_categoria).all()
+    return jsonify([h.to_dict() for h in habilidades_categoria]), 200
 
 @habilidades.route('/api/habilidades/<int:id_habilidad>', methods=['GET'])
 def obtener_habilidad(id_habilidad):

@@ -2,7 +2,7 @@
     puntuaciones
 """
 from flask import Blueprint, jsonify, request
-from models import db, Usuario, Puntuacion
+from api.models import db, Usuario, Puntuacion
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 puntuaciones = Blueprint('puntuaciones', __name__)

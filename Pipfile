@@ -21,7 +21,11 @@ eralchemy = {extras = ["graphviz"], version = "*"}
 flake8 = "*"
 black = "*"
 flask-jwt-extended = "*"
-
+authlib = "*"
+flask-dance = "*"
+oauthlib = "*"
+requests = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.13"
