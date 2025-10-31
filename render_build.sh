@@ -33,8 +33,8 @@ else
 fi
 
 # --- Ohmyzsh ---
-export RUNZSH=no
-export CHSH=no
-sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
+# export RUNZSH=no
+# export CHSH=no
+# sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
 
 echo "✔ ¡Entorno configurado correctamente!"
