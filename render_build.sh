@@ -20,6 +20,7 @@ if [ -f Pipfile ]; then
   echo "  ¡Instalando dependencias Pipenv!"
   pipenv lock --pre
   pipenv install --dev
+  pipenv install gunicorn
 else
   echo "  ¡No se encontró Pipfile!"
 fi
