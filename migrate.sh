@@ -1,4 +1,4 @@
-#!/bin/zsh
+# #!/bin/zsh
 set -e
 
 SOURCE_ENV_FILE="environment.txt"
