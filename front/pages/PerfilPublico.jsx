@@ -45,7 +45,19 @@ function PerfilPublico() {
     );
   };
 
-  if (cargando) return <p className="text-center mt-5">Cargando perfil...</p>;
+  if (cargando)
+    return (
+      <div className="d-flex flex-column justify-content-center align-items-center">
+        <div
+          className="spinner-border "
+          style={{ color: "#ff7517" }}
+          role="status"
+        >
+          <span className="visually-hidden"></span>
+        </div>
+        <h4 className="mt-3">Cargando perfil...</h4>
+      </div>
+    );
   if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
 
   return (
