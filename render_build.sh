@@ -1,4 +1,13 @@
-#!/bin/zsh
+#!/usr/bin/env bash
+# exit on error
+# set -o errexit
+
+# npm install
+# npm run build
+
+# pipenv install
+
+# pipenv run upgrade
 set -e
 
 echo "  ¡Configurando entorno!"
@@ -11,6 +20,7 @@ if [ -f Pipfile ]; then
   echo "  ¡Instalando dependencias Pipenv!"
   pipenv lock --pre
   pipenv install --dev
+  pipenv install gunicorn
 else
   echo "  ¡No se encontró Pipfile!"
 fi
@@ -24,8 +34,8 @@ else
 fi
 
 # --- Ohmyzsh ---
-export RUNZSH=no
-export CHSH=no
-sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
+# export RUNZSH=no
+# export CHSH=no
+# sh -c "$(curl -fsSL https://install.ohmyz.sh/)"
 
 echo "✔ ¡Entorno configurado correctamente!"

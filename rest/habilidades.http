@@ -2,9 +2,8 @@
 ###Obtener las habilidades de los usuasrios
 GET http://localhost:5000/api/habilidades
 Accept: application/json
+
 ###
-
-
 
 ### Obtener una habilidad
 GET http://localhost:5000/api/habilidades/5

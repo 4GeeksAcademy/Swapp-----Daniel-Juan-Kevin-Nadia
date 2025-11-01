@@ -1,32 +1,54 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
+import { env } from "../environ";
+import { useStore } from "../hooks/useStore";
 
 function PerfilUsuario() {
+  const { store, dispatch } = useStore();
   const [usuario, setUsuario] = useState(null);
   const [seccionActiva, setSeccionActiva] = useState("datos");
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [idCategorie, setIdCategorie] = useState(0);
+  const [habilidades, setHabilidades] = useState([]);
+  const [idHabilidad, setIdHabilidad] = useState(0);
   const [editandoHabilidades, setEditandoHabilidades] = useState(false);
-  const [nuevaHabilidad, setNuevaHabilidad] = useState({ nombre: "", descripcion: "" });
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const usuarioLocal = JSON.parse(localStorage.getItem("usuario"));
-    if (!usuarioLocal) {
-      alert("⚠️ No hay sesión activa. Por favor inicia sesión.");
-      window.location.href = "/";
+    const rawToken = localStorage.getItem("token");
+    const usuarioToken = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
+
+    if (!usuarioToken) {
+      alert(" No hay sesión activa. Por favor inicia sesión.");
+      navigate("/login");
       return;
     }
 
     const fetchUsuario = async () => {
       try {
-        const response = await fetch(
-          `https://68e8dfb5f2707e6128cc97d2.mockapi.io/api/usuario/${usuarioLocal.id}`
-        );
+        const response = await fetch(`${env.api}/api/autorizacion`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${usuarioToken}`,
+            Accept: "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          console.error("Error al obtener usuario:", response.status);
+          return;
+        }
+
         const data = await response.json();
+        console.log("Usuario cargado:", data);
         setUsuario(data);
         setFormData(data);
+        dispatch({ type: "SET_USUARIO", payload: data });
       } catch (error) {
         console.error("Error al cargar usuario:", error);
       }
@@ -38,9 +60,21 @@ function PerfilUsuario() {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  const handleCategorieChange = (e) => {
+    let idxCategory = parseInt(e.target.value);
+    setIdCategorie(idxCategory);
+    let categ = categories.find((c) => c.id_categoria === idxCategory);
+
+    if (categ) setHabilidades(categ["habilidades"]);
+  };
+
   const handleGuardar = async () => {
     try {
-      if (!formData.nombre || !formData.apellidos || !formData.correo_electronico) {
+      if (
+        !formData.nombre ||
+        !formData.apellido ||
+        !formData.correo_electronico
+      ) {
         alert("Por favor completa todos los campos obligatorios.");
         return;
       }
@@ -52,9 +86,10 @@ function PerfilUsuario() {
           return;
         }
 
-        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(2, "0")}-${String(
-          formData.dia
-        ).padStart(2, "0")}`;
+        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(
+          2,
+          "0"
+        )}-${String(formData.dia).padStart(2, "0")}`;
       }
 
       const { dia, mes, anio, ...dataSinCamposExtra } = formData;
@@ -63,22 +98,19 @@ function PerfilUsuario() {
         fecha_nacimiento: fechaFinal,
       };
 
-      const response = await fetch(
-        `https://68e8dfb5f2707e6128cc97d2.mockapi.io/api/usuario/${usuario.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(usuarioActualizado),
-        }
-      );
+      const response = await fetch(`${env.api}/api/usuarios/${usuario.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(usuarioActualizado),
+      });
 
       const dataActualizada = await response.json();
       setUsuario(dataActualizada);
       setEditando(false);
-      alert("✅ Datos actualizados correctamente");
+      alert("Datos actualizados correctamente");
     } catch (error) {
       console.error("Error al guardar:", error);
-      alert("❌ No se pudo guardar la información");
+      alert("No se pudo guardar la información");
     }
   };
 
@@ -87,55 +119,44 @@ function PerfilUsuario() {
     if (!nuevaFoto) return;
 
     try {
-      const response = await fetch(
-        `https://68e8dfb5f2707e6128cc97d2.mockapi.io/api/usuario/${usuario.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...usuario, foto_perfil: nuevaFoto }),
-        }
-      );
+      const response = await fetch(`${env.api}/api/usuarios/${usuario.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...usuario, foto_perfil: nuevaFoto }),
+      });
       const actualizado = await response.json();
       setUsuario(actualizado);
       setFormData((prev) => ({ ...prev, foto_perfil: nuevaFoto }));
-      alert("✅ Foto actualizada correctamente");
+      alert("Foto actualizada correctamente");
     } catch (error) {
       console.error("Error al actualizar foto:", error);
-      alert("❌ No se pudo actualizar la foto");
+      alert("No se pudo actualizar la foto");
     }
   };
 
-  // === NUEVO: manejar habilidades ===
   const handleAgregarHabilidad = () => {
-    if (!nuevaHabilidad.nombre.trim()) {
-      alert("Por favor escribe el nombre de la habilidad.");
-      return;
-    }
-    const nuevasHabilidades = [
-      ...(usuario.habilidades || []),
-      { nombre: nuevaHabilidad.nombre, descripcion: nuevaHabilidad.descripcion },
-    ];
-    setUsuario({ ...usuario, habilidades: nuevasHabilidades });
-    setNuevaHabilidad({ nombre: "", descripcion: "" });
-  };
-
-  const handleGuardarHabilidades = async () => {
-    try {
-      const response = await fetch(
-        `https://68e8dfb5f2707e6128cc97d2.mockapi.io/api/usuario/${usuario.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...usuario }),
-        }
-      );
-      const actualizado = await response.json();
-      setUsuario(actualizado);
+    if (idHabilidad > 0) {
+      fetch(`${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          asociar: idHabilidad,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Error en la petición: " + response.status);
+          }
+          return response.json();
+        })
+        .then((data) => setUsuario(data))
+        .catch((error) => {
+          console.error("Hubo un problema con la petición:", error);
+        });
       setEditandoHabilidades(false);
-      alert("✅ Habilidades guardadas correctamente");
-    } catch (error) {
-      console.error("Error al guardar habilidades:", error);
-      alert("❌ No se pudieron guardar las habilidades");
     }
   };
 
@@ -146,14 +167,18 @@ function PerfilUsuario() {
       <Navbar />
       <div className="container-fluid perfil-container py-5">
         <div className="row justify-content-center">
-          {/* Sidebar */}
           <div className="col-12 col-md-3 perfil-sidebar text-center p-4">
             <div className="perfil-avatar-container">
               <img
-                src={usuario.foto_perfil}
+                src={
+                  usuario.foto_perfil && usuario.foto_perfil.trim() !== ""
+                    ? usuario.foto_perfil
+                    : "/swapp-profile.png"
+                }
                 alt="Foto de perfil"
                 className="perfil-avatar mb-3"
               />
+
               <button
                 className="btn btn-editar-foto mb-2"
                 onClick={handleEditarFoto}
@@ -161,33 +186,46 @@ function PerfilUsuario() {
                 📷 Editar Foto
               </button>
               <h4 className="perfil-nombre mb-4">
-                {usuario.nombre} {usuario.apellidos}
+                {usuario.nombre} {usuario.apellido}
               </h4>
             </div>
 
             <div className="perfil-secciones mt-4">
               <button
-                className={`list-group-item ${seccionActiva === "datos" ? "active" : ""}`}
+                className={`list-group-item ${
+                  seccionActiva === "datos" ? "active" : ""
+                }`}
                 onClick={() => setSeccionActiva("datos")}
               >
                 Datos Personales
               </button>
               <div className="perfil-divider"></div>
               <button
-                className={`list-group-item ${seccionActiva === "habilidades" ? "active" : ""
-                  }`}
-                onClick={() => setSeccionActiva("habilidades")}
+                className={`list-group-item ${
+                  seccionActiva === "habilidades" ? "active" : ""
+                }`}
+                onClick={() => {
+                  setSeccionActiva("habilidades");
+                  fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`)
+                    .then((response) => {
+                      if (!response.ok) {
+                        throw new Error(
+                          "Error en la petición: " + response.status
+                        );
+                      }
+                      return response.json();
+                    })
+                    .then((data) => setUsuario(data))
+                    .catch((error) => {
+                      console.error("Hubo un problema con la petición:", error);
+                    });
+                }}
               >
                 Habilidades
               </button>
             </div>
-
-            <div className="perfil-footer mt-auto text-center">
-              <img src="/swapp sin fondo.webp" alt="Swapp" className="perfil-logo mt-4" />
-            </div>
           </div>
 
-          {/* Contenido principal */}
           <div className="col-12 col-md-8 perfil-content p-4">
             {seccionActiva === "datos" ? (
               <>
@@ -214,7 +252,7 @@ function PerfilUsuario() {
                       type="text"
                       className="form-control"
                       name="apellidos"
-                      value={formData.apellidos || ""}
+                      value={formData.apellido || ""}
                       onChange={handleChange}
                       disabled={!editando}
                     />
@@ -362,8 +400,7 @@ function PerfilUsuario() {
                       <ul className="habilidades-lista">
                         {usuario.habilidades.map((hab, index) => (
                           <li key={index}>
-                            <strong>{hab.nombre}</strong> —{" "}
-                            {hab.descripcion || "Sin descripción"}
+                            <strong>{hab.nombre_habilidad}</strong>
                           </li>
                         ))}
                       </ul>
@@ -374,7 +411,25 @@ function PerfilUsuario() {
                     )}
                     <button
                       className="btn perfil-accion-btn mt-3"
-                      onClick={() => setEditandoHabilidades(true)}
+                      onClick={() => {
+                        setEditandoHabilidades(true);
+                        fetch(`${env.api}/api/categorias`)
+                          .then((response) => {
+                            if (!response.ok) {
+                              throw new Error(
+                                "Error en la petición: " + response.status
+                              );
+                            }
+                            return response.json();
+                          })
+                          .then((data) => setCategories(data))
+                          .catch((error) => {
+                            console.error(
+                              "Hubo un problema con la petición:",
+                              error
+                            );
+                          });
+                      }}
                     >
                       ✏️ Editar habilidades
                     </button>
@@ -382,30 +437,57 @@ function PerfilUsuario() {
                 ) : (
                   <>
                     <div className="mb-3 text-start">
-                      <label className="form-label">Nueva habilidad</label>
-                      <input
-                        type="text"
-                        className="form-control mb-2"
-                        placeholder="Nombre de la habilidad"
-                        value={nuevaHabilidad.nombre}
-                        onChange={(e) =>
-                          setNuevaHabilidad({
-                            ...nuevaHabilidad,
-                            nombre: e.target.value,
-                          })
-                        }
-                      />
-                      <textarea
-                        className="form-control mb-2"
-                        placeholder="Descripción"
-                        value={nuevaHabilidad.descripcion}
-                        onChange={(e) =>
-                          setNuevaHabilidad({
-                            ...nuevaHabilidad,
-                            descripcion: e.target.value,
-                          })
-                        }
-                      />
+                      <div className="input-group my-2">
+                        <div className="input-group-prepend">
+                          <label htmlFor="inputGroupSelect01">Categorías</label>
+                        </div>
+                        <select
+                          className="form-select registro-input mt-1"
+                          style={{ width: "100%" }}
+                          name="id_categoria"
+                          onChange={handleCategorieChange}
+                          value={idCategorie}
+                          id="selectCategoria"
+                        >
+                          {categories &&
+                            categories.map((category, id) => (
+                              <option
+                                key={`categoria-${category?.id_categoria}`}
+                                value={category?.id_categoria}
+                              >
+                                {category?.nombre_categoria}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+
+                      <div className="input-group my-2">
+                        <div className="input-group-prepend">
+                          <label htmlFor="inputGroupSelect01">
+                            Habilidades
+                          </label>
+                        </div>
+                        <select
+                          className="form-select registro-input mt-1"
+                          style={{ width: "100%" }}
+                          name="id_habilidad"
+                          onChange={(e) =>
+                            setIdHabilidad(parseInt(e.target.value))
+                          }
+                          value={idHabilidad}
+                          id="selectHabilidad"
+                        >
+                          {habilidades &&
+                            habilidades.map((habilidad, id) => (
+                              <option
+                                key={`id_habilidad-${id}`}
+                                value={habilidad?.id_habilidad}
+                              >
+                                {habilidad?.nombre_habilidad}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
                       <button
                         className="btn btn-editar-foto"
                         onClick={handleAgregarHabilidad}
@@ -418,19 +500,11 @@ function PerfilUsuario() {
                       <ul className="habilidades-lista mt-3">
                         {usuario.habilidades.map((hab, index) => (
                           <li key={index}>
-                            <strong>{hab.nombre}</strong> —{" "}
-                            {hab.descripcion || "Sin descripción"}
+                            <strong>{hab.nombre_habilidad}</strong>
                           </li>
                         ))}
                       </ul>
                     )}
-
-                    <button
-                      className="btn perfil-accion-btn mt-4"
-                      onClick={handleGuardarHabilidades}
-                    >
-                      💾 Guardar cambios
-                    </button>
                   </>
                 )}
               </>

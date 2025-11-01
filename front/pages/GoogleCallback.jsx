@@ -1,29 +1,40 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const GoogleCallback = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/auth/google/callback" + window.location.search
-        );
-        const data = await response.json();
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const name = params.get("name");
+    const email = params.get("email");
+    const picture = params.get("picture");
 
-        // Guarda los datos en el almacenamiento local
-        localStorage.setItem("token", data.access_token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+    console.log("Parámetros recibidos en el callback:");
+    for (const [key, value] of params.entries()) {
+      console.log(`${key}: ${value}`);
+    }
 
-        // Redirige al perfil o home
-        window.location.href = "/";
-      } catch (error) {
-        console.error("Error procesando callback de Google:", error);
-      }
-    };
+    if (token) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify({ name, email, picture }));
 
-    fetchUserData();
-  }, []);
+      console.log("Sesión iniciada con Google:", { name, email, picture });
 
-  return <p>Conectando con Google...</p>;
+      setTimeout(() => navigate("/perfil"), 200);
+    } else {
+      console.error("Error: token no encontrado en la URL");
+      alert("Error al autenticar con Google. Intenta de nuevo.");
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  return (
+    <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <h4>Autenticando con Google...</h4>
+    </div>
+  );
 };
 
 export default GoogleCallback;

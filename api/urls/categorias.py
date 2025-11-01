@@ -14,7 +14,15 @@ def obtener_categorias():
     categorias_todas = Categoria.query.all()
     if not categorias_todas:
         return jsonify({"Error": "No hay categorias registradas"}), 404
-    return jsonify([c.to_dict() for c in categorias_todas]), 200
+
+    categories = []
+    for c in categorias_todas:
+        categorie = c.to_dict()
+        categorie["habilidades"] = [h.to_dict()
+                                    for h in c.habilidades]
+        categories.append(categorie)
+
+    return jsonify(categories), 200
 
 
 @categorias.route('/api/categorias/<int:id_categoria>', methods=['GET'])

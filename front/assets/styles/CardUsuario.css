@@ -9,12 +9,14 @@
   border: none;
 }
 
+.btn-main1 {
+  padding: 5px 9px !important;
+}
 .card:hover {
   transform: translateY(-6px) scale(1.03);
   box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
 }
 .texto-recomendados {
-  border-color: #ff7517;
   color: #3e3939;
 }
 .text-limit {

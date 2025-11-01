@@ -1,23 +1,66 @@
 import "../styles/Navbar.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { env } from "../../environ";
+import { useStore } from "../../hooks/useStore";
 
 function Navbar() {
+  const {store, dispatch} = useStore();
   const [usuario, setUsuario] = useState(null);
+  const [categorias, setCategorias] = useState([]);
   const navigate = useNavigate();
 
+  const CATEGORIAS_DESTACADAS = [
+    "Educación y Tutorías",
+    "Tecnología y Programación",
+    "Música y Audio",
+    "Negocios y Finanzas",
+    "Entretenimiento y Cultura",
+  ];
+  const iconosCategorias = {
+    "Educación y Tutorías": "fa-solid fa-graduation-cap",
+    "Tecnología y Programación": "fa-solid fa-square-binary",
+    "Música y Audio": "fa-solid fa-play",
+    "Negocios y Finanzas": "fa-solid fa-money-bill-trend-up",
+    "Entretenimiento y Cultura": "fa-solid fa-masks-theater",
+    "Dibujo y pintura": "fa-solid fa-palette",
+    "Deporte y Bienestar": "fa-solid fa-heart",
+    "Moda, Belleza y Cuidado Personal": "fa-solid fa-hand-sparkles",
+    "Hogar y Reparaciones": "fa-solid fa-screwdriver-wrench",
+    "Mascotas y Animales": "fa-solid fa-paw",
+    "Viajes y Estilo de Vida": "fa-solid fa-suitcase",
+    "Comunicación y Marketing": "fa-solid fa-bullhorn",
+    "Desarrollo Personal y Coaching": "fa-solid fa-child-reaching",
+    "Otros / Misceláneos": "fa-solid fa-puzzle-piece",
+  };
+ 
   useEffect(() => {
-    const usuarioGuardado = localStorage.getItem("usuario");
-    if (usuarioGuardado) {
-      setUsuario(JSON.parse(usuarioGuardado));
+    const usuarioGuardado = store.usuario;
+    if (Object.keys(usuarioGuardado).length > 0) {
+      setUsuario(usuarioGuardado);
     }
+
+    const fetchCategorias = async () => {
+      try {
+        const response = await fetch(`${env.api}/api/categorias`);
+        if (!response.ok) throw new Error("Error al obtener categorías");
+        const data = await response.json();
+        setCategorias(data);
+        dispatch({type: "SET_CATEGORIAS", payload: data});
+      } catch (error) {
+        console.error("Error cargando categorías:", error);
+      }
+    };
+    fetchCategorias();
   }, []);
 
   const handleLogout = () => {
     const confirmLogout = window.confirm("¿Deseas cerrar sesión?");
     if (confirmLogout) {
-      localStorage.removeItem("usuario");
       setUsuario(null);
+      dispatch({type: "SET_USUARIO", payload: {}});
+      dispatch({type: "SET_TOKEN", payload: ""});
+      localStorage.removeItem("token");
       navigate("/login");
     }
   };
@@ -37,7 +80,7 @@ function Navbar() {
             />
           </Link>
 
-          <div className="d-flex flex-grow-1 align-items-center mx-3 position-relative">
+          {/* <div className="d-flex flex-grow-1 align-items-center mx-3 position-relative">
             <form className="d-flex flex-grow-1 me-2 ms-0" role="search">
               <div className="input-group w-100">
                 <input
@@ -60,9 +103,11 @@ function Navbar() {
             >
               <i className="fa-solid fa-bars"></i>
             </button>
-          </div>
+          </div> */}
 
-          {/* <h5>Swapp, donde todo tiene otro valor.</h5> */}
+          <h3 className="d-none d-md-block flex-grow-1 mx-3 text-center mb-0 fst-italic eslogan">
+            ¡Donde todo, tiene otro valor!
+          </h3>
           <div className="d-flex">
             {usuario ? (
               <>
@@ -116,36 +161,30 @@ function Navbar() {
           >
             <i className="fa-solid fa-bars mt-1"></i>Todas las categorías
           </button>
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0 ms-2">
-            <li className="nav-item me-3">
-              <a
-                className="active"
-                aria-current="page"
-                href="#"
-                // onClick={() => handleClickCategoria(educacion)}
-              >
-                Educación y Tutorías
-              </a>
-            </li>
-            <li className="nav-item me-3">
-              <a
-                href="#"
-                // onClick={() => handleClickCategoria(tecnologia)}
-              >
-                {" "}
-                Tecnología y Programación
-              </a>
-            </li>
 
-            <li className="nav-item me-3">
-              <a href="#">Música y Audio</a>
-            </li>
-            <li className="nav-item me-3 ">
-              <a href="#">Negocios y Finanzas</a>
-            </li>
-            <li className="nav-item">
-              <a href="#">Entretenimiento y Cultura</a>
-            </li>
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0 ms-2">
+            {CATEGORIAS_DESTACADAS.map((nombre) => {
+              const categoria = categorias?.find(
+                (cat) => cat.nombre_categoria === nombre
+              );
+
+              return (
+                <li key={nombre} className="nav-item me-3">
+                  {categoria ? (
+                    <NavLink
+                      to={`/usuarios/categoria/${categoria.id_categoria}`}
+                      className={({ isActive }) =>
+                        `nav-link ${isActive ? "active-link" : ""}`
+                      }
+                    >
+                      {nombre}
+                    </NavLink>
+                  ) : (
+                    <span className="text-muted">{nombre}</span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       </nav>
@@ -207,86 +246,31 @@ function Navbar() {
           </div>
 
           <ul className="list-unstyled">
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-graduation-cap me-3"></i>Educación y
-                Tutorías
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-square-binary me-3"></i>Tecnología y
-                Programación
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-play me-3"></i>Música y Audio
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-money-bill-trend-up me-3"></i>Negocios
-                y Finanzas
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-masks-theater me-3"></i>
-                Entretenimiento y Cultura
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-palette me-3"></i>Dibujo y pintura
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-heart me-3"></i>Deporte y Bienestar
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-hand-sparkles me-3"></i>Moda, Belleza
-                y Cuidado Personal
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-screwdriver-wrench me-3"></i>Hogar y
-                Reparaciones
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-paw me-3"></i>Mascotas y Animales
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-suitcase me-3"></i>Viajes y Estilo de
-                Vida
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-bullhorn me-3"></i>Comunicación y
-                Marketing
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-child-reaching me-3"></i>Desarrollo
-                Personal y Coaching
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-puzzle-piece me-3"></i>Otros /
-                Misceláneos
-              </a>
-            </li>
+            {categorias.map((cat) => (
+              <li key={cat.id_categoria}>
+                <NavLink
+                  to={`/usuarios/categoria/${cat.id_categoria}`}
+                  className={({ isActive }) =>
+                    `nav-link ${isActive ? "active-link" : ""}`
+                  }
+                  onClick={() => {
+                    const offcanvasEl =
+                      document.getElementById("categoriasSidebar");
+                    const bsOffcanvas =
+                      bootstrap.Offcanvas.getInstance(offcanvasEl);
+                    if (bsOffcanvas) bsOffcanvas.hide(); // 👈 esto es suficiente
+                  }}
+                >
+                  <i
+                    className={`${
+                      iconosCategorias[cat.nombre_categoria] ||
+                      "fa-solid fa-circle"
+                    } me-3`}
+                  ></i>
+                  {cat.nombre_categoria}
+                </NavLink>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
