@@ -60,20 +60,29 @@ function Home() {
     
   }, []);
 
+  useEffect(() => {
+    fetch(`${env.api}/api/usuarios`)
+      .then((res) => res.json())
+      .then((data) => setUsuarios(data.slice(0, 8)))
+      .catch((err) => console.error("Error al cargar usuarios:", err));
+  }, []);
+
   return (
     <>
       <Navbar></Navbar>
       <Carousel></Carousel>
-      <CardUsuario></CardUsuario>
+      <CardUsuario usuarios={usuarios} titulo="Recomendados"></CardUsuario>
       <Footer></Footer>
 
       {usuario ? (
         <>
-          <BotonMensajeria onClick={() => setMostrarModal(true)}></BotonMensajeria>
+          <BotonMensajeria
+            onClick={() => setMostrarModal(true)}
+          ></BotonMensajeria>
           <ModalMensajeria
             mostrar={mostrarModal}
-            cerrar={() => setMostrarModal(false)}>
-          </ModalMensajeria>
+            cerrar={() => setMostrarModal(false)}
+          ></ModalMensajeria>
         </>
       ) : ""}
 
