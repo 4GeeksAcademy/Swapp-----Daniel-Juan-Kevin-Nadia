@@ -3,9 +3,11 @@ import { useNavigate } from "react-router";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
-import { env } from "../environ";
+import { env } from "../environ"
+import { useStore } from "../hooks/useStore";
 
 function PerfilUsuario() {
+  const {store, dispatch} = useStore();
   const [usuario, setUsuario] = useState(null);
   const [seccionActiva, setSeccionActiva] = useState("datos");
   const [editando, setEditando] = useState(false);
@@ -18,8 +20,9 @@ function PerfilUsuario() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const rawToken = localStorage.getItem("token");
-    const usuarioToken = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
+    const usuarioToken = store.token !== "" 
+    ? JSON.parse(localStorage.getItem("token"))
+    : store.token;
 
     if (!usuarioToken) {
       alert(" No hay sesión activa. Por favor inicia sesión.");
@@ -46,6 +49,7 @@ function PerfilUsuario() {
         console.log("Usuario cargado:", data);
         setUsuario(data);
         setFormData(data);
+        dispatch({type: "SET_USUARIO", payload: data})
       } catch (error) {
         console.error("Error al cargar usuario:", error);
       }
