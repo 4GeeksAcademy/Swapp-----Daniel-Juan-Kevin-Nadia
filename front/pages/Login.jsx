@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../assets/styles/Login.css";
 import { Link, useNavigate } from "react-router";
-import { env } from "../environ"
+import { env } from "../environ";
 
 const Login = () => {
   const [correo, setCorreo] = useState("");
@@ -20,30 +20,28 @@ const Login = () => {
     setError("");
 
     try {
-      const response = await fetch(
-        `${env.api}/api/autorizar`,
-        {
+      const response = await fetch(`${env.api}/api/autorizar`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json",
         },
         body: JSON.stringify({
           correo_electronico: correo,
-          contrasena: contrasena
-        })
-      })
+          contrasena: contrasena,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Error al conectar con el servidor");
       }
 
       const data = await response.json();
-      console.log(data);      
+      console.log(data);
 
       if (data) {
         localStorage.setItem("token", JSON.stringify(data?.token));
-        navigate("/perfil")
+        navigate("/perfil");
       } else {
         setError("Correo o contraseña incorrectos.");
       }
@@ -77,7 +75,7 @@ const Login = () => {
               type="button"
               className="btn-google-swapp mb-3 w-100 d-flex align-items-center justify-content-center gap-2"
               onClick={() => {
-                navigate(`${env.api}/auth/google/login?next=/`)                  ;
+                window.location.href = `${env.api}/auth/google/login`;
               }}
             >
               <img

@@ -1,8 +1,10 @@
 # api/urls/auth.py
 import os
 from flask import Blueprint, current_app, request, session, url_for, jsonify
+from flask import redirect
 from flask_jwt_extended import create_access_token
 import requests
+import urllib.parse
 
 auth = Blueprint("auth", __name__)
 
@@ -20,36 +22,47 @@ def google_login():
 
 @auth.route("/google/callback", methods=["GET"])
 def google_callback():
-    # Intercambia code→tokens (valida state/PKCE internamente)
-    token = current_app.oauth.google.authorize_access_token()
+    try:
 
-    # userinfo puede venir embebido; si no, parsea id_token
-    userinfo = token.get(
-        "userinfo") or current_app.oauth.google.parse_id_token(token)
+        token = current_app.oauth.google.authorize_access_token()
+        if not token:
+            return jsonify(
+                {"error": "No se pudo obtener el token de Google"}), 400
 
-    # Guarda tokens en sesión (por si quieres revocar en logout)
-    session["google_access_token"] = token.get("access_token")
-    session["google_id_token"] = token.get("id_token")
+        userinfo = token.get(
+            "userinfo") or current_app.oauth.google.parse_id_token(token)
+        if not userinfo:
+            return jsonify(
+                {"error": "No se pudo obtener información del usuario"}), 400
 
-    # Crea JWT local (stateless). Identidad = sub (Google)
-    access_token = create_access_token(
-        identity=userinfo["sub"],
-        additional_claims={
-            "email": userinfo.get("email"),
-            "name": userinfo.get("name"),
-            "picture": userinfo.get("picture"),
-            "provider": "google",
-        },
-    )
-    return jsonify(
-        {
-            "token_type": "Bearer",
-            "access_token": access_token,
-            "google_id_token": token.get("id_token"),  # opcional, debug
-            "user": userinfo,
-            "redirect": session.pop("post_auth_redirect", "/auth/me"),
+        session["google_access_token"] = token.get("access_token")
+        session["google_id_token"] = token.get("id_token")
+
+        access_token = create_access_token(
+            identity=userinfo.get("email"),
+            additional_claims={
+                "name": userinfo.get("name"),
+                "picture": userinfo.get("picture"),
+                "provider": "google",
+            },
+        )
+
+        print("Userinfo recibido:", userinfo)
+
+        frontend_url = "http://localhost:3000/auth/google/callback"
+        params = {
+            "token": access_token,
+            "name": userinfo.get("name", ""),
+            "email": userinfo.get("email", ""),
+            "picture": userinfo.get("picture", ""),
         }
-    )
+
+        redirect_url = f"{frontend_url}?{urllib.parse.urlencode(params)}"
+        return redirect(redirect_url)
+
+    except Exception as e:
+        print(" Error en google_callback:", e)
+        return jsonify({"error": str(e)}), 500
 
 
 @auth.route("/logout", methods=["POST", "GET"])
@@ -68,9 +81,7 @@ def logout():
         except Exception:
             revoked = False
 
-    #
     session.clear()
-
     return jsonify({"ok": True, "google_token_revoked": revoked})
 
 

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
-import { env } from "../environ"
+import { env } from "../environ";
 
 function PerfilUsuario() {
   const [usuario, setUsuario] = useState(null);
@@ -18,27 +18,32 @@ function PerfilUsuario() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const usuarioToken = JSON.parse(localStorage.getItem("token"));
+    const rawToken = localStorage.getItem("token");
+    const usuarioToken = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
+
     if (!usuarioToken) {
-      alert("⚠️ No hay sesión activa. Por favor inicia sesión.");
+      alert(" No hay sesión activa. Por favor inicia sesión.");
       navigate("/login");
       return;
     }
 
     const fetchUsuario = async () => {
       try {
-        const response = await fetch(
-          `${env.api}/api/autorizacion`,
-          {
-            method: "GET",
-            headers: {
-              "Authorization": `Bearer ${usuarioToken}`,
-              "Accept": "application/json"
-            }
-          }
-        );
+        const response = await fetch(`${env.api}/api/autorizacion`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${usuarioToken}`,
+            Accept: "application/json",
+          },
+        });
 
-        const data = await response.json();       
+        if (!response.ok) {
+          console.error("Error al obtener usuario:", response.status);
+          return;
+        }
+
+        const data = await response.json();
+        console.log("Usuario cargado:", data);
         setUsuario(data);
         setFormData(data);
       } catch (error) {
@@ -54,15 +59,19 @@ function PerfilUsuario() {
 
   const handleCategorieChange = (e) => {
     let idxCategory = parseInt(e.target.value);
-    setIdCategorie(idxCategory)
-    let categ = categories.find(c => c.id_categoria === idxCategory)
+    setIdCategorie(idxCategory);
+    let categ = categories.find((c) => c.id_categoria === idxCategory);
 
-    if(categ) setHabilidades(categ["habilidades"]);
-  }
+    if (categ) setHabilidades(categ["habilidades"]);
+  };
 
   const handleGuardar = async () => {
     try {
-      if (!formData.nombre || !formData.apellido || !formData.correo_electronico) {
+      if (
+        !formData.nombre ||
+        !formData.apellido ||
+        !formData.correo_electronico
+      ) {
         alert("Por favor completa todos los campos obligatorios.");
         return;
       }
@@ -74,9 +83,10 @@ function PerfilUsuario() {
           return;
         }
 
-        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(2, "0")}-${String(
-          formData.dia
-        ).padStart(2, "0")}`;
+        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(
+          2,
+          "0"
+        )}-${String(formData.dia).padStart(2, "0")}`;
       }
 
       const { dia, mes, anio, ...dataSinCamposExtra } = formData;
@@ -85,22 +95,19 @@ function PerfilUsuario() {
         fecha_nacimiento: fechaFinal,
       };
 
-      const response = await fetch(
-        `${env.api}/api/usuarios/${usuario.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(usuarioActualizado),
-        }
-      );
+      const response = await fetch(`${env.api}/api/usuarios/${usuario.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(usuarioActualizado),
+      });
 
       const dataActualizada = await response.json();
       setUsuario(dataActualizada);
       setEditando(false);
-      alert("✅ Datos actualizados correctamente");
+      alert("Datos actualizados correctamente");
     } catch (error) {
       console.error("Error al guardar:", error);
-      alert("❌ No se pudo guardar la información");
+      alert("No se pudo guardar la información");
     }
   };
 
@@ -109,55 +116,47 @@ function PerfilUsuario() {
     if (!nuevaFoto) return;
 
     try {
-      const response = await fetch(
-        `${env.api}/api/usuarios/${usuario.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...usuario, foto_perfil: nuevaFoto }),
-        }
-      );
+      const response = await fetch(`${env.api}/api/usuarios/${usuario.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...usuario, foto_perfil: nuevaFoto }),
+      });
       const actualizado = await response.json();
       setUsuario(actualizado);
       setFormData((prev) => ({ ...prev, foto_perfil: nuevaFoto }));
-      alert("✅ Foto actualizada correctamente");
+      alert("Foto actualizada correctamente");
     } catch (error) {
       console.error("Error al actualizar foto:", error);
-      alert("❌ No se pudo actualizar la foto");
+      alert("No se pudo actualizar la foto");
     }
   };
 
-  // === NUEVO: manejar habilidades ===
   const handleAgregarHabilidad = () => {
-    if(idHabilidad > 0) {
-      fetch(
-        `${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`,
-        {
+    if (idHabilidad > 0) {
+      fetch(`${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json",
         },
         body: JSON.stringify({
-          asociar: idHabilidad
-        })
-      }
-      )
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Error en la petición: " + response.status);
-        }
-        return response.json();
+          asociar: idHabilidad,
+        }),
       })
-      .then(data => setUsuario(data))
-      .catch(error => {
-        console.error("Hubo un problema con la petición:", error);
-      });
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Error en la petición: " + response.status);
+          }
+          return response.json();
+        })
+        .then((data) => setUsuario(data))
+        .catch((error) => {
+          console.error("Hubo un problema con la petición:", error);
+        });
       setEditandoHabilidades(false);
     }
   };
 
-  
   if (!usuario) return <p className="text-center mt-5">Cargando perfil...</p>;
 
   return (
@@ -165,14 +164,18 @@ function PerfilUsuario() {
       <Navbar />
       <div className="container-fluid perfil-container py-5">
         <div className="row justify-content-center">
-          {/* Sidebar */}
           <div className="col-12 col-md-3 perfil-sidebar text-center p-4">
             <div className="perfil-avatar-container">
               <img
-                src={usuario.foto_perfil || "/swapp-profile.png"}
+                src={
+                  usuario.foto_perfil && usuario.foto_perfil.trim() !== ""
+                    ? usuario.foto_perfil
+                    : "/swapp-profile.png"
+                }
                 alt="Foto de perfil"
                 className="perfil-avatar mb-3"
               />
+
               <button
                 className="btn btn-editar-foto mb-2"
                 onClick={handleEditarFoto}
@@ -186,40 +189,40 @@ function PerfilUsuario() {
 
             <div className="perfil-secciones mt-4">
               <button
-                className={`list-group-item ${seccionActiva === "datos" ? "active" : ""}`}
+                className={`list-group-item ${
+                  seccionActiva === "datos" ? "active" : ""
+                }`}
                 onClick={() => setSeccionActiva("datos")}
               >
                 Datos Personales
               </button>
               <div className="perfil-divider"></div>
               <button
-                className={`list-group-item ${seccionActiva === "habilidades" ? "active" : ""
-                  }`}
+                className={`list-group-item ${
+                  seccionActiva === "habilidades" ? "active" : ""
+                }`}
                 onClick={() => {
-                  setSeccionActiva("habilidades")
+                  setSeccionActiva("habilidades");
                   fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`)
-                  .then(response => {
-                    if (!response.ok) {
-                      throw new Error("Error en la petición: " + response.status);
-                    }
-                    return response.json();
-                  })
-                  .then(data => setUsuario(data))
-                  .catch(error => {
-                    console.error("Hubo un problema con la petición:", error);
-                  });
+                    .then((response) => {
+                      if (!response.ok) {
+                        throw new Error(
+                          "Error en la petición: " + response.status
+                        );
+                      }
+                      return response.json();
+                    })
+                    .then((data) => setUsuario(data))
+                    .catch((error) => {
+                      console.error("Hubo un problema con la petición:", error);
+                    });
                 }}
               >
                 Habilidades
               </button>
             </div>
-
-            <div className="perfil-footer mt-auto text-center" style={{height:"10rem"}}>
-              {/* <img src="/swapp sin fondo.webp" alt="Swapp" className="perfil-logo mt-4" /> */}
-            </div>
           </div>
 
-          {/* Contenido principal */}
           <div className="col-12 col-md-8 perfil-content p-4">
             {seccionActiva === "datos" ? (
               <>
@@ -406,18 +409,23 @@ function PerfilUsuario() {
                     <button
                       className="btn perfil-accion-btn mt-3"
                       onClick={() => {
-                        setEditandoHabilidades(true)
+                        setEditandoHabilidades(true);
                         fetch(`${env.api}/api/categorias`)
-                        .then(response => {
-                          if (!response.ok) {
-                            throw new Error("Error en la petición: " + response.status);
-                          }
-                          return response.json();
-                        })
-                        .then(data => setCategories(data))
-                        .catch(error => {
-                          console.error("Hubo un problema con la petición:", error);
-                        });
+                          .then((response) => {
+                            if (!response.ok) {
+                              throw new Error(
+                                "Error en la petición: " + response.status
+                              );
+                            }
+                            return response.json();
+                          })
+                          .then((data) => setCategories(data))
+                          .catch((error) => {
+                            console.error(
+                              "Hubo un problema con la petición:",
+                              error
+                            );
+                          });
                       }}
                     >
                       ✏️ Editar habilidades
@@ -452,17 +460,21 @@ function PerfilUsuario() {
 
                       <div className="input-group my-2">
                         <div className="input-group-prepend">
-                          <label htmlFor="inputGroupSelect01">Habilidades</label>
+                          <label htmlFor="inputGroupSelect01">
+                            Habilidades
+                          </label>
                         </div>
                         <select
                           className="form-select registro-input mt-1"
                           style={{ width: "100%" }}
                           name="id_habilidad"
-                          onChange={e => setIdHabilidad(parseInt(e.target.value))}
+                          onChange={(e) =>
+                            setIdHabilidad(parseInt(e.target.value))
+                          }
                           value={idHabilidad}
                           id="selectHabilidad"
                         >
-                          { habilidades &&
+                          {habilidades &&
                             habilidades.map((habilidad, id) => (
                               <option
                                 key={`id_habilidad-${id}`}

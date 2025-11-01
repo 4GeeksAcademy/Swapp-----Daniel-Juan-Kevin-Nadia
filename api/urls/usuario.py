@@ -6,7 +6,8 @@ from flask import Blueprint, jsonify, request
 from api.models import db, Usuario, Habilidad
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from flask_jwt_extended import create_access_token, create_refresh_token
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt_identity
 
 usuarios = Blueprint('usuarios', __name__)
 
@@ -67,7 +68,6 @@ def usuarios_por_categoria(id_categoria):
 
     if not habilidades_ids:
         return jsonify([]), 200
-    
     usuarios_categoria = (
         Usuario.query
         .join(Usuario.habilidades)
@@ -232,6 +232,7 @@ def crear_autorizacion():
     """
         Devuelve un token de autorización
         para acceder a secciones exclusivas
+        (inicio de sesión con correo y contraseña)
     """
     data = request.get_json() or {}
     email = data.get("correo_electronico")
@@ -242,7 +243,7 @@ def crear_autorizacion():
 
         if user is None or not user.verificar_contrasena(passw):
             return jsonify(
-                {"msj": "correo electronico o contraseña incorrecto"}), 401
+                {"msj": "correo electrónico o contraseña incorrecto"}), 401
 
         token = create_access_token(identity=user.correo_electronico)
         refresh_token = create_refresh_token(identity=user.correo_electronico)
@@ -250,9 +251,9 @@ def crear_autorizacion():
             "token": token,
             "refresh_token": refresh_token,
             "correo_electronico": user.correo_electronico
-            }), 200
+        }), 200
 
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:
         return jsonify(
             {"error": "Error en la autenticación", "detalle": str(e)}), 500
 
@@ -260,14 +261,23 @@ def crear_autorizacion():
 @usuarios.route("/api/autorizacion", methods=["GET"])
 @jwt_required()
 def obtener_autorizacion():
-    """
-        Verifica que el usuario esté autorizado
-        para permitir acceder a areas exclusivas
-    """
-    current_user = get_jwt_identity()
-    if not current_user:
-        return jsonify({"msj": "clave_acceso ha expirado"}), 401
+    email = get_jwt_identity()
 
-    user = Usuario.query.filter_by(
-        correo_electronico=current_user).first()
+    if not email:
+        return jsonify({"msg": "Token sin email"}), 400
+
+    user = Usuario.query.filter_by(correo_electronico=email).first()
+
+    if not user:
+        nuevo_usuario = Usuario(
+            nombre="",
+            apellido="",
+            correo_electronico=email,
+            foto_perfil="",
+            contrasena="google_oauth_dummy"
+        )
+        db.session.add(nuevo_usuario)
+        db.session.commit()
+        user = nuevo_usuario
+
     return jsonify(user.to_dict()), 200
