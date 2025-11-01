@@ -4,12 +4,61 @@ import CardUsuario from "../assets/components/CardUsuario";
 import Footer from "../assets/components/Footer";
 import ModalMensajeria from "../assets/components/ModalMensajeria";
 import BotonMensajeria from "../assets/components/BotonMensajeria";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { env } from "../environ"
+import { useStore } from "../hooks/useStore";
 
 
 function Home() {
+  const {store, dispatch} = useStore();
   const [mostrarModal, setMostrarModal] = useState(false);
-  const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const [usuario, setUsuario] = useState();
+
+  useEffect(()=>{
+    const token = JSON.parse(
+      localStorage.getItem("token"))
+
+    if (token) {
+      fetch(
+        `${env.api}/api/autorizacion`,
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Accept": "application/json"
+          }
+        }
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data) {
+            setUsuario(data);
+            dispatch({type: "SET_USUARIO", payload: data})
+          }
+        })
+        .catch((err) => console.error("Error al cargar usuario:", err));
+      dispatch({type: "SET_TOKEN", payload: token})
+    }
+
+    fetch(`${env.api}/api/usuarios`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          dispatch({type: "SET_USUARIOS", payload: data})
+        }
+      })
+      .catch((err) => console.error("Error al cargar usuarios:", err));
+    
+    fetch(`${env.api}/api/categorias`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          dispatch({type: "SET_CATEGORIAS", payload: data})
+        }
+      })
+      .catch((err) => console.error("Error al cargar Categorias:", err));
+    
+  }, []);
 
   return (
     <>
@@ -26,7 +75,7 @@ function Home() {
             cerrar={() => setMostrarModal(false)}>
           </ModalMensajeria>
         </>
-      ) : null}
+      ) : ""}
 
     </>
   );

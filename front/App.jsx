@@ -1,4 +1,5 @@
 import "./assets/styles/App.css";
+import { StoreProvider } from './hooks/useStore.jsx';
 import { Routes, Route } from "react-router-dom";
 
 import Home from "./pages/Home";
@@ -10,7 +11,7 @@ import GoogleCallback from "./pages/GoogleCallback.jsx";
 
 export default function App() {
   return (
-    <>
+    <StoreProvider>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/registro" element={<Registro />} />
@@ -19,6 +20,6 @@ export default function App() {
         <Route path="/usuario/:id_usuario" element={<PerfilPublico />} />
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
       </Routes>
-    </>
+    </StoreProvider>
   );
 }

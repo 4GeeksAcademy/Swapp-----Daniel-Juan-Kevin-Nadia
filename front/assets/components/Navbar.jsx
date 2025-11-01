@@ -2,8 +2,10 @@ import "../styles/Navbar.css";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { env } from "../../environ";
+import { useStore } from "../../hooks/useStore";
 
 function Navbar() {
+  const {store, dispatch} = useStore();
   const [usuario, setUsuario] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const navigate = useNavigate();
@@ -31,21 +33,20 @@ function Navbar() {
     "Desarrollo Personal y Coaching": "fa-solid fa-child-reaching",
     "Otros / Misceláneos": "fa-solid fa-puzzle-piece",
   };
-
+ 
   useEffect(() => {
-    const usuarioGuardado = localStorage.getItem("usuario");
-    if (usuarioGuardado) {
-      setUsuario(JSON.parse(usuarioGuardado));
+    const usuarioGuardado = store.usuario;
+    if (Object.keys(usuarioGuardado).length > 0) {
+      setUsuario(usuarioGuardado);
     }
-  }, []);
 
-  useEffect(() => {
     const fetchCategorias = async () => {
       try {
         const response = await fetch(`${env.api}/api/categorias`);
         if (!response.ok) throw new Error("Error al obtener categorías");
         const data = await response.json();
         setCategorias(data);
+        dispatch({type: "SET_CATEGORIAS", payload: data});
       } catch (error) {
         console.error("Error cargando categorías:", error);
       }
@@ -56,8 +57,10 @@ function Navbar() {
   const handleLogout = () => {
     const confirmLogout = window.confirm("¿Deseas cerrar sesión?");
     if (confirmLogout) {
-      localStorage.removeItem("usuario");
       setUsuario(null);
+      dispatch({type: "SET_USUARIO", payload: {}});
+      dispatch({type: "SET_TOKEN", payload: ""});
+      localStorage.removeItem("token");
       navigate("/login");
     }
   };

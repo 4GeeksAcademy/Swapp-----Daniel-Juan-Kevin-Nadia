@@ -32,7 +32,7 @@ function CardUsuario() {
               <div className="card  h-100 mx-2">
                 <div className="card-header d-flex justify-content-between">
                   <img
-                    src={usuario.foto_perfil || "No hay foto"}
+                    src={usuario.foto_perfil || "/swapp-profile.png"}
                     className="card-img-top foto-perfil"
                     alt={usuario.nombre}
                   />
@@ -46,7 +46,7 @@ function CardUsuario() {
                 </div>
                 <div className="card-body">
                   <h5 className="card-title  text-center">
-                    {usuario.nombre} {usuario.apellidos}
+                    {usuario.nombre} {usuario.apellido}
                   </h5>
                   <p className="card-text  text-center text-limit ">
                     {usuario.descripcion || "Sin descripción"}

@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import "../assets/styles/Login.css";
 import { Link, useNavigate } from "react-router";
-import { env } from "../environ";
+import { env } from "../environ"
+import { useStore } from "../hooks/useStore";
 
 const Login = () => {
+  const {_, dispatch} = useStore();
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [error, setError] = useState("");
@@ -35,13 +37,12 @@ const Login = () => {
       if (!response.ok) {
         throw new Error("Error al conectar con el servidor");
       }
-
-      const data = await response.json();
-      console.log(data);
+      const data = await response.json();    
 
       if (data) {
         localStorage.setItem("token", JSON.stringify(data?.token));
-        navigate("/perfil");
+        dispatch({type: "SET_TOKEN", payload: data?.token});
+        navigate("/perfil")
       } else {
         setError("Correo o contraseña incorrectos.");
       }
