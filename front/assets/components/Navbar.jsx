@@ -105,15 +105,52 @@ function Navbar() {
             </button>
           </div> */}
 
+          {/* Solo móvil */}
+          <div className="d-flex flex-column align-items-center d-lg-none w-100">
+            <div className="w-100 d-flex justify-content-between">
+              <button
+                className="btn btn-outline-secondary"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#categoriasSidebar"
+                aria-controls="categoriasSidebar"
+              >
+                <i className="fa-solid fa-bars"></i>
+              </button>
+
+              <div className="d-flex">
+                {usuario ? (
+                  <>
+                    <Link to="/perfil" className="btn btn-main2 me-2">
+                      Perfil
+                    </Link>
+                    <button onClick={handleLogout} className="btn btn-main1">
+                      Cerrar sesión
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/registro" className="btn btn-main1 me-2">
+                      Regístrate
+                    </Link>
+                    <Link to="/login" className="btn btn-main1">
+                      Iniciar sesión
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
           <h3 className="d-none d-md-block flex-grow-1 mx-3 text-center mb-0 fst-italic eslogan">
-            ¡Donde todo, tiene otro valor!
+            {/* ¡Donde todo, tiene otro valor! */}
           </h3>
           <div className="d-flex">
             {usuario ? (
               <>
                 <Link
                   to="/perfil"
-                  className="btn btn-main2 d-none d-lg-flex me-2"
+                  className="btn btn-main1 d-none d-lg-flex me-2"
                   type="button"
                 >
                   Perfil
@@ -207,44 +244,6 @@ function Navbar() {
           ></button>
         </div>
         <div className="offcanvas-body">
-          <div className="d-flex justify-content-center d-lg-none mb-3">
-            {usuario ? (
-              <>
-                <Link
-                  to="/perfil"
-                  className="btn btn-main2 boton-registro me-2"
-                  type="button"
-                >
-                  Perfil
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="btn btn-main1 boton-inicio"
-                  type="button"
-                >
-                  Cerrar sesión
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/registro"
-                  className="btn btn-main1 boton-registro me-2"
-                  type="button"
-                >
-                  Regístrate
-                </Link>
-                <Link
-                  to="/login"
-                  className="btn btn-main1 boton-inicio"
-                  type="button"
-                >
-                  Iniciar sesión
-                </Link>
-              </>
-            )}
-          </div>
-
           <ul className="list-unstyled">
             {categorias.map((cat) => (
               <li key={cat.id_categoria}>
@@ -258,7 +257,7 @@ function Navbar() {
                       document.getElementById("categoriasSidebar");
                     const bsOffcanvas =
                       bootstrap.Offcanvas.getInstance(offcanvasEl);
-                    if (bsOffcanvas) bsOffcanvas.hide(); // 👈 esto es suficiente
+                    if (bsOffcanvas) bsOffcanvas.hide();
                   }}
                 >
                   <i
