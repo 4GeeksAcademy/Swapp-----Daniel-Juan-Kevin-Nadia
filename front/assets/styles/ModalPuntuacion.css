@@ -1,0 +1,99 @@
+:root {
+  --naranja: #ff7517;
+  --gris: #3e3939;
+  --oscuro: #2c2727;
+  --claro: #f6f4f4;
+}
+
+/* === Overlay === */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+/* === Contenedor principal === */
+.modal-contenido {
+  background: #fff;
+  border-radius: 15px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* === Animación de entrada === */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* === Título === */
+.modal-titulo {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--oscuro);
+  margin-bottom: 1rem;
+}
+.nombre-usuario {
+  color: var(--naranja);
+}
+
+/* === Estrellas === */
+.modal-estrellas {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.estrella {
+  font-size: 2rem;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.estrella.activa {
+  color: var(--naranja);
+}
+
+.estrella:hover {
+  color: var(--naranja);
+}
+
+/* === Comentario === */
+.modal-comentario {
+  width: 100%;
+  border: 1px solid var(--gris);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  height: 80px;
+  transition: border-color 0.3s;
+}
+.modal-comentario:focus {
+  border-color: var(--naranja);
+  box-shadow: 0 0 5px rgba(255, 117, 23, 0.3);
+}
+
+/* === Botones === */
+.modal-botones {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}

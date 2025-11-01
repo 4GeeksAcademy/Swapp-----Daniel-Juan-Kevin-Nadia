@@ -199,3 +199,58 @@
   display: block;
   margin: 0 auto;
 }
+
+/* === Tabla de Intercambios === */
+.tabla-intercambios-container {
+  margin-top: 2rem;
+  overflow-x: auto;
+}
+
+.tabla-intercambios {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tabla-intercambios th,
+.tabla-intercambios td {
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid #eaeaea;
+  text-align: left;
+}
+
+.tabla-intercambios th {
+  background-color: #fafafa;
+  color: var(--gris);
+  font-weight: 600;
+}
+
+.tabla-intercambios td {
+  color: var(--oscuro);
+  font-size: 0.95rem;
+}
+
+.tabla-intercambios tr:last-child td {
+  border-bottom: none;
+}
+
+/* Botón dentro de la tabla */
+.btn-finalizado {
+  background-color: var(--naranja);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-finalizado:hover {
+  background-color: #e96c0f;
+  transform: translateY(-2px);
+}
