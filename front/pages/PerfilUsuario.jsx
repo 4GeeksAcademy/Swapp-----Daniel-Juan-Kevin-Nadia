@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { data, useNavigate } from "react-router";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
@@ -7,7 +7,7 @@ import { env } from "../environ";
 import { useStore } from "../hooks/useStore";
 
 function PerfilUsuario() {
-  const { store, dispatch } = useStore();
+  const { _, dispatch } = useStore();
   const [usuario, setUsuario] = useState(null);
   const [seccionActiva, setSeccionActiva] = useState("datos");
   const [editando, setEditando] = useState(false);
@@ -17,6 +17,7 @@ function PerfilUsuario() {
   const [habilidades, setHabilidades] = useState([]);
   const [idHabilidad, setIdHabilidad] = useState(0);
   const [editandoHabilidades, setEditandoHabilidades] = useState(false);
+  const [msg, setMsg] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,7 +46,6 @@ function PerfilUsuario() {
         }
 
         const data = await response.json();
-        console.log("Usuario cargado:", data);
         setUsuario(data);
         setFormData(data);
         dispatch({ type: "SET_USUARIO", payload: data });
@@ -98,28 +98,29 @@ function PerfilUsuario() {
         fecha_nacimiento: fechaFinal,
       };
 
-      const response = await fetch(`${env.api}/api/usuarios/${usuario.id}`, {
+      const response = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(usuarioActualizado),
       });
 
       const dataActualizada = await response.json();
-      setUsuario(dataActualizada);
+      setUsuario(dataActualizada?.actualizado);
+      dispatch({type: "SET_USUARIO", payload: dataActualizada?.actualizado});
       setEditando(false);
-      alert("Datos actualizados correctamente");
+      setMsg({tipo:"success", contenido: dataActualizada.msj});
     } catch (error) {
       console.error("Error al guardar:", error);
-      alert("No se pudo guardar la información");
+      setMsg({tipo:"danger", contenido: "No se pudo guardar la información"});
     }
   };
-
+  
   const handleEditarFoto = async () => {
     const nuevaFoto = prompt("Introduce la nueva URL de la foto de perfil:");
     if (!nuevaFoto) return;
 
     try {
-      const response = await fetch(`${env.api}/api/usuarios/${usuario.id}`, {
+      const response = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...usuario, foto_perfil: nuevaFoto }),
@@ -127,10 +128,10 @@ function PerfilUsuario() {
       const actualizado = await response.json();
       setUsuario(actualizado);
       setFormData((prev) => ({ ...prev, foto_perfil: nuevaFoto }));
-      alert("Foto actualizada correctamente");
+      setMsg({tipo:"success", contenido: "Foto actualizada correctamente"});
     } catch (error) {
       console.error("Error al actualizar foto:", error);
-      alert("No se pudo actualizar la foto");
+      setMsg({tipo:"danger", contenido: "No se pudo actualizar la foto"});
     }
   };
 
@@ -251,7 +252,7 @@ function PerfilUsuario() {
                     <input
                       type="text"
                       className="form-control"
-                      name="apellidos"
+                      name="apellido"
                       value={formData.apellido || ""}
                       onChange={handleChange}
                       disabled={!editando}
@@ -377,6 +378,11 @@ function PerfilUsuario() {
                       rows="3"
                     />
                   </div>
+                  
+                  { Object.keys(msg).length > 0 ? (
+                      <div className={`alert alert-${msg?.tipo}`} role="alert">{msg?.contenido}</div>
+                    ) : ""
+                  }
 
                   <div className="col-12 text-center mt-4">
                     <button
