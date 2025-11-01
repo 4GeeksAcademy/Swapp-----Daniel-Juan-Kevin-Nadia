@@ -1,22 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/CardUsuario.css";
-import { env } from "../../environ";
+// import { env } from "../../environ";
 
-function CardUsuario() {
-  const [usuarios, setUsuarios] = useState([]);
-  // const [puntuacion, setPuntuacion] = useState([]);
-
+function CardUsuario({ usuarios = [], titulo = "Recomendados" }) {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetch(`${env.api}/api/usuarios`)
-      .then((res) => res.json())
-      .then((data) => {
-        setUsuarios(data.slice(0, 8));
-      })
-      .catch((err) => console.error("Error al cargar usuarios:", err));
-  }, []);
 
   const handleVerPerfil = (id_usuario) => {
     navigate(`/usuario/${id_usuario}`);
@@ -25,7 +13,7 @@ function CardUsuario() {
   return (
     <>
       <div className="container-fluid mt-5">
-        <h3 className="text-center texto-recomendados">Recomendados</h3>
+        <h3 className="text-center texto-recomendados">{titulo}</h3>
         <div className="row mt-5">
           {usuarios.map((usuario) => (
             <div className="col-md-3 mb-4 " key={usuario.id_usuario}>
@@ -37,9 +25,9 @@ function CardUsuario() {
                     alt={usuario.nombre}
                   />
                   <button
-                    className="btn btn-main1 px-4"
+                    className="btn btn-main1"
                     type="button"
-                    onClick={() => handleVerPerfil(usuario.id_usuario)} // ✅ botón redirige
+                    onClick={() => handleVerPerfil(usuario.id_usuario)}
                   >
                     Ver perfil
                   </button>
