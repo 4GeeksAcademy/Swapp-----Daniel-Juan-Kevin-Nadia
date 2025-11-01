@@ -58,7 +58,7 @@ def obtener_usuario(id_usuario):
 @usuarios.route("/api/usuarios/categoria/<int:id_categoria>", methods=["GET"])
 def usuarios_por_categoria(id_categoria):
     """
-    Devuelve todos los usuarios que tienen habilidades de una categoría
+        Devuelve todos los usuarios que tienen habilidades de una categoría
     """
 
     categoria = Categoria.query.get_or_404(id_categoria)
@@ -104,29 +104,34 @@ def crear_usuario():
     """
     data = request.get_json() or {}
     try:
-        habilidad = Habilidad.query.get(data["id_habilidad"])
-
         if not data:
             return jsonify({
                 "msj": "Parametros vacios"
             }), 400
 
-        if not habilidad:
-            return jsonify({
-                "msj": "Habilidad no Existente"
-            }), 400
-
-        fecha_nacimiento = datetime.strptime(
-            data['fecha_nacimiento'], "%Y-%m-%d").date()
         usr = Usuario(
             nombre=data['nombre'], apellido=data['apellido'],
             correo_electronico=data['correo_electronico'],
             contrasena=data['contrasena'],
-            fecha_nacimiento=fecha_nacimiento,
-            genero=data['genero'],
-            descripcion=data['descripcion'],
-            acepta_terminos=data['acepta_terminos'])
-        usr.habilidades.append(habilidad)
+            acepta_terminos=data['acepta_terminos']
+        )
+
+        extra = [
+                    "descripcion", "fecha_nacimiento",
+                    "genero", "foto_perfil", "id_habilidad"
+                ]
+
+        for f in extra:
+            if f in data:
+                if f == "fecha_nacimiento":
+                    setattr(usr, f, datetime.strptime(
+                        data[f], "%Y-%m-%d").date())
+                elif f == "id_habilidad":
+                    habilidad = Habilidad.query.get(data[f])
+                    if habilidad:
+                        usr.habilidades.append(habilidad)
+                else:
+                    setattr(usr, f, data[f])
 
         db.session.add(usr)
         db.session.commit()
