@@ -85,14 +85,6 @@ function PerfilPublico() {
                 ✉️ Contactar
               </button>
             </div>
-
-            <div className="perfil-publico-footer mt-auto text-center">
-              <img
-                src="/swapp sin fondo.webp"
-                alt="Swapp"
-                className="perfil-publico-logo mt-4"
-              />
-            </div>
           </div>
 
           {/* Contenido principal */}
