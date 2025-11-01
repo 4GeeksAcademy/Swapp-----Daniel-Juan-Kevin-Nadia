@@ -4,11 +4,13 @@
   --oscuro: #2c2727;
   --claro: #f6f4f4;
 }
+body {
+  background-color: var(--claro);
+}
 
 /* Contenedor general */
 .login-page-swapp {
   min-height: 100vh;
-  background-color: var(--claro);
   font-family: "Poppins", sans-serif;
   color: var(--gris-oscuro);
   display: flex;
@@ -52,7 +54,6 @@
   flex-direction: column;
   justify-content: center;
 }
-
 
 /* Título */
 .form-title-login {
@@ -117,7 +118,6 @@
   box-shadow: var(--naranja);
 }
 
-
 /* Enlace */
 .enlace-login-swapp {
   color: var(--naranja);
@@ -153,7 +153,6 @@
     padding: 2rem;
     min-height: auto;
   }
-
 }
 
 @media (max-width: 576px) {
