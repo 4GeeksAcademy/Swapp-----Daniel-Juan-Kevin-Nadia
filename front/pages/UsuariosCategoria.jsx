@@ -47,7 +47,7 @@ function UsuariosCategoria() {
             >
               <span className="visually-hidden">Cargando...</span>
             </div>
-            <h4>Cargando usuarios...</h4>
+            <h4 className="mt-3">Cargando usuarios...</h4>
           </div>
         ) : usuarios && usuarios.length > 0 ? (
           <CardUsuario usuarios={usuarios} titulo=""></CardUsuario>

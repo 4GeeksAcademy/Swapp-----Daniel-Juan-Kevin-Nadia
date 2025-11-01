@@ -2,8 +2,10 @@ import "../styles/Navbar.css";
 import { Link, useNavigate, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { env } from "../../environ";
+import { useStore } from "../../hooks/useStore";
 
 function Navbar() {
+  const {store, dispatch} = useStore();
   const [usuario, setUsuario] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const navigate = useNavigate();
@@ -31,21 +33,20 @@ function Navbar() {
     "Desarrollo Personal y Coaching": "fa-solid fa-child-reaching",
     "Otros / Misceláneos": "fa-solid fa-puzzle-piece",
   };
-
+ 
   useEffect(() => {
-    const usuarioGuardado = localStorage.getItem("usuario");
-    if (usuarioGuardado) {
-      setUsuario(JSON.parse(usuarioGuardado));
+    const usuarioGuardado = store.usuario;
+    if (Object.keys(usuarioGuardado).length > 0) {
+      setUsuario(usuarioGuardado);
     }
-  }, []);
 
-  useEffect(() => {
     const fetchCategorias = async () => {
       try {
         const response = await fetch(`${env.api}/api/categorias`);
         if (!response.ok) throw new Error("Error al obtener categorías");
         const data = await response.json();
         setCategorias(data);
+        dispatch({type: "SET_CATEGORIAS", payload: data});
       } catch (error) {
         console.error("Error cargando categorías:", error);
       }
@@ -56,8 +57,10 @@ function Navbar() {
   const handleLogout = () => {
     const confirmLogout = window.confirm("¿Deseas cerrar sesión?");
     if (confirmLogout) {
-      localStorage.removeItem("usuario");
       setUsuario(null);
+      dispatch({type: "SET_USUARIO", payload: {}});
+      dispatch({type: "SET_TOKEN", payload: ""});
+      localStorage.removeItem("token");
       navigate("/login");
     }
   };
@@ -102,15 +105,52 @@ function Navbar() {
             </button>
           </div> */}
 
+          {/* Solo móvil */}
+          <div className="d-flex flex-column align-items-center d-lg-none w-100">
+            <div className="w-100 d-flex justify-content-between">
+              <button
+                className="btn btn-outline-secondary"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#categoriasSidebar"
+                aria-controls="categoriasSidebar"
+              >
+                <i className="fa-solid fa-bars"></i>
+              </button>
+
+              <div className="d-flex">
+                {usuario ? (
+                  <>
+                    <Link to="/perfil" className="btn btn-main2 me-2">
+                      Perfil
+                    </Link>
+                    <button onClick={handleLogout} className="btn btn-main1">
+                      Cerrar sesión
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/registro" className="btn btn-main1 me-2">
+                      Regístrate
+                    </Link>
+                    <Link to="/login" className="btn btn-main1">
+                      Iniciar sesión
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
           <h3 className="d-none d-md-block flex-grow-1 mx-3 text-center mb-0 fst-italic eslogan">
-            ¡Donde todo, tiene otro valor!
+            {/* ¡Donde todo, tiene otro valor! */}
           </h3>
           <div className="d-flex">
             {usuario ? (
               <>
                 <Link
                   to="/perfil"
-                  className="btn btn-main2 d-none d-lg-flex me-2"
+                  className="btn btn-main1 d-none d-lg-flex me-2"
                   type="button"
                 >
                   Perfil
@@ -204,44 +244,6 @@ function Navbar() {
           ></button>
         </div>
         <div className="offcanvas-body">
-          <div className="d-flex justify-content-center d-lg-none mb-3">
-            {usuario ? (
-              <>
-                <Link
-                  to="/perfil"
-                  className="btn btn-main2 boton-registro me-2"
-                  type="button"
-                >
-                  Perfil
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="btn btn-main1 boton-inicio"
-                  type="button"
-                >
-                  Cerrar sesión
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/registro"
-                  className="btn btn-main1 boton-registro me-2"
-                  type="button"
-                >
-                  Regístrate
-                </Link>
-                <Link
-                  to="/login"
-                  className="btn btn-main1 boton-inicio"
-                  type="button"
-                >
-                  Iniciar sesión
-                </Link>
-              </>
-            )}
-          </div>
-
           <ul className="list-unstyled">
             {categorias.map((cat) => (
               <li key={cat.id_categoria}>
@@ -255,7 +257,7 @@ function Navbar() {
                       document.getElementById("categoriasSidebar");
                     const bsOffcanvas =
                       bootstrap.Offcanvas.getInstance(offcanvasEl);
-                    if (bsOffcanvas) bsOffcanvas.hide(); // 👈 esto es suficiente
+                    if (bsOffcanvas) bsOffcanvas.hide();
                   }}
                 >
                   <i
