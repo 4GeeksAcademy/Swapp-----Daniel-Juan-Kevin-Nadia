@@ -5,10 +5,15 @@ import { env } from "../../environ";
 import { useStore } from "../../hooks/useStore";
 
 function Navbar() {
-  const {store, dispatch} = useStore();
+  const { store, dispatch } = useStore();
   const [usuario, setUsuario] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const navigate = useNavigate();
+  const isLogged = !!(
+    usuario ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("user")
+  );
 
   const CATEGORIAS_DESTACADAS = [
     "Educación y Tutorías",
@@ -33,11 +38,26 @@ function Navbar() {
     "Desarrollo Personal y Coaching": "fa-solid fa-child-reaching",
     "Otros / Misceláneos": "fa-solid fa-puzzle-piece",
   };
- 
+
   useEffect(() => {
-    const usuarioGuardado = store.usuario;
-    if (Object.keys(usuarioGuardado).length > 0) {
-      setUsuario(usuarioGuardado);
+    const fromStore =
+      store?.usuario && Object.keys(store.usuario).length > 0
+        ? store.usuario
+        : null;
+
+    const fromLocal = JSON.parse(localStorage.getItem("user") || "null");
+
+    if (fromStore) {
+      setUsuario(fromStore);
+    } else if (fromLocal) {
+      setUsuario({
+        nombre: fromLocal.nombre,
+        apellido: fromLocal.apellido,
+        correo_electronico: fromLocal.email,
+        foto_perfil: fromLocal.picture,
+      });
+    } else {
+      setUsuario(null);
     }
 
     const fetchCategorias = async () => {
@@ -46,21 +66,36 @@ function Navbar() {
         if (!response.ok) throw new Error("Error al obtener categorías");
         const data = await response.json();
         setCategorias(data);
-        dispatch({type: "SET_CATEGORIAS", payload: data});
+        dispatch({ type: "SET_CATEGORIAS", payload: data });
       } catch (error) {
         console.error("Error cargando categorías:", error);
       }
     };
     fetchCategorias();
-  }, []);
+  }, [store.usuario, dispatch]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     const confirmLogout = window.confirm("¿Deseas cerrar sesión?");
-    if (confirmLogout) {
-      setUsuario(null);
-      dispatch({type: "SET_USUARIO", payload: {}});
-      dispatch({type: "SET_TOKEN", payload: ""});
+    if (!confirmLogout) return;
+
+    try {
+      const usuarioGoogle = localStorage.getItem("user");
+
+      if (usuarioGoogle) {
+        await fetch(`${env.api}/api/logout`, { method: "POST" });
+        localStorage.removeItem("user");
+      }
+
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      dispatch({ type: "SET_USUARIO", payload: {} });
+      dispatch({ type: "SET_TOKEN", payload: "" });
+      setUsuario(null);
+
+      navigate("/login");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      localStorage.clear();
       navigate("/login");
     }
   };
@@ -146,7 +181,7 @@ function Navbar() {
             {/* ¡Donde todo, tiene otro valor! */}
           </h3>
           <div className="d-flex">
-            {usuario ? (
+            {isLogged ? (
               <>
                 <Link
                   to="/perfil"

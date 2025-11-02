@@ -26,6 +26,7 @@ flask-dance = "*"
 oauthlib = "*"
 requests = "*"
 gunicorn = "*"
+cloudinary = "*"
 
 [requires]
 python_version = "3.13"

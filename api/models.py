@@ -19,7 +19,7 @@ class Usuario(db.Model):
     nombre = db.Column(db.String(100), nullable=False)
     apellido = db.Column(db.String(100), nullable=False)
     correo_electronico = db.Column(db.String(150), unique=True, nullable=False)
-    _contrasena = db.Column("contrasena", db.String(255), nullable=False)
+    _contrasena = db.Column("contrasena", db.String(255), nullable=True)
     fecha_nacimiento = db.Column(db.Date)
     genero = db.Column(db.String(20))
     foto_perfil = db.Column(db.String(255))
