@@ -156,7 +156,7 @@ function Registro() {
                   className="form-control registro-input"
                   id="nombre"
                   aria-describedby="emailHelp"
-                  placeholder="Nombre"
+                  placeholder="Nombre*"
                 />
                 {errors.nombre && <p className="error">{errors.nombre}</p>}
               </div>
@@ -169,7 +169,7 @@ function Registro() {
                   className="form-control registro-input flex-grow-1"
                   id="apellido"
                   aria-describedby=""
-                  placeholder="Apellidos"
+                  placeholder="Apellidos*"
                 />
                 {errors.apellido && <p className="error">{errors.apellido}</p>}
               </div>
@@ -377,7 +377,7 @@ function Registro() {
                 className="form-control registro-input"
                 id="correo_electronico"
                 aria-describedby="emailHelp"
-                placeholder="Correo electrónico"
+                placeholder="Correo electrónico*"
               />
 
               {errors.correo_electronico && (
@@ -393,7 +393,7 @@ function Registro() {
                 className="form-control registro-input
                 "
                 id="contrasena"
-                placeholder="Contraseña"
+                placeholder="Contraseña*"
               />
               {errors.contrasena && (
                 <p className="error">{errors.contrasena}</p>
@@ -412,12 +412,10 @@ function Registro() {
                 He leído y acepto las condiciones de uso y política de
                 privacidad de Swapp.
               </label>
+              {errors.acepta_terminos && (
+                <p className="error">{errors.acepta_terminos}</p>
+              )}
             </div>
-            {showAlerta && (
-              <div className="alert alert-danger mt-2 p-1" role="alert">
-                Debes aceptar las condiciones de uso para registrarte.
-              </div>
-            )}
             <div className="d-flex justify-content-center">
               <button type="submit" className="btn btn-main1 my-3">
                 Registrate
