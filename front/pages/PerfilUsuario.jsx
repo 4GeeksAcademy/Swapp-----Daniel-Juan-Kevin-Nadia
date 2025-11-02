@@ -6,27 +6,46 @@ import "../assets/styles/PerfilUsuario.css";
 import { env } from "../environ";
 import { useStore } from "../hooks/useStore";
 import CropperModal from "../assets/components/CropperModal";
+import ModalAgregarHabilidad from "../assets/components/ModalAgregarHabilidad";
+import BotonMensajeria from "../assets/components/BotonMensajeria";
+import ModalMensajeria from "../assets/components/ModalMensajeria";
+import ModalPuntuacion from "../assets/components/ModalPuntuacion";
 
 function PerfilUsuario() {
   const { _, dispatch } = useStore();
   const [usuario, setUsuario] = useState(null);
   const [seccionActiva, setSeccionActiva] = useState("datos");
+
+  // Datos personales
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({});
-  const [categories, setCategories] = useState([]);
-  const [idCategorie, setIdCategorie] = useState(0);
-  const [habilidades, setHabilidades] = useState([]);
-  const [idHabilidad, setIdHabilidad] = useState(0);
-  const [editandoHabilidades, setEditandoHabilidades] = useState(false);
   const [msg, setMsg] = useState({});
-  const navigate = useNavigate();
+
+  // Imagen / cropper
   const [imagenTemporal, setImagenTemporal] = useState(null);
   const [mostrarCropper, setMostrarCropper] = useState(false);
 
+  // Habilidades
+  const [mostrarModalHabilidad, setMostrarModalHabilidad] = useState(false);
+ 
+  // ...otros estados habilidades
+const [editandoHabilidades, setEditandoHabilidades] = useState(false);
+
+
+  // Mensajería
+  const [mostrarModalMensajes, setMostrarModalMensajes] = useState(false);
+
+  // Puntuación
+  const [mostrarModalPuntuacion, setMostrarModalPuntuacion] = useState(false);
+  const [usuarioEvaluado, setUsuarioEvaluado] = useState(null);
+  
+
+  const navigate = useNavigate();
+
+  // ========= Cargar usuario (no modificar esta lógica) =========
   useEffect(() => {
     const rawToken = localStorage.getItem("token");
     const usuarioToken = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
-
     const usuarioGoogle = localStorage.getItem("user");
 
     if (!usuarioToken && !usuarioGoogle) {
@@ -35,7 +54,7 @@ function PerfilUsuario() {
       return;
     }
 
-    // Si el usuario viene desde Google
+    // Si viene desde Google
     if (usuarioGoogle) {
       const data = JSON.parse(usuarioGoogle);
       setUsuario({
@@ -88,41 +107,24 @@ function PerfilUsuario() {
     };
 
     fetchUsuario();
-  }, []);
+  }, [dispatch, navigate]);
 
+  // Handlers de datos personales 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleCategorieChange = (e) => {
-    let idxCategory = parseInt(e.target.value);
-    setIdCategorie(idxCategory);
-    let categ = categories.find((c) => c.id_categoria === idxCategory);
-
-    if (categ) setHabilidades(categ["habilidades"]);
-  };
-
   const handleGuardar = async () => {
     try {
-      if (
-        !formData.nombre ||
-        !formData.apellido ||
-        !formData.correo_electronico
-      ) {
+      if (!formData.nombre || !formData.apellido || !formData.correo_electronico) {
         alert("Por favor completa todos los campos obligatorios.");
         return;
       }
 
       let fechaFinal = formData.fecha_nacimiento;
       if (formData.dia && formData.mes && formData.anio) {
-        if (!formData.dia || !formData.mes || !formData.anio) {
-          alert("Por favor selecciona día, mes y año.");
-          return;
-        }
-
-        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(
-          2,
-          "0"
-        )}-${String(formData.dia).padStart(2, "0")}`;
+        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(2, "0")}-${String(
+          formData.dia
+        ).padStart(2, "0")}`;
       }
 
       const { dia, mes, anio, ...dataSinCamposExtra } = formData;
@@ -131,14 +133,11 @@ function PerfilUsuario() {
         fecha_nacimiento: fechaFinal,
       };
 
-      const response = await fetch(
-        `${env.api}/api/usuarios/${usuario.id_usuario}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(usuarioActualizado),
-        }
-      );
+      const response = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(usuarioActualizado),
+      });
 
       const dataActualizada = await response.json();
       setUsuario(dataActualizada?.actualizado);
@@ -147,13 +146,11 @@ function PerfilUsuario() {
       setMsg({ tipo: "success", contenido: dataActualizada.msj });
     } catch (error) {
       console.error("Error al guardar:", error);
-      setMsg({
-        tipo: "danger",
-        contenido: "No se pudo guardar la información",
-      });
+      setMsg({ tipo: "danger", contenido: "No se pudo guardar la información" });
     }
   };
 
+  //  Foto de perfil
   const handleEditarFoto = () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -162,7 +159,6 @@ function PerfilUsuario() {
     input.onchange = (e) => {
       const file = e.target.files[0];
       if (!file) return;
-
       const url = URL.createObjectURL(file);
       setImagenTemporal(url);
       setMostrarCropper(true);
@@ -171,29 +167,77 @@ function PerfilUsuario() {
     input.click();
   };
 
-  const handleAgregarHabilidad = () => {
-    if (idHabilidad > 0) {
-      fetch(`${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`, {
+
+
+// ELIMINAR HABILIDAD DEL USUARIO (desasociar)
+const handleEliminarHabilidad = async (idHabilidad) => {
+  if (!window.confirm("¿Seguro que deseas eliminar esta habilidad?")) return;
+
+  try {
+    //  Llamada al backend para desasociar
+    const res = await fetch(
+      `${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`,
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({
-          asociar: idHabilidad,
-        }),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Error en la petición: " + response.status);
-          }
-          return response.json();
-        })
-        .then((data) => setUsuario(data))
-        .catch((error) => {
-          console.error("Hubo un problema con la petición:", error);
-        });
-      setEditandoHabilidades(false);
+        body: JSON.stringify({ desasociar: idHabilidad }),
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Error al desasociar habilidad");
+    }
+
+    // Refrescar usuario actualizado desde backend
+    const ref = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`);
+    if (!ref.ok) throw new Error("Error al refrescar usuario");
+    const data = await ref.json();
+
+    setUsuario(data);
+    setMsg({
+      tipo: "success",
+      contenido: "Habilidad eliminada correctamente.",
+    });
+  } catch (error) {
+    console.error("Error al eliminar habilidad:", error);
+    setMsg({
+      tipo: "danger",
+      contenido: "No se pudo eliminar la habilidad.",
+    });
+  }
+};
+
+
+//  GUARDAR CAMBIOS 
+const handleGuardarCambiosHabilidades = () => {
+  setEditandoHabilidades(false);
+  setMsg({
+    tipo: "success",
+    contenido: "Cambios guardados correctamente.",
+  });
+};
+
+
+
+  //  PUNTUACIONES / INTERCAMBIOS
+  const abrirModalPuntuacion = (userDestino) => {
+    setUsuarioEvaluado(userDestino);
+    setMostrarModalPuntuacion(true);
+  };
+
+  const handleEnviarPuntuacion = async (payload) => {
+    try {
+      // Deja listo para conectar con API real
+      console.log("Puntuación enviada:", payload);
+      alert("✅ Puntuación enviada correctamente (pendiente conectar API)");
+    } catch (err) {
+      console.error("Error enviando puntuación:", err);
+      alert("❌ Error al enviar puntuación");
+    } finally {
+      setMostrarModalPuntuacion(false);
     }
   };
 
@@ -202,8 +246,10 @@ function PerfilUsuario() {
   return (
     <>
       <Navbar />
+
       <div className="container-fluid perfil-container py-5">
         <div className="row justify-content-center">
+          {/* Sidebar */}
           <div className="col-12 col-md-3 perfil-sidebar text-center p-4">
             <div className="perfil-avatar-container">
               <img
@@ -215,11 +261,7 @@ function PerfilUsuario() {
                 alt="Foto de perfil"
                 className="perfil-avatar mb-3"
               />
-
-              <button
-                className="btn btn-editar-foto mb-2"
-                onClick={handleEditarFoto}
-              >
+              <button className="btn btn-editar-foto mb-2" onClick={handleEditarFoto}>
                 📷 Editar Foto
               </button>
               <h4 className="perfil-nombre mb-4">
@@ -229,48 +271,47 @@ function PerfilUsuario() {
 
             <div className="perfil-secciones mt-4">
               <button
-                className={`list-group-item ${
-                  seccionActiva === "datos" ? "active" : ""
-                }`}
+                className={`list-group-item ${seccionActiva === "datos" ? "active" : ""}`}
                 onClick={() => setSeccionActiva("datos")}
               >
                 Datos Personales
               </button>
+
               <div className="perfil-divider"></div>
+
               <button
-                className={`list-group-item ${
-                  seccionActiva === "habilidades" ? "active" : ""
-                }`}
+                className={`list-group-item ${seccionActiva === "habilidades" ? "active" : ""}`}
                 onClick={() => {
                   setSeccionActiva("habilidades");
+                  // refresca para traer descripciones actualizadas desde backend
                   fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`)
-                    .then((response) => {
-                      if (!response.ok) {
-                        throw new Error(
-                          "Error en la petición: " + response.status
-                        );
-                      }
-                      return response.json();
-                    })
-                    .then((data) => setUsuario(data))
-                    .catch((error) => {
-                      console.error("Hubo un problema con la petición:", error);
-                    });
+                    .then((r) => r.json())
+                    .then((d) => setUsuario(d))
+                    .catch((e) => console.error("Error refrescando usuario:", e));
                 }}
               >
                 Habilidades
               </button>
+
+              <div className="perfil-divider"></div>
+
+              <button
+                className={`list-group-item ${seccionActiva === "intercambios" ? "active" : ""}`}
+                onClick={() => setSeccionActiva("intercambios")}
+              >
+                Intercambios
+              </button>
             </div>
           </div>
 
+          {/* Contenido */}
           <div className="col-12 col-md-8 perfil-content p-4">
             {seccionActiva === "datos" ? (
               <>
-                <h2 className="text-dark fw-bold mb-4 text-center">
-                  Datos Personales
-                </h2>
+                <h2 className="text-dark fw-bold mb-4 text-center">Datos Personales</h2>
 
                 <form className="row g-3">
+                  {/* Nombre */}
                   <div className="col-md-6">
                     <label className="form-label">Nombre</label>
                     <input
@@ -283,6 +324,7 @@ function PerfilUsuario() {
                     />
                   </div>
 
+                  {/* Apellido */}
                   <div className="col-md-6">
                     <label className="form-label">Apellidos</label>
                     <input
@@ -295,6 +337,7 @@ function PerfilUsuario() {
                     />
                   </div>
 
+                  {/* Correo */}
                   <div className="col-md-6">
                     <label className="form-label">Correo electrónico</label>
                     <input
@@ -307,10 +350,12 @@ function PerfilUsuario() {
                     />
                   </div>
 
+                  {/* Fecha nacimiento con Día/Mes/Año */}
                   <div className="col-md-6">
                     <label className="form-label">Fecha de nacimiento</label>
                     {editando ? (
                       <div className="d-flex" style={{ gap: "10px" }}>
+                        {/* Día */}
                         <select
                           className="form-select"
                           name="dia"
@@ -325,6 +370,7 @@ function PerfilUsuario() {
                           ))}
                         </select>
 
+                        {/* Mes */}
                         <select
                           className="form-select"
                           name="mes"
@@ -352,6 +398,7 @@ function PerfilUsuario() {
                           ))}
                         </select>
 
+                        {/* Año */}
                         <select
                           className="form-select"
                           name="anio"
@@ -379,6 +426,7 @@ function PerfilUsuario() {
                     )}
                   </div>
 
+                  {/* Género */}
                   <div className="col-md-6">
                     <label className="form-label">Género</label>
                     {editando ? (
@@ -403,6 +451,7 @@ function PerfilUsuario() {
                     )}
                   </div>
 
+                  {/* Descripción usuario */}
                   <div className="col-12">
                     <label className="form-label">Descripción</label>
                     <textarea
@@ -415,144 +464,154 @@ function PerfilUsuario() {
                     />
                   </div>
 
-                  {Object.keys(msg).length > 0 ? (
-                    <div className={`alert alert-${msg?.tipo}`} role="alert">
-                      {msg?.contenido}
+                  {/* Mensaje */}
+                  {Object.keys(msg).length > 0 && (
+                    <div className={`alert alert-${msg.tipo}`} role="alert">
+                      {msg.contenido}
                     </div>
-                  ) : (
-                    ""
                   )}
 
+                  {/* Botón guardar/editar */}
                   <div className="col-12 text-center mt-4">
                     <button
                       type="button"
                       className="btn btn-lg perfil-accion-btn"
-                      onClick={
-                        editando ? handleGuardar : () => setEditando(true)
-                      }
+                      onClick={editando ? handleGuardar : () => setEditando(true)}
                     >
                       {editando ? "Guardar Cambios" : "Editar Información"}
                     </button>
                   </div>
                 </form>
               </>
-            ) : (
-              <>
-                <h2 className="fw-bold mb-4 text-center">Habilidades</h2>
-                {!editandoHabilidades ? (
-                  <>
-                    {usuario.habilidades && usuario.habilidades.length > 0 ? (
-                      <ul className="habilidades-lista">
-                        {usuario.habilidades.map((hab, index) => (
-                          <li key={index}>
-                            <strong>{hab.nombre_habilidad}</strong>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-muted">
-                        Aún no has agregado habilidades.
-                      </p>
-                    )}
-                    <button
-                      className="btn perfil-accion-btn mt-3"
-                      onClick={() => {
-                        setEditandoHabilidades(true);
-                        fetch(`${env.api}/api/categorias`)
-                          .then((response) => {
-                            if (!response.ok) {
-                              throw new Error(
-                                "Error en la petición: " + response.status
-                              );
-                            }
-                            return response.json();
-                          })
-                          .then((data) => setCategories(data))
-                          .catch((error) => {
-                            console.error(
-                              "Hubo un problema con la petición:",
-                              error
-                            );
-                          });
-                      }}
-                    >
-                      ✏️ Editar habilidades
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <div className="mb-3 text-start">
-                      <div className="input-group my-2">
-                        <label htmlFor="selectCategoria">Categorías</label>
-                        <select
-                          className="form-select mt-1"
-                          style={{ width: "100%" }}
-                          name="id_categoria"
-                          onChange={handleCategorieChange}
-                          value={idCategorie}
-                          id="selectCategoria"
-                        >
-                          {categories &&
-                            categories.map((category) => (
-                              <option
-                                key={`categoria-${category?.id_categoria}`}
-                                value={category?.id_categoria}
-                              >
-                                {category?.nombre_categoria}
-                              </option>
-                            ))}
-                        </select>
-                      </div>
+              ) : seccionActiva === "habilidades" ? (
+                <>
+                  <h2 className="fw-bold mb-4 text-center">Habilidades</h2>
 
-                      <div className="input-group my-2">
-                        <label htmlFor="selectHabilidad">Habilidades</label>
-                        <select
-                          className="form-select mt-1"
-                          style={{ width: "100%" }}
-                          name="id_habilidad"
-                          onChange={(e) =>
-                            setIdHabilidad(parseInt(e.target.value))
-                          }
-                          value={idHabilidad}
-                          id="selectHabilidad"
-                        >
-                          {habilidades &&
-                            habilidades.map((habilidad, id) => (
-                              <option
-                                key={`id_habilidad-${id}`}
-                                value={habilidad?.id_habilidad}
-                              >
-                                {habilidad?.nombre_habilidad}
-                              </option>
-                            ))}
-                        </select>
-                      </div>
-                      <button
-                        className="btn btn-editar-foto"
-                        onClick={handleAgregarHabilidad}
-                      >
-                        ➕ Agregar habilidad
-                      </button>
+                    <div className="habilidades-contenedor">
+                      {usuario.habilidades && usuario.habilidades.length > 0 ? (
+                        usuario.habilidades.map((hab, index) => (
+                          <div key={index} className="habilidad-card">
+                            <div className="d-flex justify-content-between align-items-center">
+                              <h5 className="m-0" style={{ color: "var(--naranja)" }}>
+                                {hab.nombre_habilidad}
+                              </h5>
+                              {editandoHabilidades && (
+                                <button
+                                  className="btn btn-outline-danger btn-sm"
+                                  onClick={() => handleEliminarHabilidad(hab.id_habilidad)}
+                                >
+                                  ✖
+                                </button>
+                              )}
+                            </div>
+                            <p className="text-muted mt-2 mb-0">
+                              {hab.descripcion && hab.descripcion.trim() !== ""
+                                ? hab.descripcion
+                                : "Sin descripción"}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-muted text-center">
+                          Aún no has agregado habilidades.
+                        </p>
+                      )}
                     </div>
 
-                    {usuario.habilidades && usuario.habilidades.length > 0 && (
-                      <ul className="habilidades-lista mt-3">
-                        {usuario.habilidades.map((hab, index) => (
-                          <li key={index}>
-                            <strong>{hab.nombre_habilidad}</strong>
-                          </li>
-                        ))}
-                      </ul>
+                    {/* Alerta debajo del listado y arriba de los botones */}
+                    {msg && msg.tipo && (
+                      <div className={`alert alert-${msg.tipo} text-center mt-3`} role="alert">
+                        {msg.contenido}
+                      </div>
                     )}
-                  </>
-                )}
+
+                    <div className="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+                      {!editandoHabilidades ? (
+                        <button className="btn-naranja" onClick={() => setEditandoHabilidades(true)}>
+                          ✏️ Editar habilidades
+                        </button>
+                      ) : (
+                        <>
+                          <button className="btn-agregar" onClick={() => setMostrarModalHabilidad(true)}>
+                            ➕ Agregar habilidad
+                          </button>
+
+                          <button className="btn-naranja" onClick={handleGuardarCambiosHabilidades}>
+                            💾 Guardar cambios
+                          </button>
+
+                          <button className="btn-oscuro" onClick={() => setEditandoHabilidades(false)}>
+                            Cancelar
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+
+                  {mostrarModalHabilidad && (
+                    <ModalAgregarHabilidad
+                      usuario={usuario}
+                      onClose={() => setMostrarModalHabilidad(false)}
+                      onSuccess={() => {
+                        setMostrarModalHabilidad(false);
+                        // refresca usuario para ver la nueva habilidad
+                        fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`)
+                          .then((r) => r.json())
+                          .then((d) => setUsuario(d))
+                          .catch((e) => console.error("Error al actualizar habilidades:", e));
+                      }}
+                    />
+                  )}
+                </>
+              ) : (
+
+                // Intercambios / Puntuaciones
+                <>
+
+
+                <h2 className="fw-bold mb-4 text-center">Intercambios</h2>
+
+                <div className="tabla-intercambios-container">
+                  <table className="tabla-intercambios">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Servicio</th>
+                        <th>Persona</th>
+                        <th>Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>#123</td>
+                        <td>Clases de guitarra</td>
+                        <td>Ana López</td>
+                        <td>
+                          <button
+                            className="btn-finalizado"
+                            onClick={() =>
+                              abrirModalPuntuacion({
+                                id_usuario: 2,
+                                nombre: "Ana López",
+                              })
+                            }
+                          >
+                            Intercambio Finalizado
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </>
             )}
           </div>
         </div>
       </div>
 
-      {/* 🔥 Modal del recortador */}
+      {/* Modales */}
+
+      {/* Cropper */}
       {mostrarCropper && (
         <CropperModal
           image={imagenTemporal}
@@ -567,13 +626,10 @@ function PerfilUsuario() {
               const userData = JSON.parse(localStorage.getItem("user"));
               const userId = userData?.id_usuario || usuario?.id_usuario;
 
-              const res = await fetch(
-                `${env.api}/api/usuarios/${userId}/foto-perfil`,
-                {
-                  method: "POST",
-                  body: formData,
-                }
-              );
+              const res = await fetch(`${env.api}/api/usuarios/${userId}/foto-perfil`, {
+                method: "POST",
+                body: formData,
+              });
 
               const data = await res.json();
               if (res.ok) {
@@ -581,7 +637,8 @@ function PerfilUsuario() {
                   ...prev,
                   foto_perfil: data.foto_perfil,
                 }));
-                document.querySelector(".perfil-avatar").src = data.foto_perfil;
+                const img = document.querySelector(".perfil-avatar");
+                if (img) img.src = data.foto_perfil;
                 setMsg({
                   tipo: "success",
                   contenido: "Foto actualizada correctamente",
@@ -597,6 +654,25 @@ function PerfilUsuario() {
               });
             }
           }}
+        />
+      )}
+
+      {/* Puntuación */}
+      {mostrarModalPuntuacion && (
+        <ModalPuntuacion
+          mostrar={mostrarModalPuntuacion}
+          onClose={() => setMostrarModalPuntuacion(false)}
+          usuarioEvaluado={usuarioEvaluado}
+          onSubmit={handleEnviarPuntuacion}
+        />
+      )}
+
+      {/* Botón flotante + Mensajería */}
+      <BotonMensajeria onClick={() => setMostrarModalMensajes(true)} />
+      {mostrarModalMensajes && (
+        <ModalMensajeria
+          mostrar={mostrarModalMensajes}
+          cerrar={() => setMostrarModalMensajes(false)}
         />
       )}
 
