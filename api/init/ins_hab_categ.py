@@ -121,14 +121,15 @@ CATEGORIAS_Y_HABILIDADES = {
 def poblar_datos():
     """Algoritmo"""
     with app.app_context():
+        h = 0
         for nombre_categoria, habilidades in CATEGORIAS_Y_HABILIDADES.items():
+
             categoria = Categoria.query.filter_by(
                 nombre_categoria=nombre_categoria).first()
             if not categoria:
                 categoria = Categoria(nombre_categoria=nombre_categoria)
                 db.session.add(categoria)
                 db.session.commit()
-                print(f" Categoría creada: {nombre_categoria}")
 
             for nombre_habilidad in habilidades:
                 habilidad = Habilidad.query.filter_by(
@@ -140,9 +141,10 @@ def poblar_datos():
                         id_categoria=categoria.id_categoria
                     )
                     db.session.add(nueva_habilidad)
-                    print(f" Habilidad añadida: {nombre_habilidad}")
+            h += len(habilidades)
+        print(f"[SEED] Categorias: {len(CATEGORIAS_Y_HABILIDADES)}")
+        print(f"[SEED] Habilidades: {h}")
         db.session.commit()
-        print(" Datos iniciales cargados correctamente.")
 
 
 if __name__ == "__main__":
