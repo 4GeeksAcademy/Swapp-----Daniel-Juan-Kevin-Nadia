@@ -26,6 +26,8 @@ function Registro() {
     { id_habilidad: 0, nombre_habilidad: "Elige tu Habilidad..." },
   ]);
   const [showAlerta, setShowAlerta] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -77,36 +79,54 @@ function Registro() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const newErrors = {};
+
+    if (!formData.nombre.trim()) {
+      newErrors.nombre = "El nombre es obligatorio";
+    } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(formData.nombre)) {
+      newErrors.nombre = "El nombre sólo puede contener letras";
+    }
+
+    if (!formData.apellido.trim()) {
+      newErrors.apellido = "Los apellidos son obligatorios";
+    } else if (!/^[a-zA-ZÀ-ÿ\s]+$/.test(formData.apellido)) {
+      newErrors.apellido = "Los apellidos sólo pueden contener letras";
+    }
+
+    if (!formData.correo_electronico.trim()) {
+      newErrors.correo_electronico = "El correo es obligatorio";
+    } else if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.correo_electronico)
+    ) {
+      newErrors.correo_electronico = "El correo no es válido";
+    }
+
+    if (!formData.contrasena.trim()) {
+      newErrors.contrasena = "La contraseña es obligatoria";
+    } else if (formData.contrasena.length < 8) {
+      newErrors.contrasena = "Debe tener al menos 8 carácteres";
+    }
+
     if (!formData.acepta_terminos) {
       setShowAlerta(true);
-      return;
+      newErrors.acepta_terminos = "Debes aceptar las condiciones de uso.";
+    } else {
+      setShowAlerta(false);
     }
-    setShowAlerta(false);
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return;
 
     try {
       const data = await registrarUsuario(formData);
 
       if (data) {
-        navigate("/", { replace: true });
+        setShowModal(true);
       }
     } catch (error) {
       alert("Hubo un error al registrar!");
     }
-
-    setFormData({
-      nombre: "",
-      apellido: "",
-      dia: "",
-      mes: "",
-      anio: "",
-      fecha_nacimiento: "",
-      genero: "",
-      id_habilidad: "",
-      descripcion: "",
-      correo_electronico: "",
-      contrasena: "",
-      acepta_terminos: false,
-    });
   };
 
   return (
@@ -127,28 +147,34 @@ function Registro() {
               Únete a Swapp!
             </h5>
             <div className="d-flex gap-2">
-              <input
-                name="nombre"
-                onChange={handleChange}
-                value={formData.nombre}
-                type="text"
-                className="form-control registro-input"
-                id="nombre"
-                aria-describedby="emailHelp"
-                placeholder="Nombre"
-              />
-
-              <input
-                name="apellido"
-                onChange={handleChange}
-                value={formData.apellido}
-                type="text"
-                className="form-control registro-input flex-grow-1"
-                id="apellido"
-                aria-describedby=""
-                placeholder="Apellidos"
-              />
+              <div>
+                <input
+                  name="nombre"
+                  onChange={handleChange}
+                  value={formData.nombre}
+                  type="text"
+                  className="form-control registro-input"
+                  id="nombre"
+                  aria-describedby="emailHelp"
+                  placeholder="Nombre"
+                />
+                {errors.nombre && <p className="error">{errors.nombre}</p>}
+              </div>
+              <div>
+                <input
+                  name="apellido"
+                  onChange={handleChange}
+                  value={formData.apellido}
+                  type="text"
+                  className="form-control registro-input flex-grow-1"
+                  id="apellido"
+                  aria-describedby=""
+                  placeholder="Apellidos"
+                />
+                {errors.apellido && <p className="error">{errors.apellido}</p>}
+              </div>
             </div>
+
             <div className="mt-1">
               <label htmlFor="fecha-nacimiento" className="form-label">
                 Fecha de nacimiento
@@ -353,6 +379,10 @@ function Registro() {
                 aria-describedby="emailHelp"
                 placeholder="Correo electrónico"
               />
+
+              {errors.correo_electronico && (
+                <p className="error">{errors.correo_electronico}</p>
+              )}
             </div>
             <div className="form-group mt-2">
               <input
@@ -365,6 +395,9 @@ function Registro() {
                 id="contrasena"
                 placeholder="Contraseña"
               />
+              {errors.contrasena && (
+                <p className="error">{errors.contrasena}</p>
+              )}
             </div>
             <div className="form-group form-check mt-2">
               <input
@@ -391,6 +424,63 @@ function Registro() {
               </button>
             </div>
           </form>
+          {showModal && (
+            <div
+              className="modal fade show d-block"
+              tabIndex="-1"
+              role="dialog"
+              style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+            >
+              <div
+                className="modal-dialog modal-dialog-centered"
+                role="document"
+              >
+                <div className="modal-content p-3 text-center">
+                  <div className="modal-header border-0">
+                    <h5 className="modal-title w-100 fw-bold">
+                      ¡Te has registrado correctamente! 🎉
+                    </h5>
+                  </div>
+                  <div className="modal-body">
+                    <p>¡Bienvenido a nuestra comunidad!</p>
+                    <p>¿Qué deseas hacer ahora?</p>
+                  </div>
+                  <div className="modal-footer border-0 d-flex justify-content-center gap-3">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        setShowModal(false);
+                        setFormData({
+                          nombre: "",
+                          apellido: "",
+                          dia: "",
+                          mes: "",
+                          anio: "",
+                          fecha_nacimiento: "",
+                          genero: "",
+                          id_categoria: "",
+                          id_habilidad: "",
+                          descripcion: "",
+                          correo_electronico: "",
+                          contrasena: "",
+                          acepta_terminos: false,
+                        });
+                      }}
+                    >
+                      Cerrar
+                    </button>
+
+                    <button
+                      className="btn btn-main1"
+                      onClick={() => navigate("/login")}
+                    >
+                      Iniciar sesión
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
