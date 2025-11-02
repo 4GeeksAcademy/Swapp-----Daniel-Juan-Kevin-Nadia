@@ -5,95 +5,121 @@
   --claro: #f6f4f4;
 }
 
-/* === Overlay === */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(44, 39, 39, 0.7);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 2000;
 }
 
-/* === Contenedor principal === */
 .modal-contenido {
-  background: #fff;
-  border-radius: 15px;
-  padding: 2rem;
-  max-width: 400px;
-  width: 90%;
+  background-color: var(--claro);
+  border-radius: 20px;
+  padding: 2rem 2.5rem;
+  width: 100%;
+  max-width: 420px;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease;
 }
 
-/* === Animación de entrada === */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
-}
-
-/* === Título === */
 .modal-titulo {
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--oscuro);
+  font-weight: 700;
+  color: var(--gris);
   margin-bottom: 1rem;
 }
+
 .nombre-usuario {
   color: var(--naranja);
 }
 
-/* === Estrellas === */
 .modal-estrellas {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+  margin: 1rem 0;
 }
 
 .estrella {
   font-size: 2rem;
-  color: #ccc;
   cursor: pointer;
+  color: #ccc;
   transition: color 0.2s;
 }
 
+.estrella:hover,
 .estrella.activa {
   color: var(--naranja);
 }
 
-.estrella:hover {
-  color: var(--naranja);
-}
-
-/* === Comentario === */
 .modal-comentario {
   width: 100%;
-  border: 1px solid var(--gris);
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 14px;
+  border-radius: 12px;
+  border: 2px solid #ccc;
+  padding: 0.8rem;
+  min-height: 80px;
   resize: none;
-  outline: none;
-  height: 80px;
-  transition: border-color 0.3s;
-}
-.modal-comentario:focus {
-  border-color: var(--naranja);
-  box-shadow: 0 0 5px rgba(255, 117, 23, 0.3);
+  font-size: 0.95rem;
+  color: var(--gris);
+  background-color: #fff;
+  transition: border-color 0.2s;
 }
 
-/* === Botones === */
-.modal-botones {
+.modal-comentario:focus {
+  border-color: var(--naranja);
+  outline: none;
+}
+
+.modal-puntuacion-botones {
   display: flex;
   justify-content: center;
   gap: 1rem;
   margin-top: 1.5rem;
+}
+
+.btn-cancelar-puntuacion {
+  background-color: transparent;
+  border: 2px solid var(--gris);
+  color: var(--gris);
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.btn-cancelar-puntuacion:hover {
+  background-color: var(--gris);
+  color: var(--claro);
+}
+
+.btn-guardar-puntuacion {
+  background-color: var(--naranja);
+  border: none;
+  color: var(--claro);
+  font-weight: 600;
+  padding: 0.6rem 1.5rem;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.btn-guardar-puntuacion:hover {
+  background-color: #e8680f;
+}
+
+/* === Animación === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

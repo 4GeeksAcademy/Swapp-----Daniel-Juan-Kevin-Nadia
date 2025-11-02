@@ -18,7 +18,9 @@ from api.urls.categorias import categorias
 from api.urls.mensaje import mensajes
 from authlib.integrations.flask_client import OAuth
 from api.urls.auth import auth
-
+from api.cloudinary.routes import cloudinary_routes
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -74,3 +76,4 @@ app.register_blueprint(habilidades)
 app.register_blueprint(categorias)
 app.register_blueprint(mensajes)
 app.register_blueprint(auth, url_prefix="/auth")
+app.register_blueprint(cloudinary_routes)

@@ -7,11 +7,10 @@ const ModalAgregarHabilidad = ({ usuario, onClose, onSuccess }) => {
   const [habilidades, setHabilidades] = useState([]);
   const [idCategoria, setIdCategoria] = useState("");
   const [idHabilidad, setIdHabilidad] = useState("");
-  const [descripcion, setDescripcion] = useState("");
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState(null);
 
-  // Traer categorías al abrir modal
+  // Cargar categorías al abrir el modal
   useEffect(() => {
     fetch(`${env.api}/api/categorias`)
       .then((res) => res.json())
@@ -19,15 +18,20 @@ const ModalAgregarHabilidad = ({ usuario, onClose, onSuccess }) => {
       .catch((err) => console.error("Error al cargar categorías:", err));
   }, []);
 
+  // Actualiza la lista de habilidades al seleccionar categoría
   const handleCategoriaChange = (e) => {
     const id = parseInt(e.target.value);
     setIdCategoria(id);
     const categoria = categorias.find((c) => c.id_categoria === id);
     if (categoria) {
       setHabilidades(categoria.habilidades);
+    } else {
+      setHabilidades([]);
     }
+    setIdHabilidad("");
   };
 
+  // Agregar habilidad al usuario
   const handleAgregar = async () => {
     if (!idHabilidad) {
       setMensaje({ tipo: "error", texto: "Selecciona una habilidad" });
@@ -36,6 +40,8 @@ const ModalAgregarHabilidad = ({ usuario, onClose, onSuccess }) => {
 
     setCargando(true);
     try {
+      const body = { asociar: idHabilidad };
+
       const response = await fetch(
         `${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`,
         {
@@ -44,27 +50,33 @@ const ModalAgregarHabilidad = ({ usuario, onClose, onSuccess }) => {
             "Content-Type": "application/json",
             Accept: "application/json",
           },
-          body: JSON.stringify({
-            asociar: idHabilidad,
-            descripcion: descripcion || "",
-          }),
+          body: JSON.stringify(body),
         }
       );
 
       const data = await response.json();
 
       if (response.ok) {
-        setMensaje({ tipo: "success", texto: "Habilidad agregada correctamente" });
+        setMensaje({
+          tipo: "success",
+          texto: "✅ Habilidad agregada correctamente",
+        });
         setTimeout(() => {
           onSuccess && onSuccess();
           onClose();
         }, 1200);
       } else {
-        setMensaje({ tipo: "error", texto: data.msj || "No se pudo agregar" });
+        setMensaje({
+          tipo: "error",
+          texto: data.msj || "No se pudo agregar la habilidad",
+        });
       }
     } catch (error) {
       console.error("Error al agregar habilidad:", error);
-      setMensaje({ tipo: "error", texto: "Error en el servidor" });
+      setMensaje({
+        tipo: "error",
+        texto: "❌ Error en la conexión con el servidor",
+      });
     } finally {
       setCargando(false);
     }
@@ -72,10 +84,11 @@ const ModalAgregarHabilidad = ({ usuario, onClose, onSuccess }) => {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-agregar-habilidad">
-        <h3>Agregar Habilidad</h3>
+      <div className="modal-agregar-habilidad animate-fadeIn">
+        <h3 className="text-center fw-bold mb-3">Agregar Habilidad</h3>
 
-        <label className="form-label">Categoría</label>
+        {/* Selección de Categoría */}
+        <label className="form-label mt-2">Categoría</label>
         <select
           className="form-select"
           value={idCategoria}
@@ -89,6 +102,7 @@ const ModalAgregarHabilidad = ({ usuario, onClose, onSuccess }) => {
           ))}
         </select>
 
+        {/* Selección de Habilidad */}
         <label className="form-label mt-3">Habilidad</label>
         <select
           className="form-select"
@@ -103,15 +117,7 @@ const ModalAgregarHabilidad = ({ usuario, onClose, onSuccess }) => {
           ))}
         </select>
 
-        <label className="form-label mt-3">Descripción (opcional)</label>
-        <textarea
-          className="form-control"
-          rows="3"
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-          placeholder="Agrega una breve descripción..."
-        ></textarea>
-
+        {/* Mensajes */}
         {mensaje && (
           <div
             className={`alert mt-3 ${
@@ -122,12 +128,13 @@ const ModalAgregarHabilidad = ({ usuario, onClose, onSuccess }) => {
           </div>
         )}
 
-        <div className="modal-buttons mt-4">
-          <button className="btn-cancelar" onClick={onClose}>
+        {/* Botones */}
+        <div className="modal-buttons mt-4 d-flex justify-content-between">
+          <button className="btn-oscuro" onClick={onClose}>
             Cancelar
           </button>
           <button
-            className="btn-guardar"
+            className="btn-naranja"
             onClick={handleAgregar}
             disabled={cargando}
           >

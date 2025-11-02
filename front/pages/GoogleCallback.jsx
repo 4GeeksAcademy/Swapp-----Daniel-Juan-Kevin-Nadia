@@ -6,25 +6,38 @@ const GoogleCallback = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    const name = params.get("name");
-    const email = params.get("email");
-    const picture = params.get("picture");
 
-    console.log("Parámetros recibidos en el callback:");
-    for (const [key, value] of params.entries()) {
-      console.log(`${key}: ${value}`);
-    }
+    const token = params.get("token");
+    const id_usuario = params.get("id_usuario");
+    const nombre = params.get("nombre") || "";
+    const apellido = params.get("apellido") || "";
+    const email = params.get("email") || "";
+    const picture = params.get("picture") || "";
+
+    console.log("👉 Parámetros que llegan desde Google:", {
+      token,
+      id_usuario,
+      nombre,
+      apellido,
+      email,
+      picture,
+    });
 
     if (token) {
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify({ name, email, picture }));
-
-      console.log("Sesión iniciada con Google:", { name, email, picture });
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id_usuario,
+          nombre,
+          apellido,
+          correo_electronico: email,
+          foto_perfil: picture,
+        })
+      );
 
       setTimeout(() => navigate("/perfil"), 200);
     } else {
-      console.error("Error: token no encontrado en la URL");
       alert("Error al autenticar con Google. Intenta de nuevo.");
       navigate("/login");
     }

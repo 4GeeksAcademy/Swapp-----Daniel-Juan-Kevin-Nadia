@@ -1,72 +1,88 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
 import { env } from "../environ";
 import { useStore } from "../hooks/useStore";
-
-// Componentes existentes en tu proyecto
+import CropperModal from "../assets/components/CropperModal";
+import ModalAgregarHabilidad from "../assets/components/ModalAgregarHabilidad";
 import BotonMensajeria from "../assets/components/BotonMensajeria";
 import ModalMensajeria from "../assets/components/ModalMensajeria";
-import ModalAgregarHabilidad from "../assets/components/ModalAgregarHabilidad";
 import ModalPuntuacion from "../assets/components/ModalPuntuacion";
 
 function PerfilUsuario() {
   const { _, dispatch } = useStore();
-
-  // ======= Estado base =======
   const [usuario, setUsuario] = useState(null);
   const [seccionActiva, setSeccionActiva] = useState("datos");
 
-  // Datos Personales
+  // Datos personales
   const [editando, setEditando] = useState(false);
   const [formData, setFormData] = useState({});
   const [msg, setMsg] = useState({});
 
+  // Imagen / cropper
+  const [imagenTemporal, setImagenTemporal] = useState(null);
+  const [mostrarCropper, setMostrarCropper] = useState(false);
+
   // Habilidades
-  const [editandoHabilidades, setEditandoHabilidades] = useState(false);
   const [mostrarModalHabilidad, setMostrarModalHabilidad] = useState(false);
+ 
+  // ...otros estados habilidades
+const [editandoHabilidades, setEditandoHabilidades] = useState(false);
+
 
   // Mensajería
-  const [mostrarMensajeria, setMostrarMensajeria] = useState(false);
+  const [mostrarModalMensajes, setMostrarModalMensajes] = useState(false);
 
-  // Puntuación / Intercambios
+  // Puntuación
   const [mostrarModalPuntuacion, setMostrarModalPuntuacion] = useState(false);
   const [usuarioEvaluado, setUsuarioEvaluado] = useState(null);
+  
 
   const navigate = useNavigate();
 
-  // ======= Utilidades =======
-  const getTokenLimpio = () => {
-    const raw = localStorage.getItem("token");
-    return raw ? raw.replace(/^"|"$/g, "") : null;
-  };
-
-  const refreshUsuario = useCallback(async () => {
-    // Cuando necesites el usuario completo/actualizado
-    try {
-      if (!usuario?.id_usuario) return;
-      const res = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`);
-      if (!res.ok) throw new Error("No se pudo refrescar el usuario");
-      const data = await res.json();
-      setUsuario(data);
-      dispatch({ type: "SET_USUARIO", payload: data });
-    } catch (err) {
-      console.error("Error refrescando usuario:", err);
-    }
-  }, [usuario?.id_usuario, dispatch]);
-
-  // ======= Efecto inicial: autorización + usuario =======
+  // ========= Cargar usuario (no modificar esta lógica) =========
   useEffect(() => {
-    const usuarioToken = getTokenLimpio();
-    if (!usuarioToken) {
-      alert("⚠️ No hay sesión activa. Por favor inicia sesión.");
+    const rawToken = localStorage.getItem("token");
+    const usuarioToken = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
+    const usuarioGoogle = localStorage.getItem("user");
+
+    if (!usuarioToken && !usuarioGoogle) {
+      alert("No hay sesión activa. Por favor inicia sesión.");
       navigate("/login");
       return;
     }
 
-    const fetchUsuarioAut = async () => {
+    // Si viene desde Google
+    if (usuarioGoogle) {
+      const data = JSON.parse(usuarioGoogle);
+      setUsuario({
+        id_usuario: data.id_usuario,
+        nombre: data.nombre,
+        apellido: data.apellido,
+        correo_electronico: data.correo_electronico,
+        foto_perfil: data.foto_perfil,
+        fecha_nacimiento: null,
+        genero: "",
+        descripcion: "",
+        habilidades: [],
+      });
+
+      setFormData({
+        nombre: data.nombre,
+        apellido: data.apellido,
+        correo_electronico: data.correo_electronico,
+        foto_perfil: data.foto_perfil,
+        fecha_nacimiento: "",
+        genero: "",
+        descripcion: "",
+      });
+
+      return;
+    }
+
+    const fetchUsuario = async () => {
       try {
         const response = await fetch(`${env.api}/api/autorizacion`, {
           method: "GET",
@@ -75,10 +91,12 @@ function PerfilUsuario() {
             Accept: "application/json",
           },
         });
+
         if (!response.ok) {
           console.error("Error al obtener usuario:", response.status);
           return;
         }
+
         const data = await response.json();
         setUsuario(data);
         setFormData(data);
@@ -88,28 +106,22 @@ function PerfilUsuario() {
       }
     };
 
-    fetchUsuarioAut();
-  }, [navigate, dispatch]);
+    fetchUsuario();
+  }, [dispatch, navigate]);
 
-  // ======= Handlers Datos Personales =======
+  // Handlers de datos personales 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleGuardarDatos = async () => {
+  const handleGuardar = async () => {
     try {
-      // Comprobaciones mínimas (como en demo)
       if (!formData.nombre || !formData.apellido || !formData.correo_electronico) {
         alert("Por favor completa todos los campos obligatorios.");
         return;
       }
 
-      // Fecha final (año-mes-día)
       let fechaFinal = formData.fecha_nacimiento;
       if (formData.dia && formData.mes && formData.anio) {
-        if (!formData.dia || !formData.mes || !formData.anio) {
-          alert("Por favor selecciona día, mes y año.");
-          return;
-        }
         fechaFinal = `${formData.anio}-${String(formData.mes).padStart(2, "0")}-${String(
           formData.dia
         ).padStart(2, "0")}`;
@@ -127,83 +139,90 @@ function PerfilUsuario() {
         body: JSON.stringify(usuarioActualizado),
       });
 
-      const data = await response.json();
-      setUsuario(data?.actualizado);
-      dispatch({ type: "SET_USUARIO", payload: data?.actualizado });
+      const dataActualizada = await response.json();
+      setUsuario(dataActualizada?.actualizado);
+      dispatch({ type: "SET_USUARIO", payload: dataActualizada?.actualizado });
       setEditando(false);
-      setMsg({ tipo: "success", contenido: data.msj });
+      setMsg({ tipo: "success", contenido: dataActualizada.msj });
     } catch (error) {
       console.error("Error al guardar:", error);
-      setMsg({ tipo: "danger", contenido: "Error al guardar datos" });
+      setMsg({ tipo: "danger", contenido: "No se pudo guardar la información" });
     }
   };
 
-  const handleEditarFoto = async () => {
-    const nuevaFoto = prompt("Introduce la nueva URL de la foto de perfil:");
-    if (!nuevaFoto) return;
+  //  Foto de perfil
+  const handleEditarFoto = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
 
-    try {
-      const response = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...usuario, foto_perfil: nuevaFoto }),
-      });
-      const actualizado = await response.json();
-      setUsuario(actualizado);
-      setFormData((prev) => ({ ...prev, foto_perfil: nuevaFoto }));
-      setMsg({ tipo: "success", contenido: "Foto actualizada correctamente" });
-    } catch (error) {
-      console.error("Error al actualizar foto:", error);
-      setMsg({ tipo: "danger", contenido: "No se pudo actualizar la foto" });
-    }
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const url = URL.createObjectURL(file);
+      setImagenTemporal(url);
+      setMostrarCropper(true);
+    };
+
+    input.click();
   };
 
-  // ======= Handlers Habilidades =======
-  const entrarHabilidades = async () => {
-    setSeccionActiva("habilidades");
-    // Siempre refrescar desde backend al entrar a Habilidades (corrige lo que reportaste)
-    try {
-      const res = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`);
-      const data = await res.json();
-      setUsuario(data);
-    } catch (error) {
-      console.error("Error al recargar habilidades:", error);
-    }
-  };
 
-  const handleEliminarHabilidad = async (idHabilidad) => {
-    if (!window.confirm("¿Eliminar esta habilidad?")) return;
-    try {
-      const response = await fetch(
-        `${env.api}/api/usuarios/${usuario.id_usuario}/habilidad/${idHabilidad}`,
-        { method: "DELETE" }
-      );
-      if (response.ok) {
-        // Refresco local inmediato
-        setUsuario((prev) => ({
-          ...prev,
-          habilidades: prev.habilidades.filter((h) => h.id_habilidad !== idHabilidad),
-        }));
-      } else {
-        console.error("DELETE habilidad no OK:", response.status);
+
+// ELIMINAR HABILIDAD DEL USUARIO (desasociar)
+const handleEliminarHabilidad = async (idHabilidad) => {
+  if (!window.confirm("¿Seguro que deseas eliminar esta habilidad?")) return;
+
+  try {
+    //  Llamada al backend para desasociar
+    const res = await fetch(
+      `${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ desasociar: idHabilidad }),
       }
-    } catch (error) {
-      console.error("Error eliminando habilidad:", error);
-    }
-  };
+    );
 
-  const handleGuardarHabilidades = async () => {
-    try {
-      // Patrón de sincronización: refresco desde backend para asegurar estado correcto
-      await refreshUsuario();
-      setEditandoHabilidades(false);
-    } catch (error) {
-      console.error("Error guardando habilidades:", error);
-      alert("❌ Error al guardar habilidades");
+    if (!res.ok) {
+      throw new Error("Error al desasociar habilidad");
     }
-  };
 
-  // ======= Intercambios / Puntuación =======
+    // Refrescar usuario actualizado desde backend
+    const ref = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`);
+    if (!ref.ok) throw new Error("Error al refrescar usuario");
+    const data = await ref.json();
+
+    setUsuario(data);
+    setMsg({
+      tipo: "success",
+      contenido: "Habilidad eliminada correctamente.",
+    });
+  } catch (error) {
+    console.error("Error al eliminar habilidad:", error);
+    setMsg({
+      tipo: "danger",
+      contenido: "No se pudo eliminar la habilidad.",
+    });
+  }
+};
+
+
+//  GUARDAR CAMBIOS 
+const handleGuardarCambiosHabilidades = () => {
+  setEditandoHabilidades(false);
+  setMsg({
+    tipo: "success",
+    contenido: "Cambios guardados correctamente.",
+  });
+};
+
+
+
+  //  PUNTUACIONES / INTERCAMBIOS
   const abrirModalPuntuacion = (userDestino) => {
     setUsuarioEvaluado(userDestino);
     setMostrarModalPuntuacion(true);
@@ -211,16 +230,12 @@ function PerfilUsuario() {
 
   const handleEnviarPuntuacion = async (payload) => {
     try {
-      const res = await fetch(`${env.api}/api/intercambios/puntuacion`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error("Error puntuación");
-      alert("✅ ¡Puntuación enviada con éxito!");
+      // Deja listo para conectar con API real
+      console.log("Puntuación enviada:", payload);
+      alert("✅ Puntuación enviada correctamente (pendiente conectar API)");
     } catch (err) {
       console.error("Error enviando puntuación:", err);
-      alert("❌ Error al enviar la puntuación");
+      alert("❌ Error al enviar puntuación");
     } finally {
       setMostrarModalPuntuacion(false);
     }
@@ -234,7 +249,7 @@ function PerfilUsuario() {
 
       <div className="container-fluid perfil-container py-5">
         <div className="row justify-content-center">
-          {/* ======= Sidebar ======= */}
+          {/* Sidebar */}
           <div className="col-12 col-md-3 perfil-sidebar text-center p-4">
             <div className="perfil-avatar-container">
               <img
@@ -265,10 +280,15 @@ function PerfilUsuario() {
               <div className="perfil-divider"></div>
 
               <button
-                className={`list-group-item ${
-                  seccionActiva === "habilidades" ? "active" : ""
-                }`}
-                onClick={entrarHabilidades}
+                className={`list-group-item ${seccionActiva === "habilidades" ? "active" : ""}`}
+                onClick={() => {
+                  setSeccionActiva("habilidades");
+                  // refresca para traer descripciones actualizadas desde backend
+                  fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`)
+                    .then((r) => r.json())
+                    .then((d) => setUsuario(d))
+                    .catch((e) => console.error("Error refrescando usuario:", e));
+                }}
               >
                 Habilidades
               </button>
@@ -276,9 +296,7 @@ function PerfilUsuario() {
               <div className="perfil-divider"></div>
 
               <button
-                className={`list-group-item ${
-                  seccionActiva === "intercambios" ? "active" : ""
-                }`}
+                className={`list-group-item ${seccionActiva === "intercambios" ? "active" : ""}`}
                 onClick={() => setSeccionActiva("intercambios")}
               >
                 Intercambios
@@ -286,15 +304,14 @@ function PerfilUsuario() {
             </div>
           </div>
 
-          {/* ======= Contenido ======= */}
+          {/* Contenido */}
           <div className="col-12 col-md-8 perfil-content p-4">
-
-            {/* === DATOS PERSONALES === */}
-            {seccionActiva === "datos" && (
+            {seccionActiva === "datos" ? (
               <>
                 <h2 className="text-dark fw-bold mb-4 text-center">Datos Personales</h2>
 
                 <form className="row g-3">
+                  {/* Nombre */}
                   <div className="col-md-6">
                     <label className="form-label">Nombre</label>
                     <input
@@ -307,6 +324,7 @@ function PerfilUsuario() {
                     />
                   </div>
 
+                  {/* Apellido */}
                   <div className="col-md-6">
                     <label className="form-label">Apellidos</label>
                     <input
@@ -319,6 +337,7 @@ function PerfilUsuario() {
                     />
                   </div>
 
+                  {/* Correo */}
                   <div className="col-md-6">
                     <label className="form-label">Correo electrónico</label>
                     <input
@@ -331,7 +350,7 @@ function PerfilUsuario() {
                     />
                   </div>
 
-                  {/* Fecha de nacimiento */}
+                  {/* Fecha nacimiento con Día/Mes/Año */}
                   <div className="col-md-6">
                     <label className="form-label">Fecha de nacimiento</label>
                     {editando ? (
@@ -351,7 +370,7 @@ function PerfilUsuario() {
                           ))}
                         </select>
 
-                        {/* Mes (bloque exacto que pediste mantener) */}
+                        {/* Mes */}
                         <select
                           className="form-select"
                           name="mes"
@@ -407,6 +426,7 @@ function PerfilUsuario() {
                     )}
                   </div>
 
+                  {/* Género */}
                   <div className="col-md-6">
                     <label className="form-label">Género</label>
                     {editando ? (
@@ -422,10 +442,16 @@ function PerfilUsuario() {
                         <option value="Personalizado">Personalizado</option>
                       </select>
                     ) : (
-                      <input type="text" className="form-control" value={usuario.genero} disabled />
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={usuario.genero}
+                        disabled
+                      />
                     )}
                   </div>
 
+                  {/* Descripción usuario */}
                   <div className="col-12">
                     <label className="form-label">Descripción</label>
                     <textarea
@@ -438,116 +464,119 @@ function PerfilUsuario() {
                     />
                   </div>
 
+                  {/* Mensaje */}
                   {Object.keys(msg).length > 0 && (
                     <div className={`alert alert-${msg.tipo}`} role="alert">
                       {msg.contenido}
                     </div>
                   )}
 
+                  {/* Botón guardar/editar */}
                   <div className="col-12 text-center mt-4">
                     <button
                       type="button"
                       className="btn btn-lg perfil-accion-btn"
-                      onClick={editando ? handleGuardarDatos : () => setEditando(true)}
+                      onClick={editando ? handleGuardar : () => setEditando(true)}
                     >
                       {editando ? "Guardar Cambios" : "Editar Información"}
                     </button>
                   </div>
                 </form>
               </>
-            )}
+              ) : seccionActiva === "habilidades" ? (
+                <>
+                  <h2 className="fw-bold mb-4 text-center">Habilidades</h2>
 
-            {/* === HABILIDADES === */}
-            {seccionActiva === "habilidades" && (
-              <>
-                <h2 className="fw-bold mb-4 text-center">Habilidades</h2>
-
-                {!editandoHabilidades ? (
-                  <>
-                    {usuario.habilidades && usuario.habilidades.length > 0 ? (
-                      <div className="habilidades-contenedor">
-                        {usuario.habilidades.map((hab) => (
-                          <div key={hab.id_habilidad} className="habilidad-card">
-                            <div className="habilidad-nombre">
-                              <h5>{hab.nombre_habilidad}</h5>
+                    <div className="habilidades-contenedor">
+                      {usuario.habilidades && usuario.habilidades.length > 0 ? (
+                        usuario.habilidades.map((hab, index) => (
+                          <div key={index} className="habilidad-card">
+                            <div className="d-flex justify-content-between align-items-center">
+                              <h5 className="m-0" style={{ color: "var(--naranja)" }}>
+                                {hab.nombre_habilidad}
+                              </h5>
+                              {editandoHabilidades && (
+                                <button
+                                  className="btn btn-outline-danger btn-sm"
+                                  onClick={() => handleEliminarHabilidad(hab.id_habilidad)}
+                                >
+                                  ✖
+                                </button>
+                              )}
                             </div>
-                            <div className="habilidad-descripcion">
-                              <p>{hab.descripcion?.trim() ? hab.descripcion : "Sin descripción"}</p>
-                            </div>
+                            <p className="text-muted mt-2 mb-0">
+                              {hab.descripcion && hab.descripcion.trim() !== ""
+                                ? hab.descripcion
+                                : "Sin descripción"}
+                            </p>
                           </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-muted text-center">Aún no has agregado habilidades.</p>
-                    )}
-
-                    <div className="text-center mt-3">
-                      <button
-                        className="btn perfil-accion-btn"
-                        onClick={() => setEditandoHabilidades(true)}
-                      >
-                        ✏️ Editar habilidades
-                      </button>
+                        ))
+                      ) : (
+                        <p className="text-muted text-center">
+                          Aún no has agregado habilidades.
+                        </p>
+                      )}
                     </div>
-                  </>
-                ) : (
-                  <>
-                    {/* Modo edición: eliminar + agregar + guardar */}
-                    {usuario.habilidades && usuario.habilidades.length > 0 && (
-                      <div className="habilidades-contenedor">
-                        {usuario.habilidades.map((hab) => (
-                          <div
-                            key={hab.id_habilidad}
-                            className="habilidad-card d-flex justify-content-between align-items-center"
-                          >
-                            <div>
-                              <h5>{hab.nombre_habilidad}</h5>
-                              <p>{hab.descripcion?.trim() ? hab.descripcion : "Sin descripción"}</p>
-                            </div>
-                            <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={() => handleEliminarHabilidad(hab.id_habilidad)}
-                              title="Eliminar habilidad"
-                            >
-                              ✖
-                            </button>
-                          </div>
-                        ))}
+
+                    {/* Alerta debajo del listado y arriba de los botones */}
+                    {msg && msg.tipo && (
+                      <div className={`alert alert-${msg.tipo} text-center mt-3`} role="alert">
+                        {msg.contenido}
                       </div>
                     )}
 
-                    <div
-                      className="d-flex justify-content-center gap-3 mt-4"
-                      style={{ flexWrap: "wrap" }}
-                    >
-                      <button
-                        className="btn btn-editar-foto"
-                        onClick={() => setMostrarModalHabilidad(true)}
-                      >
-                        ➕ Agregar habilidad
-                      </button>
+                    <div className="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+                      {!editandoHabilidades ? (
+                        <button className="btn-naranja" onClick={() => setEditandoHabilidades(true)}>
+                          ✏️ Editar habilidades
+                        </button>
+                      ) : (
+                        <>
+                          <button className="btn-agregar" onClick={() => setMostrarModalHabilidad(true)}>
+                            ➕ Agregar habilidad
+                          </button>
 
-                      <button className="btn perfil-accion-btn" onClick={handleGuardarHabilidades}>
-                        💾 Guardar cambios
-                      </button>
+                          <button className="btn-naranja" onClick={handleGuardarCambiosHabilidades}>
+                            💾 Guardar cambios
+                          </button>
+
+                          <button className="btn-oscuro" onClick={() => setEditandoHabilidades(false)}>
+                            Cancelar
+                          </button>
+                        </>
+                      )}
                     </div>
-                  </>
-                )}
-              </>
-            )}
 
-            {/* === INTERCAMBIOS === */}
-            {seccionActiva === "intercambios" && (
-              <>
+
+                  {mostrarModalHabilidad && (
+                    <ModalAgregarHabilidad
+                      usuario={usuario}
+                      onClose={() => setMostrarModalHabilidad(false)}
+                      onSuccess={() => {
+                        setMostrarModalHabilidad(false);
+                        // refresca usuario para ver la nueva habilidad
+                        fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`)
+                          .then((r) => r.json())
+                          .then((d) => setUsuario(d))
+                          .catch((e) => console.error("Error al actualizar habilidades:", e));
+                      }}
+                    />
+                  )}
+                </>
+              ) : (
+
+                // Intercambios / Puntuaciones
+                <>
+
+
                 <h2 className="fw-bold mb-4 text-center">Intercambios</h2>
 
-                {/* Ejemplo de fila (ajústalo a tu backend cuando tengas el array) */}
                 <div className="tabla-intercambios-container">
                   <table className="tabla-intercambios">
                     <thead>
                       <tr>
                         <th>ID</th>
-                        <th>Nombre</th>
+                        <th>Servicio</th>
                         <th>Persona</th>
                         <th>Acción</th>
                       </tr>
@@ -567,7 +596,7 @@ function PerfilUsuario() {
                               })
                             }
                           >
-                            Servicio Finalizado
+                            Intercambio Finalizado
                           </button>
                         </td>
                       </tr>
@@ -580,33 +609,70 @@ function PerfilUsuario() {
         </div>
       </div>
 
-      {/* ======= Modales / Botón flotante ======= */}
+      {/* Modales */}
 
-      {/* Botón flotante de mensajería */}
-      <BotonMensajeria onClick={() => setMostrarMensajeria(true)} />
+      {/* Cropper */}
+      {mostrarCropper && (
+        <CropperModal
+          image={imagenTemporal}
+          onClose={() => setMostrarCropper(false)}
+          onCropDone={async (croppedBase64) => {
+            setMostrarCropper(false);
+            const blob = await (await fetch(croppedBase64)).blob();
+            const formData = new FormData();
+            formData.append("imagen", blob, "recorte.jpg");
 
-      {/* Modal de mensajería */}
-      {mostrarMensajeria && <ModalMensajeria onClose={() => setMostrarMensajeria(false)} />}
+            try {
+              const userData = JSON.parse(localStorage.getItem("user"));
+              const userId = userData?.id_usuario || usuario?.id_usuario;
 
-      {/* Modal de agregar habilidad */}
-      {mostrarModalHabilidad && (
-        <ModalAgregarHabilidad
-          usuario={usuario}
-          onClose={() => setMostrarModalHabilidad(false)}
-          onSuccess={async () => {
-            // Al cerrar OK el modal, refrescamos desde backend y nos quedamos en edición
-            await refreshUsuario();
+              const res = await fetch(`${env.api}/api/usuarios/${userId}/foto-perfil`, {
+                method: "POST",
+                body: formData,
+              });
+
+              const data = await res.json();
+              if (res.ok) {
+                setUsuario((prev) => ({
+                  ...prev,
+                  foto_perfil: data.foto_perfil,
+                }));
+                const img = document.querySelector(".perfil-avatar");
+                if (img) img.src = data.foto_perfil;
+                setMsg({
+                  tipo: "success",
+                  contenido: "Foto actualizada correctamente",
+                });
+              } else {
+                throw new Error(data.error || "Error al subir la foto");
+              }
+            } catch (err) {
+              console.error(err);
+              setMsg({
+                tipo: "danger",
+                contenido: "No se pudo subir la imagen recortada",
+              });
+            }
           }}
         />
       )}
 
-      {/* Modal de puntuación (intercambios) */}
+      {/* Puntuación */}
       {mostrarModalPuntuacion && (
         <ModalPuntuacion
           mostrar={mostrarModalPuntuacion}
           onClose={() => setMostrarModalPuntuacion(false)}
           usuarioEvaluado={usuarioEvaluado}
           onSubmit={handleEnviarPuntuacion}
+        />
+      )}
+
+      {/* Botón flotante + Mensajería */}
+      <BotonMensajeria onClick={() => setMostrarModalMensajes(true)} />
+      {mostrarModalMensajes && (
+        <ModalMensajeria
+          mostrar={mostrarModalMensajes}
+          cerrar={() => setMostrarModalMensajes(false)}
         />
       )}
 
