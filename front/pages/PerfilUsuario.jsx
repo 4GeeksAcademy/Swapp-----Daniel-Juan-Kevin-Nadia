@@ -5,6 +5,8 @@ import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
 import { env } from "../environ";
 import { useStore } from "../hooks/useStore";
+import ModalPuntuacion from "../assets/components/ModalPuntuacion";
+import BotonMensajeria from "../assets/components/BotonMensajeria";
 
 function PerfilUsuario() {
   const { _, dispatch } = useStore();
@@ -18,6 +20,9 @@ function PerfilUsuario() {
   const [idHabilidad, setIdHabilidad] = useState(0);
   const [editandoHabilidades, setEditandoHabilidades] = useState(false);
   const [msg, setMsg] = useState({});
+  const [mostrarModal, setMostrarModal] = useState(false);
+  const [usuarioEvaluado, setUsuarioEvaluado] = useState(null);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +30,7 @@ function PerfilUsuario() {
     const usuarioToken = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
 
     if (!usuarioToken) {
-      alert(" No hay sesión activa. Por favor inicia sesión.");
+      alert("⚠️ No hay sesión activa. Por favor inicia sesión.");
       navigate("/login");
       return;
     }
@@ -161,6 +166,59 @@ function PerfilUsuario() {
     }
   };
 
+  // ===== HABILIDADES (mejoras: descripción + guardado) =====
+  const handleEditarDescripcion = (index, valor) => {
+    const nuevas = [...usuario.habilidades];
+    nuevas[index].descripcion = valor;
+    setUsuario({ ...usuario, habilidades: nuevas });
+  };
+
+  const handleGuardarHabilidades = async () => {
+    try {
+      for (const hab of usuario.habilidades) {
+        await fetch(`${env.api}/api/habilidades/${hab.id_habilidad}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nombre_habilidad: hab.nombre_habilidad,
+            descripcion: hab.descripcion || "",
+            id_categoria: hab.id_categoria,
+          }),
+        });
+      }
+      alert("✅ Habilidades actualizadas correctamente");
+      setEditandoHabilidades(false);
+    } catch (error) {
+      console.error("Error al guardar habilidades:", error);
+      alert("❌ No se pudieron guardar las habilidades");
+    }
+  };
+
+  // ===== INTERCAMBIOS (modal de puntuación) =====
+  const handleServicioFinalizado = (usuarioEvaluadoArg) => {
+    setUsuarioEvaluado(usuarioEvaluadoArg);
+    setMostrarModal(true);
+  };
+
+  const handleEnviarPuntuacion = async (data) => {
+    try {
+      const response = await fetch(`${env.api}/api/intercambios/puntuacion`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        alert("✅ ¡Puntuación enviada con éxito!");
+      } else {
+        alert("❌ Error al enviar la puntuación");
+      }
+    } catch (error) {
+      console.error("Error al enviar la puntuación:", error);
+    } finally {
+      setMostrarModal(false);
+    }
+  };
+
   if (!usuario) return <p className="text-center mt-5">Cargando perfil...</p>;
 
   return (
@@ -168,6 +226,7 @@ function PerfilUsuario() {
       <Navbar />
       <div className="container-fluid perfil-container py-5">
         <div className="row justify-content-center">
+          {/* Sidebar */}
           <div className="col-12 col-md-3 perfil-sidebar text-center p-4">
             <div className="perfil-avatar-container">
               <img
@@ -224,10 +283,21 @@ function PerfilUsuario() {
               >
                 Habilidades
               </button>
+              <div className="perfil-divider"></div>
+              <button
+                className={`list-group-item ${
+                  seccionActiva === "intercambios" ? "active" : ""
+                }`}
+                onClick={() => setSeccionActiva("intercambios")}
+              >
+                Intercambios
+              </button>
             </div>
           </div>
 
+          {/* Contenido */}
           <div className="col-12 col-md-8 perfil-content p-4">
+            {/* === DATOS PERSONALES === */}
             {seccionActiva === "datos" ? (
               <>
                 <h2 className="text-dark fw-bold mb-4 text-center">
@@ -289,6 +359,7 @@ function PerfilUsuario() {
                           ))}
                         </select>
 
+                        {/* 👇 BLOQUE DE MESES (intacto) */}
                         <select
                           className="form-select"
                           name="mes"
@@ -378,7 +449,7 @@ function PerfilUsuario() {
                       rows="3"
                     />
                   </div>
-                  
+
                   { Object.keys(msg).length > 0 ? (
                       <div className={`alert alert-${msg?.tipo}`} role="alert">{msg?.contenido}</div>
                     ) : ""
@@ -397,52 +468,102 @@ function PerfilUsuario() {
                   </div>
                 </form>
               </>
-            ) : (
+            ) : seccionActiva === "habilidades" ? (
               <>
                 <h2 className="fw-bold mb-4 text-center">Habilidades</h2>
                 {!editandoHabilidades ? (
                   <>
                     {usuario.habilidades && usuario.habilidades.length > 0 ? (
-                      <ul className="habilidades-lista">
+                      <div className="habilidades-contenedor">
                         {usuario.habilidades.map((hab, index) => (
-                          <li key={index}>
-                            <strong>{hab.nombre_habilidad}</strong>
-                          </li>
+                          <div key={index} className="habilidad-card">
+                            <div className="habilidad-nombre">
+                              <h5>{hab.nombre_habilidad}</h5>
+                            </div>
+                            <div className="habilidad-descripcion">
+                              <p>
+                                {hab.descripcion?.trim()
+                                  ? hab.descripcion
+                                  : "Sin descripción"}
+                              </p>
+                            </div>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     ) : (
-                      <p className="text-muted">
+                      <p className="text-muted text-center">
                         Aún no has agregado habilidades.
                       </p>
                     )}
-                    <button
-                      className="btn perfil-accion-btn mt-3"
-                      onClick={() => {
-                        setEditandoHabilidades(true);
-                        fetch(`${env.api}/api/categorias`)
-                          .then((response) => {
-                            if (!response.ok) {
-                              throw new Error(
-                                "Error en la petición: " + response.status
+                    <div className="text-center mt-3">
+                      <button
+                        className="btn perfil-accion-btn"
+                        onClick={() => {
+                          setEditandoHabilidades(true);
+                          fetch(`${env.api}/api/categorias`)
+                            .then((response) => {
+                              if (!response.ok) {
+                                throw new Error(
+                                  "Error en la petición: " + response.status
+                                );
+                              }
+                              return response.json();
+                            })
+                            .then((data) => setCategories(data))
+                            .catch((error) => {
+                              console.error(
+                                "Hubo un problema con la petición:",
+                                error
                               );
-                            }
-                            return response.json();
-                          })
-                          .then((data) => setCategories(data))
-                          .catch((error) => {
-                            console.error(
-                              "Hubo un problema con la petición:",
-                              error
-                            );
-                          });
-                      }}
-                    >
-                      ✏️ Editar habilidades
-                    </button>
+                            });
+                        }}
+                      >
+                        ✏️ Editar habilidades
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <>
-                    <div className="mb-3 text-start">
+                    <div className="habilidades-contenedor">
+                      {usuario.habilidades.map((hab, index) => (
+                        <div key={index} className="habilidad-card">
+                          <div className="habilidad-nombre">
+                            <h5>{hab.nombre_habilidad}</h5>
+                          </div>
+                          <div className="habilidad-descripcion">
+                            <textarea
+                              className="form-control"
+                              placeholder="Agrega o modifica la descripción..."
+                              value={hab.descripcion || ""}
+                              onChange={(e) =>
+                                handleEditarDescripcion(index, e.target.value)
+                              }
+                              rows="2"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div
+                      className="d-flex justify-content-center gap-3 mt-4"
+                      style={{ flexWrap: "wrap" }}
+                    >
+                      <button
+                        className="btn btn-editar-foto"
+                        onClick={handleAgregarHabilidad}
+                      >
+                        ➕ Agregar habilidad
+                      </button>
+                      <button
+                        className="btn perfil-accion-btn"
+                        onClick={handleGuardarHabilidades}
+                      >
+                        💾 Guardar cambios
+                      </button>
+                    </div>
+
+                    <div className="mb-3 text-start mt-4">
                       <div className="input-group my-2">
                         <label>Categorías</label>
                         <select
@@ -487,31 +608,63 @@ function PerfilUsuario() {
                             ))}
                         </select>
                       </div>
-
-                      <button
-                        className="btn btn-editar-foto"
-                        onClick={handleAgregarHabilidad}
-                      >
-                        ➕ Agregar habilidad
-                      </button>
                     </div>
-
-                    {usuario.habilidades && usuario.habilidades.length > 0 && (
-                      <ul className="habilidades-lista mt-3">
-                        {usuario.habilidades.map((hab, index) => (
-                          <li key={index}>
-                            <strong>{hab.nombre_habilidad}</strong>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </>
                 )}
+              </>
+            ) : (
+              // === INTERCAMBIOS ===
+              <>
+                <h2 className="fw-bold mb-4 text-center">Intercambios</h2>
+                <div className="tabla-intercambios-container">
+                  <table className="tabla-intercambios">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Persona</th>
+                        <th>Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>#123</td>
+                        <td>Clases de guitarra</td>
+                        <td>Ana López</td>
+                        <td>
+                          <button
+                            className="btn-finalizado"
+                            onClick={() =>
+                              handleServicioFinalizado({
+                                id_usuario: 2,
+                                nombre: "Ana López",
+                              })
+                            }
+                          >
+                            Servicio Finalizado
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </>
             )}
           </div>
         </div>
       </div>
+
+      {/* Modal de Puntuación */}
+      <ModalPuntuacion
+        mostrar={mostrarModal}
+        onClose={() => setMostrarModal(false)}
+        usuarioEvaluado={usuarioEvaluado}
+        onSubmit={handleEnviarPuntuacion}
+      />
+
+      {/* Botón flotante de mensajería */}
+      <BotonMensajeria />
+
       <Footer />
     </>
   );
