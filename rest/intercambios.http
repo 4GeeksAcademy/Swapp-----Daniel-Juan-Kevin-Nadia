@@ -1,0 +1,54 @@
+### 🔹 Crear nuevo intercambio
+POST http://127.0.0.1:5000/api/intercambios
+Content-Type: application/json
+
+{
+  "id_usuario_oferta": 1,
+  "id_habilidad": 3
+}
+
+###
+
+### Asignar un demandante a un intercambio
+PUT http://127.0.0.1:5000/api/intercambios/unirse/1
+Content-Type: application/json
+
+{
+  "id_usuario": 2
+}
+
+###
+
+### 🔹 Obtener intercambio por ID
+GET http://127.0.0.1:5000/api/intercambios/1
+Content-Type: application/json
+
+###
+
+### 🔹 Obtener intercambios que ha creado el Usuario por ID
+GET http://127.0.0.1:5000/api/intercambios/postulante/1
+Content-Type: application/json
+
+###
+
+### 🔹 Obtener intercambios que ha suscrito o unido el Usuario por ID
+GET http://127.0.0.1:5000/api/intercambios/demandante/1
+Content-Type: application/json
+
+###
+
+### 🔹 Finalizar intercambio
+PUT http://127.0.0.1:5000/api/intercambios/1/finalizar
+Content-Type: application/json
+
+###
+
+### 🔹 Obtener todos los intercambios de un usuario
+GET http://127.0.0.1:5000/api/intercambios/usuario/1
+Content-Type: application/json
+
+###
+
+### 🔹 Eliminar intercambio (solo si no está finalizado)
+DELETE http://127.0.0.1:5000/api/intercambios/1
+Content-Type: application/json
