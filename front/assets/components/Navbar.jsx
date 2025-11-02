@@ -14,6 +14,7 @@ function Navbar() {
     localStorage.getItem("token") ||
     localStorage.getItem("user")
   );
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const CATEGORIAS_DESTACADAS = [
     "Educación y Tutorías",
@@ -75,9 +76,10 @@ function Navbar() {
   }, [store.usuario, dispatch]);
 
   const handleLogout = async () => {
-    const confirmLogout = window.confirm("¿Deseas cerrar sesión?");
-    if (!confirmLogout) return;
+    setShowLogoutModal(true);
+  };
 
+  const confirmLogout = async () => {
     try {
       const usuarioGoogle = localStorage.getItem("user");
 
@@ -197,6 +199,42 @@ function Navbar() {
                 >
                   Cerrar sesión
                 </button>
+                {showLogoutModal && (
+                  <div
+                    className="modal fade show d-block"
+                    tabIndex="-1"
+                    role="dialog"
+                    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                  >
+                    <div
+                      className="modal-dialog modal-dialog-centered"
+                      role="document"
+                    >
+                      <div className="modal-content text-center p-3">
+                        <div className="modal-body">
+                          <p>¿Estás seguro de que deseas cerrar sesión?</p>
+                        </div>
+                        <div className="modal-footer border-0 d-flex justify-content-center gap-3">
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => setShowLogoutModal(false)}
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            className="btn btn-main1"
+                            onClick={() => {
+                              setShowLogoutModal(false);
+                              confirmLogout();
+                            }}
+                          >
+                            Cerrar sesión
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <>
