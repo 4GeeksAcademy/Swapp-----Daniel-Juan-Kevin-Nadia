@@ -5,6 +5,8 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+from dotenv import load_dotenv
+from authlib.integrations.flask_client import OAuth
 from flask import Flask
 from flask_migrate import Migrate
 from flask_cors import CORS
@@ -16,9 +18,10 @@ from api.urls.usuario import usuarios
 from api.urls.habilidades import habilidades
 from api.urls.categorias import categorias
 from api.urls.mensaje import mensajes
-from authlib.integrations.flask_client import OAuth
+from api.urls.intercambio import intercambios
 from api.urls.auth import auth
-
+from api.cloudinary.routes import cloudinary_routes
+load_dotenv()
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -73,4 +76,6 @@ app.register_blueprint(usuarios)
 app.register_blueprint(habilidades)
 app.register_blueprint(categorias)
 app.register_blueprint(mensajes)
+app.register_blueprint(intercambios)
 app.register_blueprint(auth, url_prefix="/auth")
+app.register_blueprint(cloudinary_routes)

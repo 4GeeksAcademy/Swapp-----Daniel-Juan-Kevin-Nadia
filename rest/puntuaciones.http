@@ -10,10 +10,10 @@ Content-Type: application/json
 Accept: application/json
 
 {
+    "id_intercambio": 1,
     "puntuador": 1,
-    "puntuado": 1,
     "puntos": 4,
-    "comentario": 4
+    "comentario": "Estuvo bien!"
 }
 
 ###
@@ -25,7 +25,7 @@ Accept: application/json
 
 {
     "puntos": 4,
-    "comentario": 4
+    "comentario": "Nada"
 }
 
 ###

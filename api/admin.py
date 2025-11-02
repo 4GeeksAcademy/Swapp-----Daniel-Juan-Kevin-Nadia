@@ -4,8 +4,8 @@
 import os
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from .models import db, Usuario, Categoria
-from .models import Habilidad, Mensaje
+from .models import db, Usuario, Categoria, Intercambio
+from .models import Habilidad, Mensaje, Puntuacion
 from .admin_views import UsuarioAdmin  # pyright: ignore[reportMissingImports]
 
 
@@ -17,4 +17,6 @@ def setup_admin(app):
     admin.add_view(UsuarioAdmin(Usuario, db.session))
     admin.add_view(ModelView(Categoria, db.session))
     admin.add_view(ModelView(Habilidad, db.session))
+    admin.add_view(ModelView(Intercambio, db.session))
+    admin.add_view(ModelView(Puntuacion, db.session))
     admin.add_view(ModelView(Mensaje, db.session))

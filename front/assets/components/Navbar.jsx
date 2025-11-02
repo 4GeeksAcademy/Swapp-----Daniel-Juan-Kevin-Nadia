@@ -1,12 +1,20 @@
 import "../styles/Navbar.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { env } from "../../environ";
+import { useStore } from "../../hooks/useStore";
 
 function Navbar() {
+  const { store, dispatch } = useStore();
   const [usuario, setUsuario] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const navigate = useNavigate();
+  const isLogged = !!(
+    usuario ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("user")
+  );
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const CATEGORIAS_DESTACADAS = [
     "Educación y Tutorías",
@@ -33,37 +41,65 @@ function Navbar() {
   };
 
   useEffect(() => {
-    const usuarioGuardado = localStorage.getItem("usuario");
-    if (usuarioGuardado) {
-      setUsuario(JSON.parse(usuarioGuardado));
-    }
-  }, []);
+    const fromStore =
+      store?.usuario && Object.keys(store.usuario).length > 0
+        ? store.usuario
+        : null;
 
-  useEffect(() => {
+    const fromLocal = JSON.parse(localStorage.getItem("user") || "null");
+
+    if (fromStore) {
+      setUsuario(fromStore);
+    } else if (fromLocal) {
+      setUsuario({
+        nombre: fromLocal.nombre,
+        apellido: fromLocal.apellido,
+        correo_electronico: fromLocal.email,
+        foto_perfil: fromLocal.picture,
+      });
+    } else {
+      setUsuario(null);
+    }
+
     const fetchCategorias = async () => {
       try {
         const response = await fetch(`${env.api}/api/categorias`);
         if (!response.ok) throw new Error("Error al obtener categorías");
         const data = await response.json();
         setCategorias(data);
+        dispatch({ type: "SET_CATEGORIAS", payload: data });
       } catch (error) {
         console.error("Error cargando categorías:", error);
       }
     };
     fetchCategorias();
-  }, []);
+  }, [store.usuario, dispatch]);
 
-  const handleLogout = () => {
-    const confirmLogout = window.confirm("¿Deseas cerrar sesión?");
-    if (confirmLogout) {
-      localStorage.removeItem("usuario");
-      setUsuario(null);
-      navigate("/login");
-    }
+  const handleLogout = async () => {
+    setShowLogoutModal(true);
   };
 
-  const handleClickCategoria = (id_categoria) => {
-    navigate(`/usuarios/categoria/${id_categoria}`);
+  const confirmLogout = async () => {
+    try {
+      const usuarioGoogle = localStorage.getItem("user");
+
+      if (usuarioGoogle) {
+        await fetch(`${env.api}/api/logout`, { method: "POST" });
+        localStorage.removeItem("user");
+      }
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      dispatch({ type: "SET_USUARIO", payload: {} });
+      dispatch({ type: "SET_TOKEN", payload: "" });
+      setUsuario(null);
+
+      navigate("/login");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      localStorage.clear();
+      navigate("/login");
+    }
   };
 
   return (
@@ -81,7 +117,7 @@ function Navbar() {
             />
           </Link>
 
-          <div className="d-flex flex-grow-1 align-items-center mx-3 position-relative">
+          {/* <div className="d-flex flex-grow-1 align-items-center mx-3 position-relative">
             <form className="d-flex flex-grow-1 me-2 ms-0" role="search">
               <div className="input-group w-100">
                 <input
@@ -104,15 +140,54 @@ function Navbar() {
             >
               <i className="fa-solid fa-bars"></i>
             </button>
+          </div> */}
+
+          {/* Solo móvil */}
+          <div className="d-flex flex-column align-items-center d-lg-none w-100">
+            <div className="w-100 d-flex justify-content-between">
+              <button
+                className="btn btn-outline-secondary"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#categoriasSidebar"
+                aria-controls="categoriasSidebar"
+              >
+                <i className="fa-solid fa-bars"></i>
+              </button>
+
+              <div className="d-flex">
+                {usuario ? (
+                  <>
+                    <Link to="/perfil" className="btn btn-main2 me-2">
+                      Perfil
+                    </Link>
+                    <button onClick={handleLogout} className="btn btn-main1">
+                      Cerrar sesión
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/registro" className="btn btn-main1 me-2">
+                      Regístrate
+                    </Link>
+                    <Link to="/login" className="btn btn-main1">
+                      Iniciar sesión
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* <h5>Swapp, donde todo tiene otro valor.</h5> */}
+          <h3 className="d-none d-md-block flex-grow-1 mx-3 text-center mb-0 fst-italic eslogan">
+            {/* ¡Donde todo, tiene otro valor! */}
+          </h3>
           <div className="d-flex">
-            {usuario ? (
+            {isLogged ? (
               <>
                 <Link
                   to="/perfil"
-                  className="btn btn-main2 d-none d-lg-flex me-2"
+                  className="btn btn-main1 d-none d-lg-flex me-2"
                   type="button"
                 >
                   Perfil
@@ -124,6 +199,42 @@ function Navbar() {
                 >
                   Cerrar sesión
                 </button>
+                {showLogoutModal && (
+                  <div
+                    className="modal fade show d-block"
+                    tabIndex="-1"
+                    role="dialog"
+                    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                  >
+                    <div
+                      className="modal-dialog modal-dialog-centered"
+                      role="document"
+                    >
+                      <div className="modal-content text-center p-3">
+                        <div className="modal-body">
+                          <p>¿Estás seguro de que deseas cerrar sesión?</p>
+                        </div>
+                        <div className="modal-footer border-0 d-flex justify-content-center gap-3">
+                          <button
+                            className="btn btn-secondary"
+                            onClick={() => setShowLogoutModal(false)}
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            className="btn btn-main1"
+                            onClick={() => {
+                              setShowLogoutModal(false);
+                              confirmLogout();
+                            }}
+                          >
+                            Cerrar sesión
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <>
@@ -160,37 +271,7 @@ function Navbar() {
           >
             <i className="fa-solid fa-bars mt-1"></i>Todas las categorías
           </button>
-          {/* <ul className="navbar-nav me-auto mb-2 mb-lg-0 ms-2">
-            <li className="nav-item me-3">
-              <a
-                className="active"
-                aria-current="page"
-                href="#"
-                // onClick={() => handleClickCategoria(educacion)}
-              >
-                Educación y Tutorías
-              </a>
-            </li>
-            <li className="nav-item me-3">
-              <a
-                href="#"
-                // onClick={() => handleClickCategoria(tecnologia)}
-              >
-                {" "}
-                Tecnología y Programación
-              </a>
-            </li>
 
-            <li className="nav-item me-3">
-              <a href="#">Música y Audio</a>
-            </li>
-            <li className="nav-item me-3 ">
-              <a href="#">Negocios y Finanzas</a>
-            </li>
-            <li className="nav-item">
-              <a href="#">Entretenimiento y Cultura</a>
-            </li>
-          </ul> */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0 ms-2">
             {CATEGORIAS_DESTACADAS.map((nombre) => {
               const categoria = categorias?.find(
@@ -199,16 +280,18 @@ function Navbar() {
 
               return (
                 <li key={nombre} className="nav-item me-3">
-                  <a
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (categoria)
-                        handleClickCategoria(categoria.id_categoria);
-                    }}
-                  >
-                    {nombre}
-                  </a>
+                  {categoria ? (
+                    <NavLink
+                      to={`/usuarios/categoria/${categoria.id_categoria}`}
+                      className={({ isActive }) =>
+                        `nav-link ${isActive ? "active-link" : ""}`
+                      }
+                    >
+                      {nombre}
+                    </NavLink>
+                  ) : (
+                    <span className="text-muted">{nombre}</span>
+                  )}
                 </li>
               );
             })}
@@ -234,134 +317,20 @@ function Navbar() {
           ></button>
         </div>
         <div className="offcanvas-body">
-          <div className="d-flex justify-content-center d-lg-none mb-3">
-            {usuario ? (
-              <>
-                <Link
-                  to="/perfil"
-                  className="btn btn-main2 boton-registro me-2"
-                  type="button"
-                >
-                  Perfil
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="btn btn-main1 boton-inicio"
-                  type="button"
-                >
-                  Cerrar sesión
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/registro"
-                  className="btn btn-main1 boton-registro me-2"
-                  type="button"
-                >
-                  Regístrate
-                </Link>
-                <Link
-                  to="/login"
-                  className="btn btn-main1 boton-inicio"
-                  type="button"
-                >
-                  Iniciar sesión
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* <ul className="list-unstyled">
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-graduation-cap me-3"></i>Educación y
-                Tutorías
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-square-binary me-3"></i>Tecnología y
-                Programación
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-play me-3"></i>Música y Audio
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-money-bill-trend-up me-3"></i>Negocios
-                y Finanzas
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-masks-theater me-3"></i>
-                Entretenimiento y Cultura
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-palette me-3"></i>Dibujo y pintura
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-heart me-3"></i>Deporte y Bienestar
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-hand-sparkles me-3"></i>Moda, Belleza
-                y Cuidado Personal
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-screwdriver-wrench me-3"></i>Hogar y
-                Reparaciones
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-paw me-3"></i>Mascotas y Animales
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-suitcase me-3"></i>Viajes y Estilo de
-                Vida
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-bullhorn me-3"></i>Comunicación y
-                Marketing
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-child-reaching me-3"></i>Desarrollo
-                Personal y Coaching
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i className="fa-solid fa-puzzle-piece me-3"></i>Otros /
-                Misceláneos
-              </a>
-            </li>
-          </ul> */}
           <ul className="list-unstyled">
             {categorias.map((cat) => (
               <li key={cat.id_categoria}>
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleClickCategoria(cat.id_categoria);
+                <NavLink
+                  to={`/usuarios/categoria/${cat.id_categoria}`}
+                  className={({ isActive }) =>
+                    `nav-link ${isActive ? "active-link" : ""}`
+                  }
+                  onClick={() => {
+                    const offcanvasEl =
+                      document.getElementById("categoriasSidebar");
+                    const bsOffcanvas =
+                      bootstrap.Offcanvas.getInstance(offcanvasEl);
+                    if (bsOffcanvas) bsOffcanvas.hide();
                   }}
                 >
                   <i
@@ -371,7 +340,7 @@ function Navbar() {
                     } me-3`}
                   ></i>
                   {cat.nombre_categoria}
-                </a>
+                </NavLink>
               </li>
             ))}
           </ul>

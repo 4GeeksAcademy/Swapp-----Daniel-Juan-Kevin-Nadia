@@ -3,9 +3,12 @@ import { useNavigate } from "react-router";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
-import { env } from "../environ"
+import { env } from "../environ";
+import { useStore } from "../hooks/useStore";
+import CropperModal from "../assets/components/CropperModal";
 
 function PerfilUsuario() {
+  const { _, dispatch } = useStore();
   const [usuario, setUsuario] = useState(null);
   const [seccionActiva, setSeccionActiva] = useState("datos");
   const [editando, setEditando] = useState(false);
@@ -15,32 +18,70 @@ function PerfilUsuario() {
   const [habilidades, setHabilidades] = useState([]);
   const [idHabilidad, setIdHabilidad] = useState(0);
   const [editandoHabilidades, setEditandoHabilidades] = useState(false);
+  const [msg, setMsg] = useState({});
   const navigate = useNavigate();
+  const [imagenTemporal, setImagenTemporal] = useState(null);
+  const [mostrarCropper, setMostrarCropper] = useState(false);
 
   useEffect(() => {
-    const usuarioToken = JSON.parse(localStorage.getItem("token"));
-    if (!usuarioToken) {
-      alert("⚠️ No hay sesión activa. Por favor inicia sesión.");
+    const rawToken = localStorage.getItem("token");
+    const usuarioToken = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
+
+    const usuarioGoogle = localStorage.getItem("user");
+
+    if (!usuarioToken && !usuarioGoogle) {
+      alert("No hay sesión activa. Por favor inicia sesión.");
       navigate("/login");
+      return;
+    }
+
+    // Si el usuario viene desde Google
+    if (usuarioGoogle) {
+      const data = JSON.parse(usuarioGoogle);
+      setUsuario({
+        id_usuario: data.id_usuario,
+        nombre: data.nombre,
+        apellido: data.apellido,
+        correo_electronico: data.correo_electronico,
+        foto_perfil: data.foto_perfil,
+        fecha_nacimiento: null,
+        genero: "",
+        descripcion: "",
+        habilidades: [],
+      });
+
+      setFormData({
+        nombre: data.nombre,
+        apellido: data.apellido,
+        correo_electronico: data.correo_electronico,
+        foto_perfil: data.foto_perfil,
+        fecha_nacimiento: "",
+        genero: "",
+        descripcion: "",
+      });
+
       return;
     }
 
     const fetchUsuario = async () => {
       try {
-        const response = await fetch(
-          `${env.api}/api/autorizacion`,
-          {
-            method: "GET",
-            headers: {
-              "Authorization": `Bearer ${usuarioToken}`,
-              "Accept": "application/json"
-            }
-          }
-        );
+        const response = await fetch(`${env.api}/api/autorizacion`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${usuarioToken}`,
+            Accept: "application/json",
+          },
+        });
 
-        const data = await response.json();       
+        if (!response.ok) {
+          console.error("Error al obtener usuario:", response.status);
+          return;
+        }
+
+        const data = await response.json();
         setUsuario(data);
         setFormData(data);
+        dispatch({ type: "SET_USUARIO", payload: data });
       } catch (error) {
         console.error("Error al cargar usuario:", error);
       }
@@ -54,15 +95,19 @@ function PerfilUsuario() {
 
   const handleCategorieChange = (e) => {
     let idxCategory = parseInt(e.target.value);
-    setIdCategorie(idxCategory)
-    let categ = categories.find(c => c.id_categoria === idxCategory)
+    setIdCategorie(idxCategory);
+    let categ = categories.find((c) => c.id_categoria === idxCategory);
 
-    if(categ) setHabilidades(categ["habilidades"]);
-  }
+    if (categ) setHabilidades(categ["habilidades"]);
+  };
 
   const handleGuardar = async () => {
     try {
-      if (!formData.nombre || !formData.apellido || !formData.correo_electronico) {
+      if (
+        !formData.nombre ||
+        !formData.apellido ||
+        !formData.correo_electronico
+      ) {
         alert("Por favor completa todos los campos obligatorios.");
         return;
       }
@@ -74,9 +119,10 @@ function PerfilUsuario() {
           return;
         }
 
-        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(2, "0")}-${String(
-          formData.dia
-        ).padStart(2, "0")}`;
+        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(
+          2,
+          "0"
+        )}-${String(formData.dia).padStart(2, "0")}`;
       }
 
       const { dia, mes, anio, ...dataSinCamposExtra } = formData;
@@ -86,7 +132,7 @@ function PerfilUsuario() {
       };
 
       const response = await fetch(
-        `${env.api}/api/usuarios/${usuario.id}`,
+        `${env.api}/api/usuarios/${usuario.id_usuario}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -95,69 +141,62 @@ function PerfilUsuario() {
       );
 
       const dataActualizada = await response.json();
-      setUsuario(dataActualizada);
+      setUsuario(dataActualizada?.actualizado);
+      dispatch({ type: "SET_USUARIO", payload: dataActualizada?.actualizado });
       setEditando(false);
-      alert("✅ Datos actualizados correctamente");
+      setMsg({ tipo: "success", contenido: dataActualizada.msj });
     } catch (error) {
       console.error("Error al guardar:", error);
-      alert("❌ No se pudo guardar la información");
+      setMsg({
+        tipo: "danger",
+        contenido: "No se pudo guardar la información",
+      });
     }
   };
 
-  const handleEditarFoto = async () => {
-    const nuevaFoto = prompt("Introduce la nueva URL de la foto de perfil:");
-    if (!nuevaFoto) return;
+  const handleEditarFoto = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
 
-    try {
-      const response = await fetch(
-        `${env.api}/api/usuarios/${usuario.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...usuario, foto_perfil: nuevaFoto }),
-        }
-      );
-      const actualizado = await response.json();
-      setUsuario(actualizado);
-      setFormData((prev) => ({ ...prev, foto_perfil: nuevaFoto }));
-      alert("✅ Foto actualizada correctamente");
-    } catch (error) {
-      console.error("Error al actualizar foto:", error);
-      alert("❌ No se pudo actualizar la foto");
-    }
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const url = URL.createObjectURL(file);
+      setImagenTemporal(url);
+      setMostrarCropper(true);
+    };
+
+    input.click();
   };
 
-  // === NUEVO: manejar habilidades ===
   const handleAgregarHabilidad = () => {
-    if(idHabilidad > 0) {
-      fetch(
-        `${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`,
-        {
+    if (idHabilidad > 0) {
+      fetch(`${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json"
+          Accept: "application/json",
         },
         body: JSON.stringify({
-          asociar: idHabilidad
-        })
-      }
-      )
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Error en la petición: " + response.status);
-        }
-        return response.json();
+          asociar: idHabilidad,
+        }),
       })
-      .then(data => setUsuario(data))
-      .catch(error => {
-        console.error("Hubo un problema con la petición:", error);
-      });
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Error en la petición: " + response.status);
+          }
+          return response.json();
+        })
+        .then((data) => setUsuario(data))
+        .catch((error) => {
+          console.error("Hubo un problema con la petición:", error);
+        });
       setEditandoHabilidades(false);
     }
   };
 
-  
   if (!usuario) return <p className="text-center mt-5">Cargando perfil...</p>;
 
   return (
@@ -165,14 +204,18 @@ function PerfilUsuario() {
       <Navbar />
       <div className="container-fluid perfil-container py-5">
         <div className="row justify-content-center">
-          {/* Sidebar */}
           <div className="col-12 col-md-3 perfil-sidebar text-center p-4">
             <div className="perfil-avatar-container">
               <img
-                src={usuario.foto_perfil || "/swapp-profile.png"}
+                src={
+                  usuario.foto_perfil && usuario.foto_perfil.trim() !== ""
+                    ? usuario.foto_perfil
+                    : "/swapp-profile.png"
+                }
                 alt="Foto de perfil"
                 className="perfil-avatar mb-3"
               />
+
               <button
                 className="btn btn-editar-foto mb-2"
                 onClick={handleEditarFoto}
@@ -186,40 +229,40 @@ function PerfilUsuario() {
 
             <div className="perfil-secciones mt-4">
               <button
-                className={`list-group-item ${seccionActiva === "datos" ? "active" : ""}`}
+                className={`list-group-item ${
+                  seccionActiva === "datos" ? "active" : ""
+                }`}
                 onClick={() => setSeccionActiva("datos")}
               >
                 Datos Personales
               </button>
               <div className="perfil-divider"></div>
               <button
-                className={`list-group-item ${seccionActiva === "habilidades" ? "active" : ""
-                  }`}
+                className={`list-group-item ${
+                  seccionActiva === "habilidades" ? "active" : ""
+                }`}
                 onClick={() => {
-                  setSeccionActiva("habilidades")
+                  setSeccionActiva("habilidades");
                   fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`)
-                  .then(response => {
-                    if (!response.ok) {
-                      throw new Error("Error en la petición: " + response.status);
-                    }
-                    return response.json();
-                  })
-                  .then(data => setUsuario(data))
-                  .catch(error => {
-                    console.error("Hubo un problema con la petición:", error);
-                  });
+                    .then((response) => {
+                      if (!response.ok) {
+                        throw new Error(
+                          "Error en la petición: " + response.status
+                        );
+                      }
+                      return response.json();
+                    })
+                    .then((data) => setUsuario(data))
+                    .catch((error) => {
+                      console.error("Hubo un problema con la petición:", error);
+                    });
                 }}
               >
                 Habilidades
               </button>
             </div>
-
-            <div className="perfil-footer mt-auto text-center" style={{height:"10rem"}}>
-              {/* <img src="/swapp sin fondo.webp" alt="Swapp" className="perfil-logo mt-4" /> */}
-            </div>
           </div>
 
-          {/* Contenido principal */}
           <div className="col-12 col-md-8 perfil-content p-4">
             {seccionActiva === "datos" ? (
               <>
@@ -245,7 +288,7 @@ function PerfilUsuario() {
                     <input
                       type="text"
                       className="form-control"
-                      name="apellidos"
+                      name="apellido"
                       value={formData.apellido || ""}
                       onChange={handleChange}
                       disabled={!editando}
@@ -372,6 +415,14 @@ function PerfilUsuario() {
                     />
                   </div>
 
+                  {Object.keys(msg).length > 0 ? (
+                    <div className={`alert alert-${msg?.tipo}`} role="alert">
+                      {msg?.contenido}
+                    </div>
+                  ) : (
+                    ""
+                  )}
+
                   <div className="col-12 text-center mt-4">
                     <button
                       type="button"
@@ -406,18 +457,23 @@ function PerfilUsuario() {
                     <button
                       className="btn perfil-accion-btn mt-3"
                       onClick={() => {
-                        setEditandoHabilidades(true)
+                        setEditandoHabilidades(true);
                         fetch(`${env.api}/api/categorias`)
-                        .then(response => {
-                          if (!response.ok) {
-                            throw new Error("Error en la petición: " + response.status);
-                          }
-                          return response.json();
-                        })
-                        .then(data => setCategories(data))
-                        .catch(error => {
-                          console.error("Hubo un problema con la petición:", error);
-                        });
+                          .then((response) => {
+                            if (!response.ok) {
+                              throw new Error(
+                                "Error en la petición: " + response.status
+                              );
+                            }
+                            return response.json();
+                          })
+                          .then((data) => setCategories(data))
+                          .catch((error) => {
+                            console.error(
+                              "Hubo un problema con la petición:",
+                              error
+                            );
+                          });
                       }}
                     >
                       ✏️ Editar habilidades
@@ -427,11 +483,9 @@ function PerfilUsuario() {
                   <>
                     <div className="mb-3 text-start">
                       <div className="input-group my-2">
-                        <div className="input-group-prepend">
-                          <label htmlFor="inputGroupSelect01">Categorías</label>
-                        </div>
+                        <label htmlFor="selectCategoria">Categorías</label>
                         <select
-                          className="form-select registro-input mt-1"
+                          className="form-select mt-1"
                           style={{ width: "100%" }}
                           name="id_categoria"
                           onChange={handleCategorieChange}
@@ -439,7 +493,7 @@ function PerfilUsuario() {
                           id="selectCategoria"
                         >
                           {categories &&
-                            categories.map((category, id) => (
+                            categories.map((category) => (
                               <option
                                 key={`categoria-${category?.id_categoria}`}
                                 value={category?.id_categoria}
@@ -451,18 +505,18 @@ function PerfilUsuario() {
                       </div>
 
                       <div className="input-group my-2">
-                        <div className="input-group-prepend">
-                          <label htmlFor="inputGroupSelect01">Habilidades</label>
-                        </div>
+                        <label htmlFor="selectHabilidad">Habilidades</label>
                         <select
-                          className="form-select registro-input mt-1"
+                          className="form-select mt-1"
                           style={{ width: "100%" }}
                           name="id_habilidad"
-                          onChange={e => setIdHabilidad(parseInt(e.target.value))}
+                          onChange={(e) =>
+                            setIdHabilidad(parseInt(e.target.value))
+                          }
                           value={idHabilidad}
                           id="selectHabilidad"
                         >
-                          { habilidades &&
+                          {habilidades &&
                             habilidades.map((habilidad, id) => (
                               <option
                                 key={`id_habilidad-${id}`}
@@ -497,6 +551,55 @@ function PerfilUsuario() {
           </div>
         </div>
       </div>
+
+      {/* 🔥 Modal del recortador */}
+      {mostrarCropper && (
+        <CropperModal
+          image={imagenTemporal}
+          onClose={() => setMostrarCropper(false)}
+          onCropDone={async (croppedBase64) => {
+            setMostrarCropper(false);
+            const blob = await (await fetch(croppedBase64)).blob();
+            const formData = new FormData();
+            formData.append("imagen", blob, "recorte.jpg");
+
+            try {
+              const userData = JSON.parse(localStorage.getItem("user"));
+              const userId = userData?.id_usuario || usuario?.id_usuario;
+
+              const res = await fetch(
+                `${env.api}/api/usuarios/${userId}/foto-perfil`,
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              );
+
+              const data = await res.json();
+              if (res.ok) {
+                setUsuario((prev) => ({
+                  ...prev,
+                  foto_perfil: data.foto_perfil,
+                }));
+                document.querySelector(".perfil-avatar").src = data.foto_perfil;
+                setMsg({
+                  tipo: "success",
+                  contenido: "Foto actualizada correctamente",
+                });
+              } else {
+                throw new Error(data.error || "Error al subir la foto");
+              }
+            } catch (err) {
+              console.error(err);
+              setMsg({
+                tipo: "danger",
+                contenido: "No se pudo subir la imagen recortada",
+              });
+            }
+          }}
+        />
+      )}
+
       <Footer />
     </>
   );

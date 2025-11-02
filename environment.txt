@@ -10,3 +10,6 @@ DATABASE_URL=postgresql://user:postgres@localhost:5432/example
 GOOGLE_CLIENT_ID="1024723839431-3ascshnm9j4gr5kparoegh2kfu227mot.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET="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"
 OAUTH_REDIRECT_URI="http://localhost:5000/auth/google/callback"
+CLOUD_NAME=dcwx0hex8
+API_KEY=334438165399756
+API_SECRET=ZeY_5bT1VBBNFsWc06A25QDKMlg

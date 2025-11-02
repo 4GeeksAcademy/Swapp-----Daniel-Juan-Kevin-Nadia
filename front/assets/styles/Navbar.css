@@ -14,6 +14,9 @@ body {
   height: auto;
   object-fit: cover;
 }
+.eslogan {
+  color: var(--gris-oscuro);
+}
 .input-group input {
   border-color: var(--naranja);
 }
@@ -47,8 +50,7 @@ textarea:focus {
 }
 
 .offcanvas-body ul.list-unstyled li a,
-.navbar-nav li a,
-.boton-hamburguer {
+.navbar-nav li a {
   display: block;
   padding: 8px 12px;
   color: #333;
@@ -59,9 +61,10 @@ textarea:focus {
 
 .offcanvas-body ul.list-unstyled li a:hover,
 .navbar-nav li a:hover,
-.boton-hamburguer {
+.boton-hamburguer:hover {
   background-color: var(--claro) !important;
-  padding-left: 16px;
+  transform: translateX(4px);
+  transition: all 0.2s ease;
 }
 
 .offcanvas.no-scroll .offcanvas-body {
@@ -79,6 +82,11 @@ textarea:focus {
 
 .offcanvas.no-scroll .offcanvas-body::-webkit-scrollbar {
   display: none;
+}
+
+.active-link {
+  background-color: var(--claro);
+  font-weight: bold;
 }
 
 @media (max-width: 576px) {

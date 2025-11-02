@@ -1,29 +1,53 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const GoogleCallback = () => {
+  const navigate = useNavigate();
+
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:5000/auth/google/callback" + window.location.search
-        );
-        const data = await response.json();
+    const params = new URLSearchParams(window.location.search);
 
-        // Guarda los datos en el almacenamiento local
-        localStorage.setItem("token", data.access_token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+    const token = params.get("token");
+    const id_usuario = params.get("id_usuario");
+    const nombre = params.get("nombre") || "";
+    const apellido = params.get("apellido") || "";
+    const email = params.get("email") || "";
+    const picture = params.get("picture") || "";
 
-        // Redirige al perfil o home
-        window.location.href = "/";
-      } catch (error) {
-        console.error("Error procesando callback de Google:", error);
-      }
-    };
+    console.log("👉 Parámetros que llegan desde Google:", {
+      token,
+      id_usuario,
+      nombre,
+      apellido,
+      email,
+      picture,
+    });
 
-    fetchUserData();
-  }, []);
+    if (token) {
+      localStorage.setItem("token", token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id_usuario,
+          nombre,
+          apellido,
+          correo_electronico: email,
+          foto_perfil: picture,
+        })
+      );
 
-  return <p>Conectando con Google...</p>;
+      setTimeout(() => navigate("/perfil"), 200);
+    } else {
+      alert("Error al autenticar con Google. Intenta de nuevo.");
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  return (
+    <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <h4>Autenticando con Google...</h4>
+    </div>
+  );
 };
 
 export default GoogleCallback;
