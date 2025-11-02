@@ -5,10 +5,15 @@ import { env } from "../../environ";
 import { useStore } from "../../hooks/useStore";
 
 function Navbar() {
-  const {store, dispatch} = useStore();
+  const { store, dispatch } = useStore();
   const [usuario, setUsuario] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const navigate = useNavigate();
+  const isLogged = !!(
+    usuario ||
+    localStorage.getItem("token") ||
+    localStorage.getItem("user")
+  );
 
   const CATEGORIAS_DESTACADAS = [
     "Educación y Tutorías",
@@ -33,11 +38,26 @@ function Navbar() {
     "Desarrollo Personal y Coaching": "fa-solid fa-child-reaching",
     "Otros / Misceláneos": "fa-solid fa-puzzle-piece",
   };
- 
+
   useEffect(() => {
-    const usuarioGuardado = store.usuario;
-    if (Object.keys(usuarioGuardado).length > 0) {
-      setUsuario(usuarioGuardado);
+    const fromStore =
+      store?.usuario && Object.keys(store.usuario).length > 0
+        ? store.usuario
+        : null;
+
+    const fromLocal = JSON.parse(localStorage.getItem("user") || "null");
+
+    if (fromStore) {
+      setUsuario(fromStore);
+    } else if (fromLocal) {
+      setUsuario({
+        nombre: fromLocal.nombre,
+        apellido: fromLocal.apellido,
+        correo_electronico: fromLocal.email,
+        foto_perfil: fromLocal.picture,
+      });
+    } else {
+      setUsuario(null);
     }
 
     const fetchCategorias = async () => {
@@ -46,21 +66,36 @@ function Navbar() {
         if (!response.ok) throw new Error("Error al obtener categorías");
         const data = await response.json();
         setCategorias(data);
-        dispatch({type: "SET_CATEGORIAS", payload: data});
+        dispatch({ type: "SET_CATEGORIAS", payload: data });
       } catch (error) {
         console.error("Error cargando categorías:", error);
       }
     };
     fetchCategorias();
-  }, []);
+  }, [store.usuario, dispatch]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     const confirmLogout = window.confirm("¿Deseas cerrar sesión?");
-    if (confirmLogout) {
-      setUsuario(null);
-      dispatch({type: "SET_USUARIO", payload: {}});
-      dispatch({type: "SET_TOKEN", payload: ""});
+    if (!confirmLogout) return;
+
+    try {
+      const usuarioGoogle = localStorage.getItem("user");
+
+      if (usuarioGoogle) {
+        await fetch(`${env.api}/api/logout`, { method: "POST" });
+        localStorage.removeItem("user");
+      }
+
       localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      dispatch({ type: "SET_USUARIO", payload: {} });
+      dispatch({ type: "SET_TOKEN", payload: "" });
+      setUsuario(null);
+
+      navigate("/login");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      localStorage.clear();
       navigate("/login");
     }
   };
@@ -105,15 +140,52 @@ function Navbar() {
             </button>
           </div> */}
 
+          {/* Solo móvil */}
+          <div className="d-flex flex-column align-items-center d-lg-none w-100">
+            <div className="w-100 d-flex justify-content-between">
+              <button
+                className="btn btn-outline-secondary"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#categoriasSidebar"
+                aria-controls="categoriasSidebar"
+              >
+                <i className="fa-solid fa-bars"></i>
+              </button>
+
+              <div className="d-flex">
+                {usuario ? (
+                  <>
+                    <Link to="/perfil" className="btn btn-main2 me-2">
+                      Perfil
+                    </Link>
+                    <button onClick={handleLogout} className="btn btn-main1">
+                      Cerrar sesión
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/registro" className="btn btn-main1 me-2">
+                      Regístrate
+                    </Link>
+                    <Link to="/login" className="btn btn-main1">
+                      Iniciar sesión
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
           <h3 className="d-none d-md-block flex-grow-1 mx-3 text-center mb-0 fst-italic eslogan">
-            ¡Donde todo, tiene otro valor!
+            {/* ¡Donde todo, tiene otro valor! */}
           </h3>
           <div className="d-flex">
-            {usuario ? (
+            {isLogged ? (
               <>
                 <Link
                   to="/perfil"
-                  className="btn btn-main2 d-none d-lg-flex me-2"
+                  className="btn btn-main1 d-none d-lg-flex me-2"
                   type="button"
                 >
                   Perfil
@@ -207,44 +279,6 @@ function Navbar() {
           ></button>
         </div>
         <div className="offcanvas-body">
-          <div className="d-flex justify-content-center d-lg-none mb-3">
-            {usuario ? (
-              <>
-                <Link
-                  to="/perfil"
-                  className="btn btn-main2 boton-registro me-2"
-                  type="button"
-                >
-                  Perfil
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="btn btn-main1 boton-inicio"
-                  type="button"
-                >
-                  Cerrar sesión
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/registro"
-                  className="btn btn-main1 boton-registro me-2"
-                  type="button"
-                >
-                  Regístrate
-                </Link>
-                <Link
-                  to="/login"
-                  className="btn btn-main1 boton-inicio"
-                  type="button"
-                >
-                  Iniciar sesión
-                </Link>
-              </>
-            )}
-          </div>
-
           <ul className="list-unstyled">
             {categorias.map((cat) => (
               <li key={cat.id_categoria}>
@@ -258,7 +292,7 @@ function Navbar() {
                       document.getElementById("categoriasSidebar");
                     const bsOffcanvas =
                       bootstrap.Offcanvas.getInstance(offcanvasEl);
-                    if (bsOffcanvas) bsOffcanvas.hide(); // 👈 esto es suficiente
+                    if (bsOffcanvas) bsOffcanvas.hide();
                   }}
                 >
                   <i

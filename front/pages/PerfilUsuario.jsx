@@ -5,9 +5,10 @@ import Footer from "../assets/components/Footer";
 import "../assets/styles/PerfilUsuario.css";
 import { env } from "../environ";
 import { useStore } from "../hooks/useStore";
+import CropperModal from "../assets/components/CropperModal";
 
 function PerfilUsuario() {
-  const { store, dispatch } = useStore();
+  const { _, dispatch } = useStore();
   const [usuario, setUsuario] = useState(null);
   const [seccionActiva, setSeccionActiva] = useState("datos");
   const [editando, setEditando] = useState(false);
@@ -17,15 +18,48 @@ function PerfilUsuario() {
   const [habilidades, setHabilidades] = useState([]);
   const [idHabilidad, setIdHabilidad] = useState(0);
   const [editandoHabilidades, setEditandoHabilidades] = useState(false);
+  const [msg, setMsg] = useState({});
   const navigate = useNavigate();
+  const [imagenTemporal, setImagenTemporal] = useState(null);
+  const [mostrarCropper, setMostrarCropper] = useState(false);
 
   useEffect(() => {
     const rawToken = localStorage.getItem("token");
     const usuarioToken = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
 
-    if (!usuarioToken) {
-      alert(" No hay sesión activa. Por favor inicia sesión.");
+    const usuarioGoogle = localStorage.getItem("user");
+
+    if (!usuarioToken && !usuarioGoogle) {
+      alert("No hay sesión activa. Por favor inicia sesión.");
       navigate("/login");
+      return;
+    }
+
+    // Si el usuario viene desde Google
+    if (usuarioGoogle) {
+      const data = JSON.parse(usuarioGoogle);
+      setUsuario({
+        id_usuario: data.id_usuario,
+        nombre: data.nombre,
+        apellido: data.apellido,
+        correo_electronico: data.correo_electronico,
+        foto_perfil: data.foto_perfil,
+        fecha_nacimiento: null,
+        genero: "",
+        descripcion: "",
+        habilidades: [],
+      });
+
+      setFormData({
+        nombre: data.nombre,
+        apellido: data.apellido,
+        correo_electronico: data.correo_electronico,
+        foto_perfil: data.foto_perfil,
+        fecha_nacimiento: "",
+        genero: "",
+        descripcion: "",
+      });
+
       return;
     }
 
@@ -45,7 +79,6 @@ function PerfilUsuario() {
         }
 
         const data = await response.json();
-        console.log("Usuario cargado:", data);
         setUsuario(data);
         setFormData(data);
         dispatch({ type: "SET_USUARIO", payload: data });
@@ -98,40 +131,44 @@ function PerfilUsuario() {
         fecha_nacimiento: fechaFinal,
       };
 
-      const response = await fetch(`${env.api}/api/usuarios/${usuario.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(usuarioActualizado),
-      });
+      const response = await fetch(
+        `${env.api}/api/usuarios/${usuario.id_usuario}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(usuarioActualizado),
+        }
+      );
 
       const dataActualizada = await response.json();
-      setUsuario(dataActualizada);
+      setUsuario(dataActualizada?.actualizado);
+      dispatch({ type: "SET_USUARIO", payload: dataActualizada?.actualizado });
       setEditando(false);
-      alert("Datos actualizados correctamente");
+      setMsg({ tipo: "success", contenido: dataActualizada.msj });
     } catch (error) {
       console.error("Error al guardar:", error);
-      alert("No se pudo guardar la información");
+      setMsg({
+        tipo: "danger",
+        contenido: "No se pudo guardar la información",
+      });
     }
   };
 
-  const handleEditarFoto = async () => {
-    const nuevaFoto = prompt("Introduce la nueva URL de la foto de perfil:");
-    if (!nuevaFoto) return;
+  const handleEditarFoto = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
 
-    try {
-      const response = await fetch(`${env.api}/api/usuarios/${usuario.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...usuario, foto_perfil: nuevaFoto }),
-      });
-      const actualizado = await response.json();
-      setUsuario(actualizado);
-      setFormData((prev) => ({ ...prev, foto_perfil: nuevaFoto }));
-      alert("Foto actualizada correctamente");
-    } catch (error) {
-      console.error("Error al actualizar foto:", error);
-      alert("No se pudo actualizar la foto");
-    }
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const url = URL.createObjectURL(file);
+      setImagenTemporal(url);
+      setMostrarCropper(true);
+    };
+
+    input.click();
   };
 
   const handleAgregarHabilidad = () => {
@@ -251,7 +288,7 @@ function PerfilUsuario() {
                     <input
                       type="text"
                       className="form-control"
-                      name="apellidos"
+                      name="apellido"
                       value={formData.apellido || ""}
                       onChange={handleChange}
                       disabled={!editando}
@@ -378,6 +415,14 @@ function PerfilUsuario() {
                     />
                   </div>
 
+                  {Object.keys(msg).length > 0 ? (
+                    <div className={`alert alert-${msg?.tipo}`} role="alert">
+                      {msg?.contenido}
+                    </div>
+                  ) : (
+                    ""
+                  )}
+
                   <div className="col-12 text-center mt-4">
                     <button
                       type="button"
@@ -438,11 +483,9 @@ function PerfilUsuario() {
                   <>
                     <div className="mb-3 text-start">
                       <div className="input-group my-2">
-                        <div className="input-group-prepend">
-                          <label htmlFor="inputGroupSelect01">Categorías</label>
-                        </div>
+                        <label htmlFor="selectCategoria">Categorías</label>
                         <select
-                          className="form-select registro-input mt-1"
+                          className="form-select mt-1"
                           style={{ width: "100%" }}
                           name="id_categoria"
                           onChange={handleCategorieChange}
@@ -450,7 +493,7 @@ function PerfilUsuario() {
                           id="selectCategoria"
                         >
                           {categories &&
-                            categories.map((category, id) => (
+                            categories.map((category) => (
                               <option
                                 key={`categoria-${category?.id_categoria}`}
                                 value={category?.id_categoria}
@@ -462,13 +505,9 @@ function PerfilUsuario() {
                       </div>
 
                       <div className="input-group my-2">
-                        <div className="input-group-prepend">
-                          <label htmlFor="inputGroupSelect01">
-                            Habilidades
-                          </label>
-                        </div>
+                        <label htmlFor="selectHabilidad">Habilidades</label>
                         <select
-                          className="form-select registro-input mt-1"
+                          className="form-select mt-1"
                           style={{ width: "100%" }}
                           name="id_habilidad"
                           onChange={(e) =>
@@ -512,6 +551,55 @@ function PerfilUsuario() {
           </div>
         </div>
       </div>
+
+      {/* 🔥 Modal del recortador */}
+      {mostrarCropper && (
+        <CropperModal
+          image={imagenTemporal}
+          onClose={() => setMostrarCropper(false)}
+          onCropDone={async (croppedBase64) => {
+            setMostrarCropper(false);
+            const blob = await (await fetch(croppedBase64)).blob();
+            const formData = new FormData();
+            formData.append("imagen", blob, "recorte.jpg");
+
+            try {
+              const userData = JSON.parse(localStorage.getItem("user"));
+              const userId = userData?.id_usuario || usuario?.id_usuario;
+
+              const res = await fetch(
+                `${env.api}/api/usuarios/${userId}/foto-perfil`,
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              );
+
+              const data = await res.json();
+              if (res.ok) {
+                setUsuario((prev) => ({
+                  ...prev,
+                  foto_perfil: data.foto_perfil,
+                }));
+                document.querySelector(".perfil-avatar").src = data.foto_perfil;
+                setMsg({
+                  tipo: "success",
+                  contenido: "Foto actualizada correctamente",
+                });
+              } else {
+                throw new Error(data.error || "Error al subir la foto");
+              }
+            } catch (err) {
+              console.error(err);
+              setMsg({
+                tipo: "danger",
+                contenido: "No se pudo subir la imagen recortada",
+              });
+            }
+          }}
+        />
+      )}
+
       <Footer />
     </>
   );

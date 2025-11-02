@@ -19,7 +19,7 @@ class Usuario(db.Model):
     nombre = db.Column(db.String(100), nullable=False)
     apellido = db.Column(db.String(100), nullable=False)
     correo_electronico = db.Column(db.String(150), unique=True, nullable=False)
-    _contrasena = db.Column("contrasena", db.String(255), nullable=False)
+    _contrasena = db.Column("contrasena", db.String(255), nullable=True)
     fecha_nacimiento = db.Column(db.Date)
     genero = db.Column(db.String(20))
     foto_perfil = db.Column(db.String(255))
@@ -92,13 +92,16 @@ class Usuario(db.Model):
             "nombre": self.nombre,
             "apellido": self.apellido,
             "correo_electronico": self.correo_electronico,
-            "fecha_nacimiento": self.fecha_nacimiento,
+            "fecha_nacimiento": (
+                self.fecha_nacimiento.isoformat()
+                if self.fecha_nacimiento else None
+                ),
             "foto_perfil": self.foto_perfil,
             "genero": self.genero,
             "descripcion": self.descripcion,
             "estado": self.estado,
             "puntuacion": self.puntos,
-            "fecha_registro": self.fecha_registro
+            "fecha_registro": self.fecha_registro.strftime("%Y-%m-%d %H:%M:%S")
         }
 
 
@@ -211,7 +214,7 @@ class Mensaje(db.Model):
             "id_emisor": self.id_emisor,
             "id_receptor": self.id_receptor,
             "contenido": self.contenido,
-            "fecha_envio": self.fecha_envio,
+            "fecha_envio": self.fecha_envio.strftime("%Y-%m-%d %H:%M:%S"),
             "visto": self.visto
         }
         if excluye:
@@ -266,5 +269,5 @@ class Puntuacion(db.Model):
             "id_puntuado": self.id_puntuado,
             "puntos": self.puntos,
             "comentario": self.comentario,
-            "creado": self.fecha_registro
+            "creado": self.fecha_registro.strftime("%Y-%m-%d %H:%M:%S")
         }
