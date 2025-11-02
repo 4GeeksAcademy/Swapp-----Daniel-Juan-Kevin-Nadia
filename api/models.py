@@ -92,7 +92,10 @@ class Usuario(db.Model):
             "nombre": self.nombre,
             "apellido": self.apellido,
             "correo_electronico": self.correo_electronico,
-            "fecha_nacimiento": self.fecha_nacimiento.isoformat(),
+            "fecha_nacimiento": (
+                self.fecha_nacimiento.isoformat()
+                if self.fecha_nacimiento else None
+                ),
             "foto_perfil": self.foto_perfil,
             "genero": self.genero,
             "descripcion": self.descripcion,

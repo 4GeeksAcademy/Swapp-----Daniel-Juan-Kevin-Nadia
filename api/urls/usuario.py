@@ -22,6 +22,7 @@ def obtener_usuarios():
 
         if not users:
             return jsonify({"msj": "No hay usuarios registrados"}), 200
+
         return jsonify([u.to_dict() for u in users]), 200
 
     except SQLAlchemyError as e:
