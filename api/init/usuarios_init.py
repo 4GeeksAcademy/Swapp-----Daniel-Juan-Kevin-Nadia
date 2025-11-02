@@ -1,8 +1,12 @@
-from api.models import db, Usuario
+"""
+    DATOS DE INICIO DE LA BASE DE DATOS
+"""
 from werkzeug.security import generate_password_hash
+from api.models import db, Usuario
+from api.app import app
 
 
-USUARIOS_DEMO = [
+USUARIOS = [
 
     {
         "nombre": "Kevin",
@@ -64,29 +68,35 @@ USUARIOS_DEMO = [
         "correo_electronico": "valeria@demo.com",
         "contrasena_plana": "valeria123"
     }
-
 ]
 
 
 def usuarios_prueba():
-    for u in USUARIOS_DEMO:
-        email = u["correo_electronico"]
-        usuario = Usuario.query.filter_by(correo_electronico=email).first()
+    """USUARIOS DE INICIO"""
+    with app.app_context():
+        for u in USUARIOS:
+            email = u["correo_electronico"]
+            usuario = Usuario.query.filter_by(correo_electronico=email).first()
 
-        hash_pw = generate_password_hash(u["contrasena_plana"])
+            hash_pw = generate_password_hash(u["contrasena_plana"])
 
-        if usuario:
-            usuario.nombre = u["nombre"]
-            usuario.apellido = u["apellido"]
-            usuario._contrasena = hash_pw
-        else:
-            usuario = Usuario(
-                nombre=u["nombre"],
-                apellido=u["apellido"],
-                correo_electronico=email,
-            )
-            usuario._contrasena = hash_pw
-            db.session.add(usuario)
+            if usuario:
+                usuario.nombre = u["nombre"]
+                usuario.apellido = u["apellido"]
+                usuario.contrasena = hash_pw
+            else:
+                usuario = Usuario(
+                    nombre=u["nombre"],
+                    apellido=u["apellido"],
+                    correo_electronico=email,
+                    acepta_terminos=True
+                )
+                usuario.contrasena = hash_pw
+                db.session.add(usuario)
 
-        db.session.commit()
-        print("[seed] Usuarios de demo insertados/actualizados.")
+            db.session.commit()
+        print(f"[SEED] Se han Creado {len(USUARIOS)} Usuarios")
+
+
+if __name__ == "__main__":
+    usuarios_prueba()
