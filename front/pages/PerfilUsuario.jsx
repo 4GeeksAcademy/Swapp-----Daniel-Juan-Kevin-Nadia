@@ -28,7 +28,7 @@ function PerfilUsuario() {
   // Habilidades
   const [mostrarModalHabilidad, setMostrarModalHabilidad] = useState(false);
  
-  // ...otros estados habilidades
+  // otros estados habilidades
 const [editandoHabilidades, setEditandoHabilidades] = useState(false);
 
 
@@ -42,7 +42,7 @@ const [editandoHabilidades, setEditandoHabilidades] = useState(false);
 
   const navigate = useNavigate();
 
-  // ========= Cargar usuario (no modificar esta lógica) =========
+  // Cargar usuario 
   useEffect(() => {
     const rawToken = localStorage.getItem("token");
     const usuarioToken = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
@@ -109,46 +109,78 @@ const [editandoHabilidades, setEditandoHabilidades] = useState(false);
     fetchUsuario();
   }, [dispatch, navigate]);
 
+// helper (arriba del componente o junto al resto de helpers)
+const getTokenLimpio = () => {
+  const raw = localStorage.getItem("token");
+  return raw ? raw.replace(/^"|"$/g, "") : null;
+};
+
+
   // Handlers de datos personales 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleGuardar = async () => {
-    try {
-      if (!formData.nombre || !formData.apellido || !formData.correo_electronico) {
-        alert("Por favor completa todos los campos obligatorios.");
-        return;
-      }
 
-      let fechaFinal = formData.fecha_nacimiento;
-      if (formData.dia && formData.mes && formData.anio) {
-        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(2, "0")}-${String(
-          formData.dia
-        ).padStart(2, "0")}`;
-      }
-
-      const { dia, mes, anio, ...dataSinCamposExtra } = formData;
-      const usuarioActualizado = {
-        ...dataSinCamposExtra,
-        fecha_nacimiento: fechaFinal,
-      };
-
-      const response = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(usuarioActualizado),
-      });
-
-      const dataActualizada = await response.json();
-      setUsuario(dataActualizada?.actualizado);
-      dispatch({ type: "SET_USUARIO", payload: dataActualizada?.actualizado });
-      setEditando(false);
-      setMsg({ tipo: "success", contenido: dataActualizada.msj });
-    } catch (error) {
-      console.error("Error al guardar:", error);
-      setMsg({ tipo: "danger", contenido: "No se pudo guardar la información" });
+//Guardar datos personales usando endpoints de usuarios 
+const handleGuardar = async () => {
+  try {
+    // Validación mínima
+    if (!formData.nombre || !formData.apellido || !formData.correo_electronico) {
+      setMsg({ tipo: "danger", contenido: "Por favor completa todos los campos obligatorios." });
+      return;
     }
-  };
+
+    // Construir fecha SOLO si hay día/mes/año
+    let fechaFinal = null;
+    if (formData.dia && formData.mes && formData.anio) {
+      fechaFinal = `${formData.anio}-${String(formData.mes).padStart(2, "0")}-${String(formData.dia).padStart(2, "0")}`;
+    }
+
+    // Armar payload sin dia/mes/anio
+    const { dia, mes, anio, ...resto } = formData;
+    const payload = { ...resto };
+
+    // Si hay fecha, la incluimos; si no, no la mandamos (o payload.fecha_nacimiento = null;)
+    if (fechaFinal) {
+      payload.fecha_nacimiento = fechaFinal;
+    } else {
+      // opción 1 (recomendada): omitirla
+      delete payload.fecha_nacimiento;
+      // opción 2 (si backend lo necesita): payload.fecha_nacimiento = null;
+    }
+
+    // Token (si el update está protegido)
+    const token = getTokenLimpio();
+
+    const resp = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!resp.ok) {
+      // leer texto para entender el 404/500
+      const errText = await resp.text();
+      console.error("PUT /api/usuarios/:id fallo:", resp.status, errText);
+      throw new Error(`Error HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+
+    // Actualizar estado
+    setUsuario(data?.actualizado ?? usuario);
+    dispatch({ type: "SET_USUARIO", payload: data?.actualizado ?? usuario });
+    setEditando(false);
+    setMsg({ tipo: "success", contenido: data?.msj || "Cambios guardados correctamente." });
+  } catch (e) {
+    console.error("Error al guardar:", e);
+    setMsg({ tipo: "danger", contenido: "No se pudo guardar la información." });
+  }
+};
+
 
   //  Foto de perfil
   const handleEditarFoto = () => {
