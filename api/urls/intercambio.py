@@ -8,6 +8,27 @@ from api.models import db, Intercambio, Usuario, Habilidad
 intercambios = Blueprint("intercambios", __name__)
 
 
+@intercambios.route("/api/intercambios", methods=["GET"])
+def listar_intercambios():
+    """
+        Listar todos los intercambios existentes
+    """
+    try:
+        lista_intercambios = Intercambio.query.all()
+
+        if not lista_intercambios:
+            return jsonify({"mensaje": "No hay intercambios registrados"}), 404
+
+        return jsonify([i.to_dict() for i in lista_intercambios]), 200
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({
+            "error": "Error al obtener los intercambios",
+            "detalle": str(e)
+        }), 500
+
+
 @intercambios.route("/api/intercambios/<int:id_intercambio>", methods=["GET"])
 def obtener_intercambio(id_intercambio):
     """
@@ -85,13 +106,14 @@ def crear_intercambio():
     data = request.get_json() or {}
 
     try:
-        required = ["id_usuario_oferta", "id_habilidad"]
+        required = ["id_usuario_postulante", "id_habilidad"]
         for field in required:
             if field not in data:
                 return jsonify({
                     "error": f"Falta el campo requerido: {field}"}), 400
 
-        usuario_oferta = Usuario.query.get_or_404(data["id_usuario_oferta"])
+        usuario_oferta = Usuario.query.get_or_404(
+            data["id_usuario_postulante"])
         habilidad = Habilidad.query.get_or_404(data["id_habilidad"])
 
         intercambio = Intercambio(

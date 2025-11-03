@@ -19,6 +19,7 @@ from api.urls.habilidades import habilidades
 from api.urls.categorias import categorias
 from api.urls.mensaje import mensajes
 from api.urls.intercambio import intercambios
+from api.urls.puntuacion import puntuaciones
 from api.urls.auth import auth
 from api.cloudinary.routes import cloudinary_routes
 load_dotenv()
@@ -50,7 +51,7 @@ jwt = JWTManager(app)
 
 
 @app.errorhandler(APIException)
-def handle_invalid_usage(error):
+def handle_invalid_usage():
     """ Handle/serialize errors like a JSON object """
     return {}
 
@@ -72,10 +73,11 @@ oauth.register(
     client_kwargs={"scope": "openid email profile"},
 )
 
+app.register_blueprint(auth, url_prefix="/auth")
+app.register_blueprint(cloudinary_routes)
 app.register_blueprint(usuarios)
 app.register_blueprint(habilidades)
 app.register_blueprint(categorias)
 app.register_blueprint(mensajes)
 app.register_blueprint(intercambios)
-app.register_blueprint(auth, url_prefix="/auth")
-app.register_blueprint(cloudinary_routes)
+app.register_blueprint(puntuaciones)
