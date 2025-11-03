@@ -8,6 +8,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from authlib.integrations.flask_client import OAuth
 from flask import Flask
+from flask import send_from_directory
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -55,10 +56,20 @@ def handle_invalid_usage(error):
     return {}
 
 
-@app.route('/')
-def sitemap():
-    """ generate sitemap with all your endpoints """
-    return generate_sitemap(app)
+# @app.route('/')
+# def sitemap():
+    #  """ generate sitemap with all your endpoints """
+    # return generate_sitemap(app)
+
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_frontend(path):
+    """Front"""
+    if path != "" and os.path.exists(f"api/static/{path}"):
+        return send_from_directory('static', path)
+    else:
+        return send_from_directory('static', 'index.html')
 
 
 oauth = OAuth(app)

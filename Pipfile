@@ -4,6 +4,10 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+mysqlclient = "*"
+flake8 = "*"
+black = "*"
+eralchemy = {extras = ["graphviz"], version = "*"}
 
 [packages]
 flask = "*"
@@ -16,10 +20,6 @@ flask-migrate = "*"
 psycopg2 = "*"
 python-dotenv = "*"
 wtforms = "*"
-mysqlclient = "*"
-eralchemy = {extras = ["graphviz"], version = "*"}
-flake8 = "*"
-black = "*"
 flask-jwt-extended = "*"
 authlib = "*"
 flask-dance = "*"
