@@ -22,9 +22,4 @@ cp -r dist/* api/static/
 echo "🗄️ Ejecutando migraciones de base de datos..."
 flask db upgrade
 
-# --- Carga inicial ---
-echo "📚 Cargando datos iniciales..."
-python -m api.init.usuarios_init
-python -m api.init.ins_hab_categ
-
 echo "✅ Despliegue completado exitosamente."
