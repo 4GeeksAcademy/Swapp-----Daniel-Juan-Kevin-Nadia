@@ -16,10 +16,15 @@ def obtener_habilidades():
     skills = Habilidad.query.all()
     return jsonify([s.to_dict() for s in skills]), 200
 
-@habilidades.route('/api/habilidades/categoria/<int:id_categoria>', methods=['GET'])
+
+@habilidades.route(
+        '/api/habilidades/categoria/<int:id_categoria>', methods=['GET'])
 def obtener_habilidades_por_categoria(id_categoria):
-    habilidades_categoria = Habilidad.query.filter_by(id_categoria=id_categoria).all()
+    """Filtrar Usuarios por Categoria"""
+    habilidades_categoria = Habilidad.query.filter_by(
+        id_categoria=id_categoria).all()
     return jsonify([h.to_dict() for h in habilidades_categoria]), 200
+
 
 @habilidades.route('/api/habilidades/<int:id_habilidad>', methods=['GET'])
 def obtener_habilidad(id_habilidad):

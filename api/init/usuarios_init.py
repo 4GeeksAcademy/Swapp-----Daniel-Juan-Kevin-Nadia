@@ -1,8 +1,11 @@
+"""
+    DATOS DE INICIO DE LA BASE DE DATOS
+"""
 from api.models import db, Usuario
-from werkzeug.security import generate_password_hash
+from api.app import app
 
 
-USUARIOS_DEMO = [
+USUARIOS = [
 
     {
         "nombre": "Kevin",
@@ -64,29 +67,33 @@ USUARIOS_DEMO = [
         "correo_electronico": "valeria@demo.com",
         "contrasena_plana": "valeria123"
     }
-
 ]
 
 
 def usuarios_prueba():
-    for u in USUARIOS_DEMO:
-        email = u["correo_electronico"]
-        usuario = Usuario.query.filter_by(correo_electronico=email).first()
+    """USUARIOS DE INICIO"""
+    with app.app_context():
+        for u in USUARIOS:
+            email = u["correo_electronico"]
+            usuario = Usuario.query.filter_by(correo_electronico=email).first()
 
-        hash_pw = generate_password_hash(u["contrasena_plana"])
+            if usuario:
+                usuario.nombre = u["nombre"]
+                usuario.apellido = u["apellido"]
+                usuario.contrasena = u["contrasena_plana"]
+            else:
+                usuario = Usuario(
+                    nombre=u["nombre"],
+                    apellido=u["apellido"],
+                    correo_electronico=email,
+                    acepta_terminos=True
+                )
+                usuario.contrasena = u["contrasena_plana"]
+                db.session.add(usuario)
 
-        if usuario:
-            usuario.nombre = u["nombre"]
-            usuario.apellido = u["apellido"]
-            usuario._contrasena = hash_pw
-        else:
-            usuario = Usuario(
-                nombre=u["nombre"],
-                apellido=u["apellido"],
-                correo_electronico=email,
-            )
-            usuario._contrasena = hash_pw
-            db.session.add(usuario)
+            db.session.commit()
+        print(f"[SEED] Se han Creado {len(USUARIOS)} Usuarios")
 
-        db.session.commit()
-        print("[seed] Usuarios de demo insertados/actualizados.")
+
+if __name__ == "__main__":
+    usuarios_prueba()

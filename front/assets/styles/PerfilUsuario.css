@@ -5,13 +5,13 @@
   --claro: #f6f4f4;
 }
 
-/* === General === */
+/*  General  */
 .perfil-container {
   background-color: var(--claro);
   min-height: 100vh;
 }
 
-/* === Sidebar === */
+/*  Sidebar  */
 .perfil-sidebar {
   background-color: var(--oscuro);
   color: var(--claro);
@@ -29,6 +29,7 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  gap: 8px;
 }
 
 .perfil-avatar {
@@ -57,10 +58,6 @@
   transition: all 0.3s ease;
 }
 
-.btn-editar-foto {
-  margin-top: 25px;
-}
-
 .perfil-secciones button.active,
 .perfil-secciones button:hover {
   background-color: var(--naranja);
@@ -75,7 +72,7 @@
   margin: 8px auto;
 }
 
-/* === Logo === */
+/*  Logo  */
 .perfil-footer {
   margin-top: auto;
   text-align: center;
@@ -94,7 +91,7 @@
   transform: scale(1.05);
 }
 
-/* === Contenido === */
+/*  Contenido  */
 .perfil-content {
   background-color: #fff;
   border-radius: 15px;
@@ -102,14 +99,14 @@
   padding: 30px;
 }
 
-/* === Cuadro principal === */
+/*  Cuadro principal  */
 .perfil-datos-box {
   border-radius: 12px;
   padding: 20px;
   background-color: #fff;
 }
 
-/* === Inputs y selects === */
+/*  Inputs y selects  */
 .perfil-content .form-control,
 .perfil-content .form-select {
   border: 1px solid var(--gris);
@@ -124,7 +121,7 @@
   box-shadow: 0 0 4px rgba(255, 117, 23, 0.3);
 }
 
-/* === Botones === */
+/*  Botones base  */
 .perfil-accion-btn {
   background-color: var(--naranja);
   color: var(--claro);
@@ -139,15 +136,7 @@
   background-color: #e96c0f;
 }
 
-
-.perfil-avatar-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-/* === Botón "Editar Foto" */
+/*  Botón "Editar Foto"  */
 .btn-editar-foto {
   display: inline-block;
   background-color: var(--naranja);
@@ -160,6 +149,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
+  margin-top: 25px;
 }
 
 .btn-editar-foto:hover {
@@ -167,6 +157,7 @@
   transform: translateY(-2px);
 }
 
+/*  Habilidades  */
 .habilidades-contenedor {
   display: flex;
   flex-direction: column;
@@ -195,7 +186,102 @@
   margin: 0.5rem 0 0;
 }
 
-.perfil-content .perfil-accion-btn {
-  display: block;
-  margin: 0 auto;
+/*  Botones habilidades  */
+.d-flex.justify-content-center.gap-3.mt-4.flex-wrap {
+  justify-content: center;
+  gap: 1.2rem;
+}
+
+/* Botones uniformes */
+.btn-agregar,
+.btn-naranja,
+.btn-oscuro {
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  padding: 0.6rem 1.5rem;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+/* Agregar / Guardar */
+.btn-agregar,
+.btn-naranja {
+  background-color: var(--naranja);
+  color: var(--claro);
+}
+
+.btn-agregar:hover,
+.btn-naranja:hover {
+  background-color: #e8680f;
+  transform: translateY(-2px);
+}
+
+/* Cancelar */
+.btn-oscuro {
+  background-color: var(--oscuro);
+  color: var(--claro);
+}
+
+.btn-oscuro:hover {
+  background-color: #1e1b1b;
+  transform: translateY(-2px);
+}
+
+/*  Tabla de Intercambios  */
+.tabla-intercambios-container {
+  margin-top: 2rem;
+  overflow-x: auto;
+}
+
+.tabla-intercambios {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tabla-intercambios th,
+.tabla-intercambios td {
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid #eaeaea;
+  text-align: left;
+}
+
+.tabla-intercambios th {
+  background-color: #fafafa;
+  color: var(--gris);
+  font-weight: 600;
+}
+
+.tabla-intercambios td {
+  color: var(--oscuro);
+  font-size: 0.95rem;
+}
+
+.tabla-intercambios tr:last-child td {
+  border-bottom: none;
+}
+
+/* Botón dentro de la tabla */
+.btn-finalizado {
+  background-color: var(--naranja);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-finalizado:hover {
+  background-color: #e96c0f;
+  transform: translateY(-2px);
 }
