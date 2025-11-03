@@ -24,7 +24,7 @@ from api.urls.auth import auth
 from api.cloudinary.routes import cloudinary_routes
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__,  static_folder="static", static_url_path="/")
 app.url_map.strict_slashes = False
 
 DB_URL = os.getenv("DATABASE_URL")

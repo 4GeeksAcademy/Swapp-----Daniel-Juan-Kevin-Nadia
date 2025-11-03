@@ -15,7 +15,8 @@ npm run build
 
 # --- Copia del build ---
 echo "📂 Copiando archivos compilados a Flask..."
-mkdir -p api/static && cp -r front/dist/* api/static/
+mkdir -p api/static/
+cp -r dist/* api/static/
 
 # --- Migraciones ---
 echo "🗄️ Ejecutando migraciones de base de datos..."
