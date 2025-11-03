@@ -1,64 +1,48 @@
-# ============================================================
-# Render deployment configuration for Flask + React (Vite)
-# Project: Swapp
-# ============================================================
-
 services:
   - type: web
     name: swapp-backend
     env: python
     plan: free
-    buildCommand: ./deploy.sh
-    startCommand: gunicorn api.wsgi:app
-
+    buildCommand: "./deploy.sh"
+    startCommand: "gunicorn api.wsgi:app"
     envVars:
-      # --- Flask ---
       - key: FLASK_APP
-        value: api/app.py
+        value: api/app
       - key: FLASK_ENV
         value: production
-      - key: FLASK_DEBUG
-        value: "0"
-
-      # --- Security ---
-      - key: FLASK_APP_KEY
-        generateValue: true
-      - key: JWT_SECRET_KEY
-        generateValue: true
-
-      # --- Database (Render la crea automáticamente abajo) ---
+      - key: FLASK_RUN_PORT
+        value: 5000
+      - key: FLASK_RUN_HOST
+        value: 0.0.0.0
       - key: DATABASE_URL
         fromService:
           type: pserv
           name: swapp-db
           property: connectionString
-
-
-      # --- Cloudinary ---
+      - key: JWT_SECRET_KEY
+        sync: false
       - key: CLOUD_NAME
         sync: false
       - key: API_KEY
         sync: false
       - key: API_SECRET
         sync: false
-
-      # --- Google OAuth ---
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: OAUTH_REDIRECT_URI
         sync: false
-
-      # --- Frontend config ---
       - key: VITE_APP_NAME
         value: Swapp
       - key: VITE_BACKEND_URL
-        fromService:
-          type: web
-          name: swapp-backend
-          property: url
+        value: https://swapp-backend.onrender.com
 
-databases:
-  - name: swapp-db
+  - type: pserv
+    name: swapp-db
+    env: postgres
     plan: free
+    disk:
+      name: swapp-db-disk
+      mountPath: /var/lib/postgresql/data
+      sizeGB: 1
