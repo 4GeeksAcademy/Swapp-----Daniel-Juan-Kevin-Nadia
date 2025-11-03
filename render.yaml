@@ -28,9 +28,11 @@ services:
 
       # --- Database (Render la crea automáticamente abajo) ---
       - key: DATABASE_URL
-        fromDatabase:
+        fromService:
+          type: pserv
           name: swapp-db
           property: connectionString
+
 
       # --- Cloudinary ---
       - key: CLOUD_NAME
