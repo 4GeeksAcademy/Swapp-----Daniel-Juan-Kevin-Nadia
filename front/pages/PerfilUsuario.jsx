@@ -171,10 +171,8 @@ const [editandoHabilidades, setEditandoHabilidades] = useState(false);
 
 // ELIMINAR HABILIDAD DEL USUARIO (desasociar)
 const handleEliminarHabilidad = async (idHabilidad) => {
-  if (!window.confirm("¿Seguro que deseas eliminar esta habilidad?")) return;
-
   try {
-    //  Llamada al backend para desasociar
+    // Llamada al backend para desasociar la habilidad
     const res = await fetch(
       `${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`,
       {
@@ -191,7 +189,7 @@ const handleEliminarHabilidad = async (idHabilidad) => {
       throw new Error("Error al desasociar habilidad");
     }
 
-    // Refrescar usuario actualizado desde backend
+    // Refrescar los datos del usuario desde backend
     const ref = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`);
     if (!ref.ok) throw new Error("Error al refrescar usuario");
     const data = await ref.json();
@@ -209,6 +207,7 @@ const handleEliminarHabilidad = async (idHabilidad) => {
     });
   }
 };
+
 
 
 //  GUARDAR CAMBIOS 
