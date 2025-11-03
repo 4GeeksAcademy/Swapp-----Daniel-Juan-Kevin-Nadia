@@ -27,4 +27,9 @@ fi
 
 pipenv run flask db upgrade
 
+# --- Datos Iniciales ---
+echo "📚 Cargando datos iniciales..."
+pipenv run python -m api.init.usuarios_init
+pipenv run python -m api.init.ins_hab_categ
+
 echo "✅ Despliegue completado exitosamente."
