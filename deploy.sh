@@ -20,6 +20,11 @@ cp -r dist/* api/static/
 
 # --- Migraciones ---
 echo "🗄️ Ejecutando migraciones de base de datos..."
-flask db upgrade
+if [ ! -d "migrations" ]; then
+  pipenv run flask db init
+  pipenv run flask db migrate
+fi
+
+pipenv run flask db upgrade
 
 echo "✅ Despliegue completado exitosamente."
