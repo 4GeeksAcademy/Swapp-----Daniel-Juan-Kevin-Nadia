@@ -3,9 +3,30 @@
 """
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from api.models import db, Usuario, Puntuacion
+from api.models import db, Usuario, Puntuacion, Intercambio
 
 puntuaciones = Blueprint('puntuaciones', __name__)
+
+
+@puntuaciones.route('/api/puntuaciones', methods=['GET'])
+def listar_puntuaciones():
+    """
+        Listar todas las Puntuaciones
+    """
+    try:
+        puntuaciones_list = Puntuacion.query.all()
+
+        if not puntuaciones_list:
+            return jsonify({"mensaje": "No hay puntuaciones registradas"}), 404
+
+        return jsonify([p.to_dict() for p in puntuaciones_list]), 200
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        return jsonify({
+            "error": "Error al obtener las puntuaciones",
+            "detalle": str(e)
+        }), 500
 
 
 @puntuaciones.route('/api/puntuaciones/<int:id_puntuacion>', methods=['GET'])
@@ -34,24 +55,39 @@ def crear_puntuacion():
     """
     data = request.get_json() or {}
     try:
-        puntuador = Usuario.query.get_or_404(data["puntuador"])
-        puntuado = Usuario.query.get_or_404(data["puntuado"])
+        required_fields = ["id_intercambio", "id_puntuador", "puntos"]
+        missing = [f for f in required_fields if f not in data]
 
-        if not puntuador:
+        if missing:
             return jsonify({
-                "error": f"Usuario {data["puntuador"]} no encontrado"}), 404
-        if not puntuado:
+                "error":
+                f"Faltan campos requeridos: {' ,'.join(missing)}"
+            }), 400
+
+        intercambio = Intercambio.query.get_or_404(data["id_intercambio"])
+        puntuador = Usuario.query.get_or_404(data["id_puntuador"])
+
+        if puntuador.id_usuario == intercambio.id_usuario_oferta:
+            id_puntuado = intercambio.id_usuario_demanda
+        else:
+            id_puntuado = intercambio.id_usuario_oferta
+
+        if not id_puntuado:
             return jsonify({
-                "error": f"Usuario {data["puntuado"]} no encontrado"}), 404
-        if not data:
-            return jsonify({"error": "Parametros vacios"}), 404
+                "error":
+                "El intercambio aún no tiene un demandante asignado"}), 400
+
+        puntuado = Usuario.query.get_or_404(id_puntuado)
 
         ptc = Puntuacion(
-            puntuador=puntuador,
-            puntuado=puntuado,
-            puntos=data["puntos"],
-            comentario=data["comentario"],
+            id_intercambio=intercambio.id_intercambio,
+            id_puntuador=puntuador.id_usuario,
+            id_puntuado=puntuado.id_usuario,
+            puntos=data["puntos"]
         )
+
+        if "comentario" in data:
+            setattr(ptc, "comentario", data["comentario"])
 
         db.session.add(ptc)
         db.session.commit()
@@ -80,7 +116,7 @@ def actualizar_puntuacion(id_puntuacion):
         if not ptc:
             return jsonify({"error": "Puntuacion no encontrada"}), 404
         if not data:
-            return jsonify({"error": "Parametros incompletos"}), 404
+            return jsonify({"error": "Parametros incompletos"}), 400
 
         fields = [
             "puntos", "comentario"
