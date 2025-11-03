@@ -1,7 +1,6 @@
 """
     DATOS DE INICIO DE LA BASE DE DATOS
 """
-from werkzeug.security import generate_password_hash
 from api.models import db, Usuario
 from api.app import app
 
@@ -78,12 +77,10 @@ def usuarios_prueba():
             email = u["correo_electronico"]
             usuario = Usuario.query.filter_by(correo_electronico=email).first()
 
-            hash_pw = generate_password_hash(u["contrasena_plana"])
-
             if usuario:
                 usuario.nombre = u["nombre"]
                 usuario.apellido = u["apellido"]
-                usuario.contrasena = hash_pw
+                usuario.contrasena = u["contrasena_plana"]
             else:
                 usuario = Usuario(
                     nombre=u["nombre"],
@@ -91,7 +88,7 @@ def usuarios_prueba():
                     correo_electronico=email,
                     acepta_terminos=True
                 )
-                usuario.contrasena = hash_pw
+                usuario.contrasena = u["contrasena_plana"]
                 db.session.add(usuario)
 
             db.session.commit()
