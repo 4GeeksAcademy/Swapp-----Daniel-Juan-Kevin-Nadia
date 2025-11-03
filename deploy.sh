@@ -11,9 +11,9 @@ pipenv install --system --deploy
 # --- Frontend ---
 echo "🧩 Compilando frontend con Vite..."
 cd front
-npm ci --omit=dev
+npm install --omit=dev
 npm run build
-cd ..J
+cd ..
 
 # --- Copia del build ---
 echo "📂 Copiando archivos compilados a Flask..."
