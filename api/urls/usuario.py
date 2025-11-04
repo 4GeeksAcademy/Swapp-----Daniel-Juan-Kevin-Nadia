@@ -118,7 +118,7 @@ def crear_usuario():
         )
 
         extra = [
-                    "descripcion", "fecha_nacimiento",
+                    "descripcion", "fecha_nacimiento", "estado",
                     "genero", "foto_perfil", "id_habilidad"
                 ]
 
