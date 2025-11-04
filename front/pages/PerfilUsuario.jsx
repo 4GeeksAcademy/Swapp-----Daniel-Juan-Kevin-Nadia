@@ -39,6 +39,8 @@ const [editandoHabilidades, setEditandoHabilidades] = useState(false);
   const [mostrarModalPuntuacion, setMostrarModalPuntuacion] = useState(false);
   const [usuarioEvaluado, setUsuarioEvaluado] = useState(null);
   
+  // Intercambios
+const [intercambios, setIntercambios] = useState([]);
 
   const navigate = useNavigate();
 
@@ -109,7 +111,7 @@ const [editandoHabilidades, setEditandoHabilidades] = useState(false);
     fetchUsuario();
   }, [dispatch, navigate]);
 
-// helper (arriba del componente o junto al resto de helpers)
+// helper
 const getTokenLimpio = () => {
   const raw = localStorage.getItem("token");
   return raw ? raw.replace(/^"|"$/g, "") : null;
@@ -140,16 +142,15 @@ const handleGuardar = async () => {
     const { dia, mes, anio, ...resto } = formData;
     const payload = { ...resto };
 
-    // Si hay fecha, la incluimos; si no, no la mandamos (o payload.fecha_nacimiento = null;)
     if (fechaFinal) {
       payload.fecha_nacimiento = fechaFinal;
     } else {
-      // opción 1 (recomendada): omitirla
+
       delete payload.fecha_nacimiento;
-      // opción 2 (si backend lo necesita): payload.fecha_nacimiento = null;
+
     }
 
-    // Token (si el update está protegido)
+
     const token = getTokenLimpio();
 
     const resp = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`, {
@@ -162,7 +163,6 @@ const handleGuardar = async () => {
     });
 
     if (!resp.ok) {
-      // leer texto para entender el 404/500
       const errText = await resp.text();
       console.error("PUT /api/usuarios/:id fallo:", resp.status, errText);
       throw new Error(`Error HTTP ${resp.status}`);
@@ -204,7 +204,6 @@ const handleGuardar = async () => {
 // ELIMINAR HABILIDAD DEL USUARIO (desasociar)
 const handleEliminarHabilidad = async (idHabilidad) => {
   try {
-    // Llamada al backend para desasociar la habilidad
     const res = await fetch(
       `${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`,
       {
@@ -252,25 +251,67 @@ const handleGuardarCambiosHabilidades = () => {
 };
 
 
+// Intercambios
+const obtenerIntercambios = async () => {
+  try {
+    const token = getTokenLimpio();
+    const res = await fetch(`${process.env.BACKEND_URL}/api/intercambios/usuario/${usuario.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setIntercambios(data);
+  } catch (err) {
+    console.error("Error al cargar intercambios:", err);
+  }
+};
 
-  //  PUNTUACIONES / INTERCAMBIOS
-  const abrirModalPuntuacion = (userDestino) => {
-    setUsuarioEvaluado(userDestino);
-    setMostrarModalPuntuacion(true);
-  };
+useEffect(() => {
+  if (usuario?.id) obtenerIntercambios();
+}, [usuario]);
 
-  const handleEnviarPuntuacion = async (payload) => {
-    try {
-      // Deja listo para conectar con API real
-      console.log("Puntuación enviada:", payload);
-      alert("✅ Puntuación enviada correctamente (pendiente conectar API)");
-    } catch (err) {
-      console.error("Error enviando puntuación:", err);
-      alert("❌ Error al enviar puntuación");
-    } finally {
-      setMostrarModalPuntuacion(false);
-    }
-  };
+
+//  Puntuaciones
+const abrirModalPuntuacion = (userDestino) => {
+  setUsuarioEvaluado(userDestino);
+  setMostrarModalPuntuacion(true);
+};
+
+const handleEnviarPuntuacion = async (payload) => {
+  try {
+    const token = getTokenLimpio();
+
+    const body = {
+      id_intercambio: usuarioEvaluado?.id_intercambio,
+      id_puntuador: usuario.id,
+      puntos: payload.puntos,
+      comentario: payload.comentario,
+    };
+
+    const res = await fetch(`${process.env.BACKEND_URL}/api/puntuaciones`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) throw new Error("Error al enviar la puntuación");
+
+    // Confirmación
+    console.log("Puntuación enviada:", body);
+    alert("✅ Puntuación enviada correctamente");
+
+    // Refresca la lista de intercambios
+    obtenerIntercambios();
+  } catch (err) {
+    console.error("Error enviando puntuación:", err);
+    alert("❌ Error al enviar puntuación");
+  } finally {
+    setMostrarModalPuntuacion(false);
+  }
+};
+
 
   if (!usuario) return <p className="text-center mt-5">Cargando perfil...</p>;
 
@@ -596,10 +637,8 @@ const handleGuardarCambiosHabilidades = () => {
                 </>
               ) : (
 
-                // Intercambios / Puntuaciones
-                <>
-
-
+              // Intercambios / Puntuaciones 
+              <div className="seccion-intercambios">
                 <h2 className="fw-bold mb-4 text-center">Intercambios</h2>
 
                 <div className="tabla-intercambios-container">
@@ -612,29 +651,54 @@ const handleGuardarCambiosHabilidades = () => {
                         <th>Acción</th>
                       </tr>
                     </thead>
+
                     <tbody>
-                      <tr>
-                        <td>#123</td>
-                        <td>Clases de guitarra</td>
-                        <td>Ana López</td>
-                        <td>
-                          <button
-                            className="btn-finalizado"
-                            onClick={() =>
-                              abrirModalPuntuacion({
-                                id_usuario: 2,
-                                nombre: "Ana López",
-                              })
-                            }
-                          >
-                            Intercambio Finalizado
-                          </button>
-                        </td>
-                      </tr>
+                      {intercambios.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="text-center">
+                            No tienes intercambios todavía.
+                          </td>
+                        </tr>
+                      ) : (
+                        intercambios.map((inter) => (
+                          <tr key={inter.id}>
+                            <td>#{inter.id}</td>
+                            <td>{inter.habilidad?.nombre || "—"}</td>
+                            <td>
+                              {inter.usuario_demandante?.nombre ||
+                                inter.usuario_postulante?.nombre ||
+                                "—"}
+                            </td>
+                            <td>
+                              {inter.estado === "finalizado" ? (
+                                <button
+                                  className="btn-finalizado"
+                                  onClick={() =>
+                                    abrirModalPuntuacion({
+                                      id_intercambio: inter.id,
+                                      id_usuario:
+                                        inter.usuario_demandante?.id ||
+                                        inter.usuario_postulante?.id,
+                                      nombre:
+                                        inter.usuario_demandante?.nombre ||
+                                        inter.usuario_postulante?.nombre,
+                                    })
+                                  }
+                                >
+                                  Intercambio Finalizado
+                                </button>
+                              ) : (
+                                <span className="text-muted">En curso</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
-              </>
+              </div>
+
             )}
           </div>
         </div>
