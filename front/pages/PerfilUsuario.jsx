@@ -111,6 +111,12 @@ const [intercambios, setIntercambios] = useState([]);
     fetchUsuario();
   }, [dispatch, navigate]);
 
+// Cargar los intercambios del usuario una vez que ya esté autenticado
+useEffect(() => {
+  if (usuario?.id_usuario) obtenerIntercambios();
+}, [usuario]);
+
+
 // helper
 const getTokenLimpio = () => {
   const raw = localStorage.getItem("token");
@@ -252,22 +258,53 @@ const handleGuardarCambiosHabilidades = () => {
 
 
 // Intercambios
+
+// === Obtener todos los intercambios del usuario autenticado ===
 const obtenerIntercambios = async () => {
   try {
-    const token = getTokenLimpio();
-    const res = await fetch(`${process.env.BACKEND_URL}/api/intercambios/usuario/${usuario.id}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    if (!usuario?.id_usuario) return;
+
+    const res = await fetch(`${env.api}/api/intercambios/usuario/${usuario.id_usuario}`, {
+      headers: { "Content-Type": "application/json" },
     });
+
+    if (!res.ok) throw new Error("Error al obtener los intercambios");
     const data = await res.json();
-    setIntercambios(data);
+
+    // Filtrar para evitar duplicados o inconsistencias (opcional)
+    const unicos = Array.isArray(data)
+      ? data.filter(
+          (v, i, arr) =>
+            arr.findIndex((x) => x.id_intercambio === v.id_intercambio) === i
+        )
+      : [];
+
+    setIntercambios(unicos);
   } catch (err) {
     console.error("Error al cargar intercambios:", err);
+    setIntercambios([]);
   }
 };
 
-useEffect(() => {
-  if (usuario?.id) obtenerIntercambios();
-}, [usuario]);
+
+
+// --- NUEVO: finalizar un intercambio ---
+const handleFinalizarIntercambio = async (intercambio) => {
+  try {
+    // Primero abrir modal de puntuación
+    abrirModalPuntuacion({
+      id_intercambio: intercambio.id_intercambio,
+      id_usuario:
+        intercambio.usuario_demandante?.id_usuario ||
+        intercambio.usuario_postulante?.id_usuario,
+      nombre:
+        intercambio.usuario_demandante?.nombre ||
+        intercambio.usuario_postulante?.nombre,
+    });
+  } catch (err) {
+    console.error("Error al finalizar intercambio:", err);
+  }
+};
 
 
 //  Puntuaciones
@@ -282,12 +319,13 @@ const handleEnviarPuntuacion = async (payload) => {
 
     const body = {
       id_intercambio: usuarioEvaluado?.id_intercambio,
-      id_puntuador: usuario.id,
-      puntos: payload.puntos,
+      id_puntuador: usuario.id_usuario,
+      puntos: payload.puntuacion,
       comentario: payload.comentario,
     };
 
-    const res = await fetch(`${process.env.BACKEND_URL}/api/puntuaciones`, {
+    //  Enviar la puntuación
+    const res = await fetch(`${env.api}/api/puntuaciones`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -298,19 +336,29 @@ const handleEnviarPuntuacion = async (payload) => {
 
     if (!res.ok) throw new Error("Error al enviar la puntuación");
 
-    // Confirmación
-    console.log("Puntuación enviada:", body);
-    alert("✅ Puntuación enviada correctamente");
+    //  Finalizar el intercambio
+    await fetch(`${env.api}/api/intercambios/${body.id_intercambio}/finalizar`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    // Refresca la lista de intercambios
+    //  Mostrar confirmación
+    alert("✅ Puntuación enviada y el intercambio ha sido finalizado.");
+
+    //  Refrescar la lista
     obtenerIntercambios();
   } catch (err) {
     console.error("Error enviando puntuación:", err);
-    alert("❌ Error al enviar puntuación");
+    alert("❌ Error al enviar la puntuación o finalizar el intercambio.");
   } finally {
     setMostrarModalPuntuacion(false);
   }
 };
+
+
 
 
   if (!usuario) return <p className="text-center mt-5">Cargando perfil...</p>;
@@ -655,46 +703,49 @@ const handleEnviarPuntuacion = async (payload) => {
                     <tbody>
                       {intercambios.length === 0 ? (
                         <tr>
-                          <td colSpan="4" className="text-center">
+                          <td colSpan="4" className="text-center text-muted">
                             No tienes intercambios todavía.
                           </td>
                         </tr>
                       ) : (
-                        intercambios.map((inter) => (
-                          <tr key={inter.id}>
-                            <td>#{inter.id}</td>
-                            <td>{inter.habilidad?.nombre || "—"}</td>
-                            <td>
-                              {inter.usuario_demandante?.nombre ||
-                                inter.usuario_postulante?.nombre ||
-                                "—"}
-                            </td>
-                            <td>
-                              {inter.estado === "finalizado" ? (
-                                <button
-                                  className="btn-finalizado"
-                                  onClick={() =>
-                                    abrirModalPuntuacion({
-                                      id_intercambio: inter.id,
-                                      id_usuario:
-                                        inter.usuario_demandante?.id ||
-                                        inter.usuario_postulante?.id,
-                                      nombre:
-                                        inter.usuario_demandante?.nombre ||
-                                        inter.usuario_postulante?.nombre,
-                                    })
-                                  }
-                                >
-                                  Intercambio Finalizado
-                                </button>
-                              ) : (
-                                <span className="text-muted">En curso</span>
-                              )}
-                            </td>
-                          </tr>
-                        ))
+                        intercambios.map((inter) => {
+                          const esCreador = inter.id_usuario_oferta === usuario.id_usuario;
+                          const habilidad = inter.habilidad?.nombre_habilidad || "—";
+                          const nombreOtroUsuario = esCreador
+                            ? inter.usuario_demanda?.nombre || "Pendiente"
+                            : inter.usuario_oferta?.nombre || "—";
+
+                          return (
+                            <tr key={inter.id_intercambio}>
+                              <td>#{inter.id_intercambio}</td>
+                              <td>{habilidad}</td>
+                              <td>{nombreOtroUsuario}</td>
+                              <td>
+                                {inter.intercambio_finalizado ? (
+                                  <span className="text-success fw-semibold">Finalizado</span>
+                                ) : (
+                                  <button
+                                    className="btn btn-oscuro btn-sm"
+                                    onClick={() =>
+                                      abrirModalPuntuacion({
+                                        id_intercambio: inter.id_intercambio,
+                                        id_usuario: esCreador
+                                          ? inter.id_usuario_demanda
+                                          : inter.id_usuario_oferta,
+                                      })
+                                    }
+                                  >
+                                    Finalizar intercambio
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
+
+
                   </table>
                 </div>
               </div>

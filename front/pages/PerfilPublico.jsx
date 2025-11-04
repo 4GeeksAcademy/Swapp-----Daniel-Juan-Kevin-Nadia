@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
-import ModalMensajeria from "../assets/components/ModalMensajeria"; // ✅ importar el modal
+import ModalMensajeria from "../assets/components/ModalMensajeria";
+import ModalIntercambio from "../assets/components/ModalIntercambio";
 import "../assets/styles/PerfilPublico.css";
 import { env } from "../environ";
 
@@ -13,6 +14,7 @@ function PerfilPublico() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [mostrarModalIntercambio, setMostrarModalIntercambio] = useState(false);
 
   useEffect(() => {
     const fetchUsuario = async () => {
@@ -81,12 +83,25 @@ function PerfilPublico() {
               <h4 className="perfil-publico-nombre mb-4">
                 {usuario.nombre} {usuario.apellido}
               </h4>
+
+              {/* Botón Contactar */}
               <button
-                className="btn btn-naranja"
+                className="btn btn-naranja mb-2"
                 onClick={() => setMostrarModal(true)}
               >
                 Contactar
               </button>
+
+                {/* Botón Iniciar Intercambio - solo visible si hay token */}
+                {localStorage.getItem("token") && (
+                  <button
+                    className="btn btn-naranja mt-2"
+                    onClick={() => setMostrarModalIntercambio(true)}
+                  >
+                    Iniciar Intercambio
+                  </button>
+                )}
+
             </div>
           </div>
 
@@ -102,8 +117,8 @@ function PerfilPublico() {
                 </span>
               )}
             </p>
-            <h2 className="text-dark fw-bold mb-4">Habilidades</h2>
 
+            <h2 className="text-dark fw-bold mb-4">Habilidades</h2>
             {usuario.habilidades && usuario.habilidades.length > 0 ? (
               <div className="habilidades-contenedor">
                 {usuario.habilidades.map((hab, index) => (
@@ -126,14 +141,24 @@ function PerfilPublico() {
         </div>
       </div>
 
-      {/* ✅ Modal de mensajería */}
+      {/* Modal de mensajería */}
       {mostrarModal && (
         <ModalMensajeria
           mostrar={mostrarModal}
           cerrar={() => setMostrarModal(false)}
-          receptorId={usuario.id_usuario} // <-- ESTE ES EL PERFIL VISUALIZADO
+          receptorId={usuario.id_usuario} // <-- PERFIL VISUALIZADO
         />
       )}
+
+      {/* Modal de Intercambio */}
+        {mostrarModalIntercambio && (
+          <ModalIntercambio
+            mostrar={mostrarModalIntercambio}
+            cerrar={() => setMostrarModalIntercambio(false)}
+            receptor={usuario} // 👈 usuario del perfil público
+          />
+        )}
+
 
       <Footer />
     </>
