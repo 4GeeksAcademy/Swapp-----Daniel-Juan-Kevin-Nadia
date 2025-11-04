@@ -11,19 +11,16 @@ mensajes = Blueprint('mensajes', __name__)
 @mensajes.route('/api/mensajes/<int:id_usuario>/enviados')
 def mensajes_enviados(id_usuario):
     """
-        Listar mensajes enviados
+        Listar mensajes enviados por el usuario
     """
     try:
         msjs = (
             Mensaje.query
-            .filter_by(id_receptor=id_usuario)
+            .filter_by(id_emisor=id_usuario)
             .order_by(Mensaje.fecha_envio.desc())
             .all()
         )
-
-        return jsonify([
-            m.to_dict(excluye=["id_receptor"])
-            for m in msjs])
+        return jsonify([m.to_dict() for m in msjs]), 200
 
     except SQLAlchemyError as e:
         db.session.rollback()
@@ -36,19 +33,16 @@ def mensajes_enviados(id_usuario):
 @mensajes.route('/api/mensajes/<int:id_usuario>/recibidos')
 def mensajes_recibidos(id_usuario):
     """
-        Listar mensajes recibidos
+        Listar mensajes recibidos por el usuario
     """
     try:
         msjs = (
             Mensaje.query
-            .filter_by(id_emisor=id_usuario)
+            .filter_by(id_receptor=id_usuario)
             .order_by(Mensaje.fecha_envio.desc())
             .all()
         )
-
-        return jsonify([
-            m.to_dict(excluye=["id_emisor"])
-            for m in msjs])
+        return jsonify([m.to_dict() for m in msjs]), 200
 
     except SQLAlchemyError as e:
         db.session.rollback()
