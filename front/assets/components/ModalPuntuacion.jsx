@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import "../styles/ModalPuntuacion.css";
-import { env } from "../../environ"; // Preparado para futura conexión con la API
+import { env } from "../../environ";
+
+const getTokenLimpio = () => {
+  const raw = localStorage.getItem("token");
+  return raw ? raw.replace(/^"|"$/g, "") : null;
+};
 
 const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
   const [puntuacion, setPuntuacion] = useState(0);
@@ -10,7 +15,6 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
 
   if (!mostrar) return null;
 
-  // Enviar puntuación
   const handleSubmit = async () => {
     if (puntuacion === 0) {
       setMensaje({
@@ -22,31 +26,41 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
 
     setCargando(true);
     try {
-      // Conexión futura con la API:
-      /*
-      const res = await fetch(`${env.api}/api/intercambios/puntuacion`, {
+      const token = getTokenLimpio();
+      const userData = JSON.parse(localStorage.getItem("user"));
+      const idPuntuador = userData?.id_usuario;
+
+      if (!idPuntuador) {
+        throw new Error("Usuario no autenticado");
+      }
+
+      const res = await fetch(`${env.api}/api/puntuaciones`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
-          id_usuario_evaluado: usuarioEvaluado?.id_usuario,
-          puntuacion,
+          id_intercambio: usuarioEvaluado?.id_intercambio,
+          id_puntuador: idPuntuador,
+          puntos: puntuacion,
           comentario,
         }),
       });
+
       const data = await res.json();
       if (!res.ok) throw new Error(data?.msj || "Error al enviar puntuación");
-      */
-
-      // Simulación temporal
-      onSubmit?.({
-        id_usuario_evaluado: usuarioEvaluado?.id_usuario,
-        puntuacion,
-        comentario,
-      });
 
       setMensaje({
         tipo: "success",
         texto: "¡Puntuación enviada correctamente!",
+      });
+
+      onSubmit?.({
+        id_intercambio: usuarioEvaluado?.id_intercambio,
+        id_usuario_evaluado: usuarioEvaluado?.id_usuario,
+        puntos: puntuacion,
+        comentario,
       });
 
       setTimeout(() => {
@@ -74,7 +88,7 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
           <span className="nombre-usuario">{usuarioEvaluado?.nombre}</span>
         </h3>
 
-        {/* === Estrellas === */}
+        {/* Estrellas */}
         <div className="modal-estrellas">
           {[1, 2, 3, 4, 5].map((n) => (
             <span
@@ -87,7 +101,7 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
           ))}
         </div>
 
-        {/* === Comentario === */}
+        {/* Comentario */}
         <textarea
           className="modal-comentario"
           placeholder="Agrega un comentario (opcional)"
@@ -96,7 +110,7 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
           maxLength={250}
         />
 
-        {/* === Mensaje === */}
+        {/* Mensaje */}
         {mensaje && (
           <div
             className={`alert mt-3 ${
@@ -108,7 +122,7 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
           </div>
         )}
 
-        {/* === Botones === */}
+        {/* Botones */}
         <div className="modal-puntuacion-botones mt-4">
           <button
             className="btn-cancelar-puntuacion"
