@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import "../styles/ModalIntercambio.css";
 import { env } from "../../environ";
 
-export default function ModalIntercambio({ mostrar, cerrar, receptor }) {
-  const [yo, setYo] = useState(null); // usuario logueado
-  const [habilidades, setHabilidades] = useState([]); // habilidades del receptor
-  const [habilidadSeleccionada, setHabilidadSeleccionada] = useState(null);
+export default function ModalIntercambio({ mostrar, cerrar }) {
+  const [yo, setYo] = useState(null);
+  const [categorias, setCategorias] = useState([]);
+  const [habilidades, setHabilidades] = useState([]);
+  const [idCategoria, setIdCategoria] = useState("");
+  const [idHabilidad, setIdHabilidad] = useState("");
   const [msg, setMsg] = useState(null);
   const [enviando, setEnviando] = useState(false);
 
@@ -29,38 +31,52 @@ export default function ModalIntercambio({ mostrar, cerrar, receptor }) {
       .catch((e) => console.error("Error al cargar usuario actual:", e));
   }, [mostrar]);
 
-  // === Cargar habilidades del usuario del perfil público (receptor) ===
+  // === Cargar categorías ===
   useEffect(() => {
-    if (!receptor?.id_usuario) return;
-    fetch(`${env.api}/api/usuarios/${receptor.id_usuario}`)
+    if (!mostrar) return;
+    fetch(`${env.api}/api/categorias`, { headers: { Accept: "application/json" } })
       .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data) => setHabilidades(data.habilidades || []))
-      .catch((e) => console.error("Error cargando habilidades:", e));
-  }, [receptor]);
+      .then((data) => setCategorias(data || []))
+      .catch((e) => console.error("Error cargando categorías:", e));
+  }, [mostrar]);
+
+  // === Manejar selección de categoría ===
+  const handleCategoriaChange = (e) => {
+    const id = parseInt(e.target.value);
+    setIdCategoria(id);
+    const categoria = categorias.find((c) => c.id_categoria === id);
+    if (categoria) {
+      setHabilidades(categoria.habilidades || []);
+    } else {
+      setHabilidades([]);
+    }
+    setIdHabilidad("");
+  };
 
   // === Cancelar o cerrar el modal ===
   const handleCerrar = () => {
     setMsg(null);
-    setHabilidadSeleccionada(null);
+    setIdCategoria("");
+    setIdHabilidad("");
     cerrar();
   };
 
-  // === Enviar solicitud de intercambio ===
+  // === Crear nuevo intercambio ===
   const handleEnviar = async () => {
     if (!yo?.id_usuario) {
-      setMsg({ tipo: "danger", contenido: "No hay sesión activa." });
+      setMsg({ tipo: "danger", contenido: "⚠️ No hay sesión activa." });
       return;
     }
-    if (!habilidadSeleccionada) {
-      setMsg({ tipo: "danger", contenido: "Selecciona una habilidad primero." });
+    if (!idHabilidad) {
+      setMsg({ tipo: "danger", contenido: "⚠️ Selecciona una habilidad." });
       return;
     }
 
     setEnviando(true);
     try {
       const body = {
-        id_usuario_postulante: yo.id_usuario, // quien envía la solicitud
-        id_habilidad: habilidadSeleccionada, // habilidad seleccionada del receptor
+        id_usuario_postulante: yo.id_usuario,
+        id_habilidad: idHabilidad,
       };
 
       const res = await fetch(`${env.api}/api/intercambios`, {
@@ -69,20 +85,20 @@ export default function ModalIntercambio({ mostrar, cerrar, receptor }) {
         body: JSON.stringify(body),
       });
 
-      if (!res.ok) throw new Error("No se pudo enviar la solicitud");
+      if (!res.ok) throw new Error("Error al crear el intercambio");
+      await res.json();
 
       setMsg({
         tipo: "success",
-        contenido: "✅ Solicitud enviada correctamente.",
+        contenido: "✅ Intercambio creado correctamente.",
       });
 
-      // cerrar modal después de breve pausa
       setTimeout(() => handleCerrar(), 1500);
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error("Error al crear intercambio:", error);
       setMsg({
         tipo: "danger",
-        contenido: "❌ Error al enviar la solicitud.",
+        contenido: "❌ No se pudo crear el intercambio.",
       });
     } finally {
       setEnviando(false);
@@ -102,10 +118,7 @@ export default function ModalIntercambio({ mostrar, cerrar, receptor }) {
         <div className="modal-content">
           {/* === HEADER === */}
           <div className="modal-header bg-naranja text-white">
-            <h5 className="modal-title">
-              Solicitud de intercambio a{" "}
-              {receptor?.nombre ? `${receptor.nombre} ${receptor.apellido || ""}` : ""}
-            </h5>
+            <h5 className="modal-title">Crear nuevo intercambio</h5>
             <button
               type="button"
               className="btn-close btn-close-white"
@@ -115,47 +128,37 @@ export default function ModalIntercambio({ mostrar, cerrar, receptor }) {
 
           {/* === BODY === */}
           <div className="modal-body">
-            {habilidades.length === 0 ? (
-              <p className="text-muted text-center">
-                Este usuario aún no tiene habilidades registradas.
-              </p>
-            ) : (
-              <>
-                <p className="fw-semibold text-center mb-3">
-                  Selecciona una habilidad para solicitar intercambio:
-                </p>
+            <label className="form-label mt-2">Categoría</label>
+            <select
+              className="form-select"
+              value={idCategoria}
+              onChange={handleCategoriaChange}
+            >
+              <option value="">Selecciona una categoría</option>
+              {categorias.map((cat) => (
+                <option key={cat.id_categoria} value={cat.id_categoria}>
+                  {cat.nombre_categoria}
+                </option>
+              ))}
+            </select>
 
-                <div className="text-start">
-                  {habilidades.map((hab) => (
-                    <div
-                      key={hab.id_habilidad}
-                      className="border rounded p-2 mb-2 d-flex align-items-start"
-                    >
-                      <input
-                        type="radio"
-                        name="habilidad"
-                        value={hab.id_habilidad}
-                        onChange={() => setHabilidadSeleccionada(hab.id_habilidad)}
-                        className="form-check-input mt-1"
-                      />
-                      <label
-                        className="ms-2"
-                        style={{ cursor: "pointer", flex: 1 }}
-                      >
-                        <strong>{hab.nombre_habilidad}</strong>
-                        <br />
-                        <small className="text-muted">
-                          {hab.descripcion || "Sin descripción"}
-                        </small>
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
+            <label className="form-label mt-3">Habilidad</label>
+            <select
+              className="form-select"
+              value={idHabilidad}
+              onChange={(e) => setIdHabilidad(parseInt(e.target.value))}
+              disabled={!idCategoria}
+            >
+              <option value="">Selecciona una habilidad</option>
+              {habilidades.map((hab) => (
+                <option key={hab.id_habilidad} value={hab.id_habilidad}>
+                  {hab.nombre_habilidad}
+                </option>
+              ))}
+            </select>
 
             {msg && (
-              <div className={`alert alert-${msg.tipo} mt-3`} role="alert">
+              <div className={`alert mt-3 alert-${msg.tipo}`} role="alert">
                 {msg.contenido}
               </div>
             )}
@@ -175,7 +178,7 @@ export default function ModalIntercambio({ mostrar, cerrar, receptor }) {
               onClick={handleEnviar}
               disabled={enviando}
             >
-              {enviando ? "Enviando..." : "Enviar solicitud"}
+              {enviando ? "Enviando..." : "Crear intercambio"}
             </button>
           </div>
         </div>

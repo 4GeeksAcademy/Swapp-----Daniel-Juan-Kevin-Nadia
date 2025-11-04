@@ -7,60 +7,167 @@ import ModalIntercambio from "../assets/components/ModalIntercambio";
 import "../assets/styles/PerfilPublico.css";
 import { env } from "../environ";
 
-function PerfilPublico() {
-  const { id_usuario } = useParams();
-  const navigate = useNavigate();
-  const [usuario, setUsuario] = useState(null);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState(null);
-  const [mostrarModal, setMostrarModal] = useState(false);
-  const [mostrarModalIntercambio, setMostrarModalIntercambio] = useState(false);
+  function PerfilPublico() {
+    const { id_usuario } = useParams();
+    const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUsuario = async () => {
+    // === Estados principales ===
+    const [usuario, setUsuario] = useState(null);
+    const [cargando, setCargando] = useState(true);
+    const [error, setError] = useState(null);
+    const [mostrarModal, setMostrarModal] = useState(false);
+    const [mostrarModalIntercambio, setMostrarModalIntercambio] = useState(false);
+    const [msg, setMsg] = useState(null);
+
+
+    // === Helper para obtener usuario autenticado ===
+    const getUsuarioActual = async () => {
+      const rawToken = localStorage.getItem("token");
+      const token = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
+      if (!token) return null;
+
       try {
-        const res = await fetch(`${env.api}/api/usuarios/${id_usuario}`);
-        if (!res.ok) throw new Error("Error al obtener usuario");
+        const res = await fetch(`${env.api}/api/autorizacion`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        });
+        if (!res.ok) return null;
         const data = await res.json();
-        setUsuario(data);
+        return data; // <-- este objeto contiene id_usuario
       } catch (err) {
-        console.error(err);
-        setError("No se pudo cargar el perfil del usuario.");
-      } finally {
-        setCargando(false);
+        console.error("Error obteniendo usuario actual:", err);
+        return null;
       }
     };
 
-    fetchUsuario();
-  }, [id_usuario]);
 
-  const handleContactar = () => {
-    const usuarioLocal = localStorage.getItem("usuario");
+    //  Intercambios creados por el usuario público
+    const [intercambios, setIntercambios] = useState([]);
 
-    if (!usuarioLocal) {
-      alert("⚠️ Debes iniciar sesión para contactar con otros usuarios.");
-      navigate("/login");
-      return;
-    }
+    // === Obtener datos del usuario ===
+    useEffect(() => {
+      const fetchUsuario = async () => {
+        try {
+          const res = await fetch(`${env.api}/api/usuarios/${id_usuario}`);
+          if (!res.ok) throw new Error("Error al obtener usuario");
+          const data = await res.json();
+          setUsuario(data);
+        } catch (err) {
+          console.error(err);
+          setError("No se pudo cargar el perfil del usuario.");
+        } finally {
+          setCargando(false);
+        }
+      };
+      fetchUsuario();
+    }, [id_usuario]);
 
-    // ✅ abrir modal en lugar de alerta
-    setMostrarModal(true);
-  };
+    // Obtener intercambios creados por este usuario (postulante)
+    useEffect(() => {
+      if (!id_usuario) return;
+      const obtenerIntercambios = async () => {
+        try {
+          const res = await fetch(
+            `${env.api}/api/intercambios/postulante/${id_usuario}`,
+            { headers: { "Content-Type": "application/json" } }
+          );
+          if (!res.ok) throw new Error("Error al obtener los intercambios");
+          const data = await res.json();
+          setIntercambios(Array.isArray(data) ? data : []);
+        } catch (err) {
+          console.error("Error al cargar intercambios:", err);
+          setIntercambios([]);
+        }
+      };
+      obtenerIntercambios();
+    }, [id_usuario]);
 
-  if (cargando)
-    return (
-      <div className="d-flex flex-column justify-content-center align-items-center">
-        <div
-          className="spinner-border "
-          style={{ color: "#ff7517" }}
-          role="status"
-        >
-          <span className="visually-hidden"></span>
+    // === Contactar ===
+    const handleContactar = () => {
+      const usuarioLocal = localStorage.getItem("usuario");
+
+      if (!usuarioLocal) {
+        alert("⚠️ Debes iniciar sesión para contactar con otros usuarios.");
+        navigate("/login");
+        return;
+      }
+
+      // ✅ abrir modal en lugar de alerta
+      setMostrarModal(true);
+    };
+
+    // === Unirse a un intercambio de este usuario ===
+    const handleUnirse = async (id_intercambio) => {
+      try {
+        const yo = await getUsuarioActual(); // ✅ obtenemos usuario autenticado
+
+        if (!yo?.id_usuario) {
+          setMsg({
+            tipo: "warning",
+            contenido: "⚠️ Debes iniciar sesión para concretar un intercambio.",
+          });
+          setTimeout(() => setMsg(null), 4000);
+          return;
+        }
+
+        const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+
+        // ✅ Mandar el ID del usuario logueado en el campo correcto
+        const body = {
+          id_usuario_demanda: yo.id_usuario,
+        };
+
+        const res = await fetch(`${env.api}/api/intercambios/unirse/${id_intercambio}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error("Error backend:", text);
+          throw new Error(`Error HTTP ${res.status}`);
+        }
+
+        // ✅ Mensaje visual de éxito
+        setMsg({
+          tipo: "success",
+          contenido: "✅ Intercambio concretado correctamente.",
+        });
+        setTimeout(() => setMsg(null), 3000);
+      } catch (err) {
+        console.error("Error uniendo al intercambio:", err);
+        setMsg({
+          tipo: "danger",
+          contenido: "❌ No se pudo concretar el intercambio.",
+        });
+        setTimeout(() => setMsg(null), 4000);
+      }
+    };
+
+
+
+    if (cargando)
+      return (
+        <div className="d-flex flex-column justify-content-center align-items-center">
+          <div
+            className="spinner-border"
+            style={{ color: "#ff7517" }}
+            role="status"
+          >
+            <span className="visually-hidden"></span>
+          </div>
+          <h4 className="mt-3">Cargando perfil...</h4>
         </div>
-        <h4 className="mt-3">Cargando perfil...</h4>
-      </div>
-    );
-  if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
+      );
+
+    if (error) return <p className="text-center mt-5 text-danger">{error}</p>;
 
   return (
     <>
@@ -92,21 +199,12 @@ function PerfilPublico() {
                 Contactar
               </button>
 
-                {/* Botón Iniciar Intercambio - solo visible si hay token */}
-                {localStorage.getItem("token") && (
-                  <button
-                    className="btn btn-naranja mt-2"
-                    onClick={() => setMostrarModalIntercambio(true)}
-                  >
-                    Iniciar Intercambio
-                  </button>
-                )}
-
             </div>
           </div>
 
           {/* Contenido principal */}
           <div className="col-12 col-md-8 perfil-publico-content p-4 text-center">
+            {/* === Descripción === */}
             <h2 className="text-dark fw-bold mb-4">Descripción</h2>
             <p>
               {usuario.descripcion ? (
@@ -118,6 +216,7 @@ function PerfilPublico() {
               )}
             </p>
 
+            {/* === Habilidades === */}
             <h2 className="text-dark fw-bold mb-4">Habilidades</h2>
             {usuario.habilidades && usuario.habilidades.length > 0 ? (
               <div className="habilidades-contenedor">
@@ -137,9 +236,60 @@ function PerfilPublico() {
                 Este usuario aún no ha agregado habilidades.
               </p>
             )}
+
+            {/* === Intercambios creados por este usuario === */}
+           {/* <h2 className="text-dark fw-bold mb-4 mt-5">Intercambios</h2>
+
+            {intercambios.length === 0 ? (
+              <p className="text-muted">
+                Este usuario aún no ha creado intercambios.
+              </p>
+            ) : (
+              <div className="tabla-intercambios-container mt-3">
+                <table className="tabla-intercambios w-100">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Habilidad que busca</th>
+                      <th>Estado</th>
+                      <th>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {intercambios.map((inter) => (
+                      <tr key={inter.id_intercambio}>
+                        <td>#{inter.id_intercambio}</td>
+                        <td>{inter.habilidad?.nombre_habilidad || "—"}</td>
+                        <td>{inter.estado || "Activo"}</td>
+                        <td>
+                          {localStorage.getItem("token") ? (
+                            <button
+                              className="btn btn-naranja btn-sm"
+                              onClick={() => handleUnirse(inter.id_intercambio)}
+                            >
+                              Concretar intercambio
+                            </button>
+                          ) : (
+                            <span className="text-muted">
+                              Inicia sesión para unirte
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {msg && msg.contenido && (
+                  <div className={`alert alert-${msg.tipo} text-center mt-3`} role="alert">
+                    {msg.contenido}
+                  </div>
+                )}
+              </div>
+)} */}
           </div>
-        </div>
-      </div>
+          </div>
+          </div>
+
 
       {/* Modal de mensajería */}
       {mostrarModal && (
@@ -150,14 +300,6 @@ function PerfilPublico() {
         />
       )}
 
-      {/* Modal de Intercambio */}
-        {mostrarModalIntercambio && (
-          <ModalIntercambio
-            mostrar={mostrarModalIntercambio}
-            cerrar={() => setMostrarModalIntercambio(false)}
-            receptor={usuario} // 👈 usuario del perfil público
-          />
-        )}
 
 
       <Footer />

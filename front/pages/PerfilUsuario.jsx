@@ -10,6 +10,7 @@ import ModalAgregarHabilidad from "../assets/components/ModalAgregarHabilidad";
 import BotonMensajeria from "../assets/components/BotonMensajeria";
 import ModalMensajeria from "../assets/components/ModalMensajeria";
 import ModalPuntuacion from "../assets/components/ModalPuntuacion";
+import ModalIntercambio from "../assets/components/ModalIntercambio";
 
 function PerfilUsuario() {
   const { _, dispatch } = useStore();
@@ -41,6 +42,7 @@ const [editandoHabilidades, setEditandoHabilidades] = useState(false);
   
   // Intercambios
 const [intercambios, setIntercambios] = useState([]);
+const [mostrarModalIntercambio, setMostrarModalIntercambio] = useState(false);
 
   const navigate = useNavigate();
 
@@ -263,28 +265,18 @@ const handleGuardarCambiosHabilidades = () => {
 const obtenerIntercambios = async () => {
   try {
     if (!usuario?.id_usuario) return;
-
     const res = await fetch(`${env.api}/api/intercambios/usuario/${usuario.id_usuario}`, {
       headers: { "Content-Type": "application/json" },
     });
-
     if (!res.ok) throw new Error("Error al obtener los intercambios");
     const data = await res.json();
-
-    // Filtrar para evitar duplicados o inconsistencias (opcional)
-    const unicos = Array.isArray(data)
-      ? data.filter(
-          (v, i, arr) =>
-            arr.findIndex((x) => x.id_intercambio === v.id_intercambio) === i
-        )
-      : [];
-
-    setIntercambios(unicos);
+    setIntercambios(Array.isArray(data) ? data : []);
   } catch (err) {
     console.error("Error al cargar intercambios:", err);
     setIntercambios([]);
   }
 };
+
 
 
 
@@ -305,6 +297,43 @@ const handleFinalizarIntercambio = async (intercambio) => {
     console.error("Error al finalizar intercambio:", err);
   }
 };
+
+// === Eliminar un intercambio creado ===
+const handleEliminarIntercambio = async (id_intercambio) => {
+  try {
+    const res = await fetch(`${env.api}/api/intercambios/${id_intercambio}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (!res.ok) throw new Error("Error al eliminar el intercambio");
+
+    // ✅ Mostrar mensaje visual en pantalla (sin alertas del navegador)
+    setMsg({
+      tipo: "success",
+      contenido: "✅ Intercambio eliminado correctamente.",
+    });
+
+    // Refrescar la lista de intercambios
+    obtenerIntercambios();
+
+    // Ocultar el mensaje después de unos segundos
+    setTimeout(() => {
+      setMsg(null);
+    }, 3000);
+  } catch (err) {
+    console.error("Error eliminando intercambio:", err);
+    setMsg({
+      tipo: "danger",
+      contenido: "❌ No se pudo eliminar el intercambio.",
+    });
+
+    setTimeout(() => {
+      setMsg(null);
+    }, 4000);
+  }
+};
+
 
 
 //  Puntuaciones
@@ -689,13 +718,25 @@ const handleEnviarPuntuacion = async (payload) => {
               <div className="seccion-intercambios">
                 <h2 className="fw-bold mb-4 text-center">Intercambios</h2>
 
+                {/* Botón para crear nuevo intercambio */}
+                <div className="text-center mb-4">
+                  <button
+                    className="btn-naranja"
+                    onClick={() => setMostrarModalIntercambio(true)}
+                  >
+                    ➕ Crear nuevo intercambio
+                  </button>
+                </div>
+
+                {/* Tabla de intercambios */}
                 <div className="tabla-intercambios-container">
                   <table className="tabla-intercambios">
                     <thead>
                       <tr>
                         <th>ID</th>
-                        <th>Servicio</th>
-                        <th>Persona</th>
+                        <th>Habilidad que busca</th>
+                        <th>Otro usuario</th>
+                        <th>Estado</th>
                         <th>Acción</th>
                       </tr>
                     </thead>
@@ -703,52 +744,60 @@ const handleEnviarPuntuacion = async (payload) => {
                     <tbody>
                       {intercambios.length === 0 ? (
                         <tr>
-                          <td colSpan="4" className="text-center text-muted">
-                            No tienes intercambios todavía.
+                          <td colSpan="5" className="text-center text-muted">
+                            No tienes intercambios creados todavía.
                           </td>
                         </tr>
                       ) : (
-                        intercambios.map((inter) => {
-                          const esCreador = inter.id_usuario_oferta === usuario.id_usuario;
-                          const habilidad = inter.habilidad?.nombre_habilidad || "—";
-                          const nombreOtroUsuario = esCreador
-                            ? inter.usuario_demanda?.nombre || "Pendiente"
-                            : inter.usuario_oferta?.nombre || "—";
+                        intercambios.map((inter) => (
+                          <tr key={inter.id_intercambio}>
+                            <td>#{inter.id_intercambio}</td>
+                            <td>{inter.habilidad?.nombre_habilidad || "—"}</td>
 
-                          return (
-                            <tr key={inter.id_intercambio}>
-                              <td>#{inter.id_intercambio}</td>
-                              <td>{habilidad}</td>
-                              <td>{nombreOtroUsuario}</td>
-                              <td>
-                                {inter.intercambio_finalizado ? (
-                                  <span className="text-success fw-semibold">Finalizado</span>
-                                ) : (
+                            {/* Mostrar el otro usuario si ya alguien se unió */}
+                            <td>
+                              {inter.usuario_demandante
+                                ? `${inter.usuario_demandante.nombre} ${inter.usuario_demandante.apellido || ""}`
+                                : inter.usuario_oferta
+                                ? `${inter.usuario_oferta.nombre} ${inter.usuario_oferta.apellido || ""}`
+                                : "—"}
+                            </td>
+
+                            <td>{inter.estado || "Activo"}</td>
+
+                            <td className="d-flex gap-2 justify-content-center flex-wrap">
+                              {!inter.intercambio_finalizado ? (
+                                <>
                                   <button
                                     className="btn btn-oscuro btn-sm"
+                                    onClick={() => handleFinalizarIntercambio(inter)}
+                                  >
+                                    Finalizar
+                                  </button>
+
+                                  <button
+                                    className="btn btn-outline-danger btn-sm"
                                     onClick={() =>
-                                      abrirModalPuntuacion({
-                                        id_intercambio: inter.id_intercambio,
-                                        id_usuario: esCreador
-                                          ? inter.id_usuario_demanda
-                                          : inter.id_usuario_oferta,
-                                      })
+                                      handleEliminarIntercambio(inter.id_intercambio)
                                     }
                                   >
-                                    Finalizar intercambio
+                                    Eliminar
                                   </button>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })
+                                </>
+                              ) : (
+                                <span className="text-success fw-semibold">Finalizado</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
                       )}
                     </tbody>
-
-
                   </table>
                 </div>
               </div>
+
+
+
 
             )}
           </div>
@@ -821,6 +870,16 @@ const handleEnviarPuntuacion = async (payload) => {
           cerrar={() => setMostrarModalMensajes(false)}
         />
       )}
+      
+      {mostrarModalIntercambio && (
+      <ModalIntercambio
+        mostrar={mostrarModalIntercambio}
+        cerrar={() => {
+          setMostrarModalIntercambio(false);
+          obtenerIntercambios(); // refrescar lista al cerrar
+        }}
+      />
+    )}
 
       <Footer />
     </>
