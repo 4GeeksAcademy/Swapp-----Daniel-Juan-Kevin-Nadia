@@ -28,7 +28,7 @@ function PerfilUsuario() {
   // Habilidades
   const [mostrarModalHabilidad, setMostrarModalHabilidad] = useState(false);
  
-  // ...otros estados habilidades
+  // otros estados habilidades
 const [editandoHabilidades, setEditandoHabilidades] = useState(false);
 
 
@@ -39,10 +39,12 @@ const [editandoHabilidades, setEditandoHabilidades] = useState(false);
   const [mostrarModalPuntuacion, setMostrarModalPuntuacion] = useState(false);
   const [usuarioEvaluado, setUsuarioEvaluado] = useState(null);
   
+  // Intercambios
+const [intercambios, setIntercambios] = useState([]);
 
   const navigate = useNavigate();
 
-  // ========= Cargar usuario (no modificar esta lógica) =========
+  // Cargar usuario 
   useEffect(() => {
     const rawToken = localStorage.getItem("token");
     const usuarioToken = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
@@ -109,46 +111,76 @@ const [editandoHabilidades, setEditandoHabilidades] = useState(false);
     fetchUsuario();
   }, [dispatch, navigate]);
 
+// helper
+const getTokenLimpio = () => {
+  const raw = localStorage.getItem("token");
+  return raw ? raw.replace(/^"|"$/g, "") : null;
+};
+
+
   // Handlers de datos personales 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleGuardar = async () => {
-    try {
-      if (!formData.nombre || !formData.apellido || !formData.correo_electronico) {
-        alert("Por favor completa todos los campos obligatorios.");
-        return;
-      }
 
-      let fechaFinal = formData.fecha_nacimiento;
-      if (formData.dia && formData.mes && formData.anio) {
-        fechaFinal = `${formData.anio}-${String(formData.mes).padStart(2, "0")}-${String(
-          formData.dia
-        ).padStart(2, "0")}`;
-      }
-
-      const { dia, mes, anio, ...dataSinCamposExtra } = formData;
-      const usuarioActualizado = {
-        ...dataSinCamposExtra,
-        fecha_nacimiento: fechaFinal,
-      };
-
-      const response = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(usuarioActualizado),
-      });
-
-      const dataActualizada = await response.json();
-      setUsuario(dataActualizada?.actualizado);
-      dispatch({ type: "SET_USUARIO", payload: dataActualizada?.actualizado });
-      setEditando(false);
-      setMsg({ tipo: "success", contenido: dataActualizada.msj });
-    } catch (error) {
-      console.error("Error al guardar:", error);
-      setMsg({ tipo: "danger", contenido: "No se pudo guardar la información" });
+//Guardar datos personales usando endpoints de usuarios 
+const handleGuardar = async () => {
+  try {
+    // Validación mínima
+    if (!formData.nombre || !formData.apellido || !formData.correo_electronico) {
+      setMsg({ tipo: "danger", contenido: "Por favor completa todos los campos obligatorios." });
+      return;
     }
-  };
+
+    // Construir fecha SOLO si hay día/mes/año
+    let fechaFinal = null;
+    if (formData.dia && formData.mes && formData.anio) {
+      fechaFinal = `${formData.anio}-${String(formData.mes).padStart(2, "0")}-${String(formData.dia).padStart(2, "0")}`;
+    }
+
+    // Armar payload sin dia/mes/anio
+    const { dia, mes, anio, ...resto } = formData;
+    const payload = { ...resto };
+
+    if (fechaFinal) {
+      payload.fecha_nacimiento = fechaFinal;
+    } else {
+
+      delete payload.fecha_nacimiento;
+
+    }
+
+
+    const token = getTokenLimpio();
+
+    const resp = await fetch(`${env.api}/api/usuarios/${usuario.id_usuario}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!resp.ok) {
+      const errText = await resp.text();
+      console.error("PUT /api/usuarios/:id fallo:", resp.status, errText);
+      throw new Error(`Error HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+
+    // Actualizar estado
+    setUsuario(data?.actualizado ?? usuario);
+    dispatch({ type: "SET_USUARIO", payload: data?.actualizado ?? usuario });
+    setEditando(false);
+    setMsg({ tipo: "success", contenido: data?.msj || "Cambios guardados correctamente." });
+  } catch (e) {
+    console.error("Error al guardar:", e);
+    setMsg({ tipo: "danger", contenido: "No se pudo guardar la información." });
+  }
+};
+
 
   //  Foto de perfil
   const handleEditarFoto = () => {
@@ -172,7 +204,6 @@ const [editandoHabilidades, setEditandoHabilidades] = useState(false);
 // ELIMINAR HABILIDAD DEL USUARIO (desasociar)
 const handleEliminarHabilidad = async (idHabilidad) => {
   try {
-    // Llamada al backend para desasociar la habilidad
     const res = await fetch(
       `${env.api}/api/usuarios/${usuario.id_usuario}/habilidad`,
       {
@@ -220,25 +251,67 @@ const handleGuardarCambiosHabilidades = () => {
 };
 
 
+// Intercambios
+const obtenerIntercambios = async () => {
+  try {
+    const token = getTokenLimpio();
+    const res = await fetch(`${process.env.BACKEND_URL}/api/intercambios/usuario/${usuario.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setIntercambios(data);
+  } catch (err) {
+    console.error("Error al cargar intercambios:", err);
+  }
+};
 
-  //  PUNTUACIONES / INTERCAMBIOS
-  const abrirModalPuntuacion = (userDestino) => {
-    setUsuarioEvaluado(userDestino);
-    setMostrarModalPuntuacion(true);
-  };
+useEffect(() => {
+  if (usuario?.id) obtenerIntercambios();
+}, [usuario]);
 
-  const handleEnviarPuntuacion = async (payload) => {
-    try {
-      // Deja listo para conectar con API real
-      console.log("Puntuación enviada:", payload);
-      alert("✅ Puntuación enviada correctamente (pendiente conectar API)");
-    } catch (err) {
-      console.error("Error enviando puntuación:", err);
-      alert("❌ Error al enviar puntuación");
-    } finally {
-      setMostrarModalPuntuacion(false);
-    }
-  };
+
+//  Puntuaciones
+const abrirModalPuntuacion = (userDestino) => {
+  setUsuarioEvaluado(userDestino);
+  setMostrarModalPuntuacion(true);
+};
+
+const handleEnviarPuntuacion = async (payload) => {
+  try {
+    const token = getTokenLimpio();
+
+    const body = {
+      id_intercambio: usuarioEvaluado?.id_intercambio,
+      id_puntuador: usuario.id,
+      puntos: payload.puntos,
+      comentario: payload.comentario,
+    };
+
+    const res = await fetch(`${process.env.BACKEND_URL}/api/puntuaciones`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) throw new Error("Error al enviar la puntuación");
+
+    // Confirmación
+    console.log("Puntuación enviada:", body);
+    alert("✅ Puntuación enviada correctamente");
+
+    // Refresca la lista de intercambios
+    obtenerIntercambios();
+  } catch (err) {
+    console.error("Error enviando puntuación:", err);
+    alert("❌ Error al enviar puntuación");
+  } finally {
+    setMostrarModalPuntuacion(false);
+  }
+};
+
 
   if (!usuario) return <p className="text-center mt-5">Cargando perfil...</p>;
 
@@ -564,10 +637,8 @@ const handleGuardarCambiosHabilidades = () => {
                 </>
               ) : (
 
-                // Intercambios / Puntuaciones
-                <>
-
-
+              // Intercambios / Puntuaciones 
+              <div className="seccion-intercambios">
                 <h2 className="fw-bold mb-4 text-center">Intercambios</h2>
 
                 <div className="tabla-intercambios-container">
@@ -580,29 +651,54 @@ const handleGuardarCambiosHabilidades = () => {
                         <th>Acción</th>
                       </tr>
                     </thead>
+
                     <tbody>
-                      <tr>
-                        <td>#123</td>
-                        <td>Clases de guitarra</td>
-                        <td>Ana López</td>
-                        <td>
-                          <button
-                            className="btn-finalizado"
-                            onClick={() =>
-                              abrirModalPuntuacion({
-                                id_usuario: 2,
-                                nombre: "Ana López",
-                              })
-                            }
-                          >
-                            Intercambio Finalizado
-                          </button>
-                        </td>
-                      </tr>
+                      {intercambios.length === 0 ? (
+                        <tr>
+                          <td colSpan="4" className="text-center">
+                            No tienes intercambios todavía.
+                          </td>
+                        </tr>
+                      ) : (
+                        intercambios.map((inter) => (
+                          <tr key={inter.id}>
+                            <td>#{inter.id}</td>
+                            <td>{inter.habilidad?.nombre || "—"}</td>
+                            <td>
+                              {inter.usuario_demandante?.nombre ||
+                                inter.usuario_postulante?.nombre ||
+                                "—"}
+                            </td>
+                            <td>
+                              {inter.estado === "finalizado" ? (
+                                <button
+                                  className="btn-finalizado"
+                                  onClick={() =>
+                                    abrirModalPuntuacion({
+                                      id_intercambio: inter.id,
+                                      id_usuario:
+                                        inter.usuario_demandante?.id ||
+                                        inter.usuario_postulante?.id,
+                                      nombre:
+                                        inter.usuario_demandante?.nombre ||
+                                        inter.usuario_postulante?.nombre,
+                                    })
+                                  }
+                                >
+                                  Intercambio Finalizado
+                                </button>
+                              ) : (
+                                <span className="text-muted">En curso</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
-              </>
+              </div>
+
             )}
           </div>
         </div>

@@ -92,6 +92,16 @@ function PerfilPublico() {
 
           {/* Contenido principal */}
           <div className="col-12 col-md-8 perfil-publico-content p-4 text-center">
+            <h2 className="text-dark fw-bold mb-4">Descripción</h2>
+            <p>
+              {usuario.descripcion ? (
+                usuario.descripcion
+              ) : (
+                <span className="text-muted">
+                  Este usuario no tiene una descripción.
+                </span>
+              )}
+            </p>
             <h2 className="text-dark fw-bold mb-4">Habilidades</h2>
 
             {usuario.habilidades && usuario.habilidades.length > 0 ? (

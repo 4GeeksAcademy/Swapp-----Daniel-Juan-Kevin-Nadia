@@ -1,3 +1,9 @@
+### Obtener Todas las Puntuaciones (GET)
+GET http://localhost:5000/api/puntuaciones
+Accept: application/json
+
+###
+
 ### Obtener una Puntuacion por ID (GET)
 GET http://localhost:5000/api/puntuaciones/1
 Accept: application/json
@@ -10,8 +16,8 @@ Content-Type: application/json
 Accept: application/json
 
 {
-    "id_intercambio": 1,
-    "puntuador": 1,
+    "id_intercambio": 4,
+    "id_puntuador": 2,
     "puntos": 4,
     "comentario": "Estuvo bien!"
 }
@@ -31,5 +37,5 @@ Accept: application/json
 ###
 
 ### Eliminar una Puntuación (DELETE)
-DELETE http://localhost:5000/api/puntuaciones/2
+DELETE http://localhost:5000/api/puntuaciones/1
 Accept: application/json
