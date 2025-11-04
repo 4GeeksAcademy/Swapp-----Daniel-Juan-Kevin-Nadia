@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../assets/components/Navbar";
 import Footer from "../assets/components/Footer";
+import ModalMensajeria from "../assets/components/ModalMensajeria"; // ✅ importar el modal
 import "../assets/styles/PerfilPublico.css";
 import { env } from "../environ";
 
@@ -11,6 +12,7 @@ function PerfilPublico() {
   const [usuario, setUsuario] = useState(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
+  const [mostrarModal, setMostrarModal] = useState(false);
 
   useEffect(() => {
     const fetchUsuario = async () => {
@@ -39,10 +41,8 @@ function PerfilPublico() {
       return;
     }
 
-    // Aquí irá la vista de mensajería en el futuro
-    alert(
-      "📩 Funcionalidad de mensajería en desarrollo. Pronto podrás enviar mensajes."
-    );
+    // ✅ abrir modal en lugar de alerta
+    setMostrarModal(true);
   };
 
   if (cargando)
@@ -81,8 +81,11 @@ function PerfilPublico() {
               <h4 className="perfil-publico-nombre mb-4">
                 {usuario.nombre} {usuario.apellido}
               </h4>
-              <button className="btn-contactar mb-3" onClick={handleContactar}>
-                ✉️ Contactar
+              <button
+                className="btn btn-naranja"
+                onClick={() => setMostrarModal(true)}
+              >
+                Contactar
               </button>
             </div>
           </div>
@@ -112,6 +115,16 @@ function PerfilPublico() {
           </div>
         </div>
       </div>
+
+      {/* ✅ Modal de mensajería */}
+      {mostrarModal && (
+        <ModalMensajeria
+          mostrar={mostrarModal}
+          cerrar={() => setMostrarModal(false)}
+          receptorId={usuario.id_usuario} // <-- ESTE ES EL PERFIL VISUALIZADO
+        />
+      )}
+
       <Footer />
     </>
   );
