@@ -13,7 +13,7 @@ USUARIOS = [
             buscando nuevos retos.",
         "correo_electronico": "kevin@demo.com",
         "contrasena_plana": "kevin123",
-        "foto_perfil": "",
+        "foto_perfil": "/Hombre1.png",
         "habilidades": ["Desarrollo web", "Bases de datos", "Java"]
     },
     {
@@ -23,7 +23,7 @@ USUARIOS = [
         "descripcion": "Programadora, gamer y fan de los gatos.",
         "correo_electronico": "maddy@demo.com",
         "contrasena_plana": "maddy123",
-        "foto_perfil": "",
+        "foto_perfil": "/Mujer1.png",
         "habilidades": ["Diseño gráfico", "Fotografía", "Ilustración"]
     },
     {
@@ -34,13 +34,13 @@ USUARIOS = [
             nuevo cada día.",
         "correo_electronico": "juan@demo.com",
         "contrasena_plana": "juan123",
-        "foto_perfil": "",
+        "foto_perfil": "/Hombre2.png",
         "habilidades": ["Redacción", "Marketing digital", "SEO"]
     },
     {
         "nombre": "Nadia",
         "apellido": "Koukouss",
-        "foto_perfil": "https://res.cloudinary.com/dcwx0hex8/image/upload/v1762267798/usuarios_perfil/usuario_4_recorte.jpg",
+        "foto_perfil": "/Mujer2.png",
         "estado": "en-linea",
         "descripcion": "Creativa, soñadora y amante del arte en todas sus \
             formas",
@@ -55,7 +55,7 @@ USUARIOS = [
         "descripcion": "Jugador de ajedrez y amante de los libros de misterio",
         "correo_electronico": "daniel@demo.com",
         "contrasena_plana": "daniel123",
-        "foto_perfil": "",
+        "foto_perfil": "/Hombre3.png",
         "habilidades": ["Ciberseguridad", "Administración de sistemas"]
     },
     {
@@ -66,7 +66,7 @@ USUARIOS = [
             pequeñas cosas.",
         "correo_electronico": "lucia@demo.com",
         "contrasena_plana": "lucia123",
-        "foto_perfil": "",
+        "foto_perfil": "/Mujer3.png",
         "habilidades": [
             "Diseño UX/UI",
             "Prototipado",
@@ -81,7 +81,7 @@ USUARIOS = [
             lugares con buena comida.",
         "correo_electronico": "carlos@demo.com",
         "contrasena_plana": "carlos123",
-        "foto_perfil": "",
+        "foto_perfil": "/Hombre4.png",
         "habilidades": ["Gestión de proyectos", "Liderazgo", "Scrum"]
     },
     {
@@ -92,7 +92,7 @@ USUARIOS = [
         "descripcion": "Periodista viajera. Siempre con la cámara lista y \
             la mente abierta.",
         "contrasena_plana": "sofia123",
-        "foto_perfil": "",
+        "foto_perfil": "/Mujer4.png",
         "habilidades": [
             "Atención al cliente",
             "Ventas",
@@ -106,7 +106,7 @@ USUARIOS = [
         "descripcion": "Fotógrafo urbano en busca de los mejores atardeceres.",
         "correo_electronico": "andres@demo.com",
         "contrasena_plana": "andres123",
-        "foto_perfil": "",
+        "foto_perfil": "/Hombre5.png",
         "habilidades": ["Edición de video", "Animación", "Producción audiovisual"]
     },
     {
@@ -116,7 +116,7 @@ USUARIOS = [
         "descripcion": "Arquitecta enamorada del diseño minimalista y las plantas.",
         "correo_electronico": "valeria@demo.com",
         "contrasena_plana": "valeria123",
-        "foto_perfil": "",
+        "foto_perfil": "/Mujer5.png",
         "habilidades": ["Contabilidad", "Finanzas", "Análisis de datos"]
     }
 ]
