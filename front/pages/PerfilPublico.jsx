@@ -99,57 +99,57 @@ import { env } from "../environ";
       setMostrarModal(true);
     };
 
-    // === Unirse a un intercambio de este usuario ===
+
 // === Unirse a un intercambio ===
-const handleUnirse = async (id_intercambio) => {
-  try {
-    const yo = await getUsuarioActual(); // obtiene usuario actual con /api/autorizacion
+    const handleUnirse = async (id_intercambio) => {
+      try {
+        const yo = await getUsuarioActual(); // obtiene usuario actual con /api/autorizacion
 
-    if (!yo?.id_usuario) {
-      setMsg({
-        tipo: "warning",
-        contenido: "⚠️ Debes iniciar sesión para concretar un intercambio.",
-      });
-      setTimeout(() => setMsg(null), 4000);
-      return;
-    }
+        if (!yo?.id_usuario) {
+          setMsg({
+            tipo: "warning",
+            contenido: "⚠️ Debes iniciar sesión para concretar un intercambio.",
+          });
+          setTimeout(() => setMsg(null), 4000);
+          return;
+        }
 
-    const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
+        const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
 
-    // ✅ Campo correcto según tu backend
-    const body = {
-      id_usuario: yo.id_usuario,
+        // ✅ Campo correcto según tu backend
+        const body = {
+          id_usuario: yo.id_usuario,
+        };
+
+        const res = await fetch(`${env.api}/api/intercambios/unirse/${id_intercambio}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(body),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || "Error al unirse al intercambio");
+
+        // ✅ Mostrar mensaje real del backend
+        setMsg({
+          tipo: "success",
+          contenido: `✅ ${data.mensaje || "Intercambio concretado correctamente."}`,
+        });
+
+        setTimeout(() => setMsg(null), 3000);
+      } catch (err) {
+        console.error("Error uniendo al intercambio:", err);
+        setMsg({
+          tipo: "danger",
+          contenido: "❌ No se pudo concretar el intercambio.",
+        });
+        setTimeout(() => setMsg(null), 4000);
+      }
     };
-
-    const res = await fetch(`${env.api}/api/intercambios/unirse/${id_intercambio}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.error || "Error al unirse al intercambio");
-
-    // ✅ Mostrar mensaje real del backend
-    setMsg({
-      tipo: "success",
-      contenido: `✅ ${data.mensaje || "Intercambio concretado correctamente."}`,
-    });
-
-    setTimeout(() => setMsg(null), 3000);
-  } catch (err) {
-    console.error("Error uniendo al intercambio:", err);
-    setMsg({
-      tipo: "danger",
-      contenido: "❌ No se pudo concretar el intercambio.",
-    });
-    setTimeout(() => setMsg(null), 4000);
-  }
-};
 
 
 
