@@ -1,0 +1,39 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+flask = "*"
+sqlalchemy = "*"
+flask-cors = "*"
+flask-sqlalchemy = "*"
+flask-swagger = "*"
+flask-admin = "*"
+flask-migrate = "*"
+psycopg2 = "*"
+python-dotenv = "*"
+wtforms = "*"
+mysqlclient = "*"
+eralchemy = {extras = ["graphviz"], version = "*"}
+flake8 = "*"
+black = "*"
+flask-jwt-extended = "*"
+authlib = "*"
+flask-dance = "*"
+oauthlib = "*"
+requests = "*"
+gunicorn = "*"
+cloudinary = "*"
+
+[requires]
+python_version = "3.13"
+
+[scripts]
+start="flask run"
+init="flask db init"
+migrate="flask db migrate"
+upgrade="flask db upgrade"
+diagram = "python scripts/generate_diagram.py"

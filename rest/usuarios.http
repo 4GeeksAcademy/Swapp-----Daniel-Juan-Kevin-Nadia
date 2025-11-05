@@ -1,0 +1,85 @@
+### Obtener la lista de los Usuarios (GET)
+GET http://localhost:5000/api/usuarios
+Accept: application/json
+
+###
+
+### Obtener Usuario por ID (GET)
+GET http://localhost:5000/api/usuarios/1
+Accept: application/json
+
+###
+
+### Añadir un Usuario (POST)
+POST http://localhost:5000/api/usuarios
+Content-Type: application/json
+Accept: application/json
+
+{
+    "nombre": "Pedro",
+    "apellido": "Cisneros",
+    "correo_electronico": "pedro.cisneros@example.com",
+    "fecha_nacimiento": "1998-10-14",
+    "contrasena": "abc&123456789",
+    "genero": "masculino",
+    "descripcion": "Me defino como un hombre proactivo",
+    "id_habilidad": 2,
+    "acepta_terminos": true
+}
+
+###
+
+### Asociar/desasociar una habilidad (POST)
+### Se envia uno de los 2 parametros que son id_habilidad
+POST http://localhost:5000/api/usuarios/1/habilidad
+Content-Type: application/json
+Accept: application/json
+
+{
+    "desasociar": 15,
+    "asociar": 21
+}
+
+###
+
+### Actualizar datos de usuario (PUT)
+PUT http://localhost:5000/api/usuarios/5
+Content-Type: application/json
+Accept: application/json
+
+{
+    "nombre": "marta",
+    "apellido": "Ramirez",
+    "correo_electronico": "molo.ramirez@example.com",
+    "fecha_nacimiento": "1997-10-14",
+    "contrasena": "123456789",
+    "foto_perfil": "...",
+    "genero": "masculino",
+    "descripcion": "...",
+    "estado": false
+}
+
+###
+
+### Borrar/Eliminar un Usuario (DELETE)
+DELETE http://localhost:5000/api/usuarios/2
+Accept: application/json
+
+###
+
+### Verificar Autorización (GET)
+GET http://localhost:5000/api/autorizacion
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MDgxODE1MCwianRpIjoiMmVmMjYyNmMtNTA4Mi00OWUyLWJiYjgtYjdiYTBiNzRiOTZkIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6InBlZHJvLmNpc25lcm9zQGV4YW1wbGUuY29tIiwibmJmIjoxNzYwODE4MTUwLCJjc3JmIjoiYjBkYTg5MDQtODE2OS00ZTI0LWExMWMtMDA5YTczY2U5NDRiIiwiZXhwIjoxNzYwODM5NzUwfQ.4mpUaOW_nDKL9oJX7c74Gt1ENGq0Ocm7cMr7MlOIZwQ
+Accept: application/json
+
+###
+
+### Solicitar Autorización (POST)
+POST http://localhost:5000/api/autorizar
+Content-Type: application/json
+Accept: application/json
+
+{
+    "correo_electronico": "pedro.cisneros@example.com",
+    "contrasena": "abc&123456789"
+}

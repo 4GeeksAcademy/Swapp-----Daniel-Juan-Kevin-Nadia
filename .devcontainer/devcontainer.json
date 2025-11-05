@@ -1,0 +1,41 @@
+{
+	"name": "swapp",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				// --- Backend ---
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"LittleFoxTeam.vscode-python-test-adapter",
+				"humao.rest-client",
+				"esbenp.prettier-vscode",
+				"ms-python.pylint",
+				"ms-python.flake8",
+				"oderwat.indent-rainbow",
+				// --- Frontend ---
+				"dsznajder.es7-react-js-snippets",
+				"formulahendry.auto-rename-tag",
+				"planbcoding.vscode-react-refactor",
+				"christian-kohler.npm-intellisense"
+			],
+			"settings": {
+				"python.linting.enabled": true,
+				"python.linting.flake8Enabled": true,
+				"python.formatting.provider": "black",
+				"python-envs.defaultEnvManager": "ms-python.python:pipenv",
+				"editor.formatOnSave": true
+			}
+		}
+	},
+	"forwardPorts": [
+		3000,
+		5000
+	],
+	"containerEnv": {
+		"CHOKIDAR_USEPOLLING": "true"
+	},
+	"postCreateCommand": "zsh .devcontainer/cfg.sh"
+}

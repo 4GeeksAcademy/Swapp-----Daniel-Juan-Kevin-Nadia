@@ -1,0 +1,154 @@
+:root {
+    --naranja: #ff7517;
+    --gris: #3e3939;
+    --oscuro: #2c2727;
+    --claro: #f6f4f4;
+}
+
+/* Fondo */
+.fondo-modal {
+    background-color: rgba(0, 0, 0, 0.55);
+}
+
+/* Header */
+.bg-naranja {
+    background-color: var(--naranja) !important;
+    color: white;
+}
+
+/* Fondo claro */
+.fondo-claro {
+    background-color: var(--claro);
+}
+
+/* Lista izquierda */
+.lista-mensajes {
+    min-height: 400px;
+    overflow-y: auto;
+}
+
+.mensaje-item {
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.mensaje-item:hover {
+    background-color: #fff5ee;
+}
+
+.mensaje-item.activo {
+    background-color: #ffe6d1;
+    border-left: 4px solid var(--naranja);
+}
+
+/* Detalle derecho */
+.detalle-mensaje {
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.texto-mensaje {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    /* 🔹 Activamos flex */
+    flex-direction: column;
+    /* 🔹 Mensajes uno debajo del otro */
+    gap: 10px;
+    /* 🔹 Espacio entre ellos */
+}
+
+
+.mensaje-recibido {
+    background-color: #c4c4c4aa;
+    /* 🔹 Gris más visible */
+    padding: 10px 14px;
+    border-radius: 10px;
+    display: inline-block;
+    max-width: 75%;
+    color: var(--gris);
+    align-self: flex-start;
+    /* 🔹 Alinea a la izquierda */
+    margin-bottom: 8px;
+}
+
+.mensaje-enviado {
+    background-color: var(--naranja);
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: rgb(255, 255, 255);
+    display: inline-block;
+    max-width: 75%;
+    align-self: flex-end;
+    /* 🔹 Mueve a la derecha */
+    margin-bottom: 8px;
+}
+
+
+.estado.leido {
+    color: var(--gris);
+    font-weight: 600;
+}
+
+.estado.no-leido {
+    color: var(--naranja);
+    font-weight: 600;
+}
+
+/* Botón principal */
+.btn-naranja {
+    background-color: var(--naranja);
+    color: #fff;
+    border: none;
+}
+
+.btn-naranja:hover {
+    background-color: #e56710;
+}
+
+/* Ajuste de ancho para modal Bootstrap */
+.modal-dialog.modal-lg {
+    max-width: 900px !important;
+    /* antes ~800px */
+    width: 95%;
+}
+
+.modal-mensajeria .modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* === Ajuste tamaño del modal de mensajería === */
+.modal-mensajeria .modal-dialog.modal-xl {
+    max-width: 1000px !important;
+    /* ancho general del modal */
+    width: 92vw !important;
+    /* ocupa el 92% del ancho de la pantalla */
+}
+
+.modal-mensajeria .modal-content {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.25);
+}
+
+.modal-mensajeria .modal-body {
+    min-height: 520px;
+    /* más alto para ver mejor los chats */
+}
+
+/* Ajuste scroll interno */
+.lista-mensajes,
+.texto-mensaje {
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+/* Mejora visual general */
+.texto-mensaje {
+    background: #fff;
+    padding: 1.2rem;
+    border-radius: 0 0 12px 12px;
+}
