@@ -53,7 +53,7 @@ const [mostrarModalIntercambio, setMostrarModalIntercambio] = useState(false);
     const usuarioGoogle = localStorage.getItem("user");
 
     if (!usuarioToken && !usuarioGoogle) {
-      alert("No hay sesión activa. Por favor inicia sesión.");
+      // alert("No hay sesión activa. Por favor inicia sesión.");
       navigate("/login");
       return;
     }
@@ -375,13 +375,13 @@ const handleEnviarPuntuacion = async (payload) => {
     });
 
     //  Mostrar confirmación
-    alert("✅ Puntuación enviada y el intercambio ha sido finalizado.");
+    // alert("✅ Puntuación enviada y el intercambio ha sido finalizado.");
 
     //  Refrescar la lista
     obtenerIntercambios();
   } catch (err) {
     console.error("Error enviando puntuación:", err);
-    alert("❌ Error al enviar la puntuación o finalizar el intercambio.");
+    // alert("❌ Error al enviar la puntuación o finalizar el intercambio.");
   } finally {
     setMostrarModalPuntuacion(false);
   }
