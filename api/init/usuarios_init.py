@@ -9,7 +9,8 @@ USUARIOS = [
         "nombre": "Kevin",
         "apellido": "Erazo",
         "estado": "ocupado",
-        "descripcion": "Apasionado por la tecnología y el café. Siempre buscando nuevos retos.",
+        "descripcion": "Apasionado por la tecnología y el café. Siempre \
+            buscando nuevos retos.",
         "correo_electronico": "kevin@demo.com",
         "contrasena_plana": "kevin123",
         "foto_perfil": "",
@@ -27,9 +28,10 @@ USUARIOS = [
     },
     {
         "nombre": "Juan",
-        "apellido": "Navarro",
-        "estado": "en linea",
-        "descripcion": "Emprendedor, curioso y con ganas de aprender algo nuevo cada día.",
+        "apellido": "Martínez",
+        "estado": "en-linea",
+        "descripcion": "Emprendedor, curioso y con ganas de aprender algo \
+            nuevo cada día.",
         "correo_electronico": "juan@demo.com",
         "contrasena_plana": "juan123",
         "foto_perfil": "",
@@ -39,17 +41,18 @@ USUARIOS = [
         "nombre": "Nadia",
         "apellido": "Koukouss",
         "foto_perfil": "https://res.cloudinary.com/dcwx0hex8/image/upload/v1762267798/usuarios_perfil/usuario_4_recorte.jpg",
-        "estado": "en linea",
-        "descripcion": "",
+        "estado": "en-linea",
+        "descripcion": "Creativa, soñadora y amante del arte en todas sus \
+            formas",
         "correo_electronico": "nadia@demo.com",
         "contrasena_plana": "nadia123",
         "habilidades": ["Traducción", "Idiomas", "Comunicación"]
     },
     {
         "nombre": "Daniel",
-        "apellido": "López",
+        "apellido": "Andueza",
         "estado": "ocupado",
-        "descripcion": "",
+        "descripcion": "Jugador de ajedrez y amante de los libros de misterio",
         "correo_electronico": "daniel@demo.com",
         "contrasena_plana": "daniel123",
         "foto_perfil": "",
@@ -58,8 +61,9 @@ USUARIOS = [
     {
         "nombre": "Lucía",
         "apellido": "Torres",
-        "estado": "en linea",
-        "descripcion": "",
+        "estado": "en-linea",
+        "descripcion": "Me encanta bailar, reír y disfrutar de las \
+            pequeñas cosas.",
         "correo_electronico": "lucia@demo.com",
         "contrasena_plana": "lucia123",
         "foto_perfil": "",
@@ -72,8 +76,9 @@ USUARIOS = [
     {
         "nombre": "Carlos",
         "apellido": "Mendoza",
-        "estado": "en linea",
-        "descripcion": "Me gusta viajar, hacer senderismo y descubrir lugares con buena comida.",
+        "estado": "en-linea",
+        "descripcion": "Me gusta viajar, hacer senderismo y descubrir \
+            lugares con buena comida.",
         "correo_electronico": "carlos@demo.com",
         "contrasena_plana": "carlos123",
         "foto_perfil": "",
@@ -84,6 +89,8 @@ USUARIOS = [
         "apellido": "Ramírez",
         "estado": "ocupado",
         "correo_electronico": "sofia@demo.com",
+        "descripcion": "Periodista viajera. Siempre con la cámara lista y \
+            la mente abierta.",
         "contrasena_plana": "sofia123",
         "foto_perfil": "",
         "habilidades": [
@@ -114,6 +121,7 @@ USUARIOS = [
     }
 ]
 
+
 def usuarios_prueba():
     """USUARIOS DE INICIO"""
     with app.app_context():
@@ -127,7 +135,9 @@ def usuarios_prueba():
                     apellido=u["apellido"],
                     correo_electronico=email,
                     acepta_terminos=True,
-                    foto_perfil=u["foto_perfil"]
+                    foto_perfil=u["foto_perfil"],
+                    estado=u["estado"],
+                    descripcion=u["descripcion"]
                 )
                 usuario.contrasena = u["contrasena_plana"]
                 db.session.add(usuario)
