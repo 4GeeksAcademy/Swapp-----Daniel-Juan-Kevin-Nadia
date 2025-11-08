@@ -114,6 +114,7 @@ USUARIOS = [
     }
 ]
 
+
 def usuarios_prueba():
     """USUARIOS DE INICIO"""
     with app.app_context():
