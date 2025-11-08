@@ -48,7 +48,7 @@ const Login = () => {
       }
     } catch (err) {
       console.error("Error al iniciar sesión:", err);
-      setError("No se pudo conectar con la API.");
+      setError("Error al iniciar sesión");
     }
   };
 
