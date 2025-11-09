@@ -13,11 +13,6 @@ echo "🧩 Compilando frontend con Vite..."
 npm install
 npm run build
 
-# --- Copia del build ---
-echo "📂 Copiando archivos compilados a Flask..."
-mkdir -p api/static/
-cp -r dist/* api/static/
-
 # --- Migraciones ---
 echo "🗄️ Aplicando migraciones de base de datos..."
 pipenv run flask db upgrade
