@@ -112,7 +112,7 @@ function Navbar() {
           >
             <img
               className="logo-navbar"
-              src="/logo swapp.webp"
+              src="/logo-swapp.webp"
               alt="logo Swapp"
             />
           </Link>
