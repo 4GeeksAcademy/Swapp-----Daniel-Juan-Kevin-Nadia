@@ -332,14 +332,19 @@ const obtenerIntercambios = async () => {
 
 // seccion intercambios
 const handleFinalizarIntercambio = (inter) => {
+  const esDemandante =
+    inter.usuario_demanda?.id_usuario === usuario?.id_usuario ||
+    inter.id_usuario_demanda === usuario?.id_usuario;
+
+  const usuarioDestino = esDemandante
+    ? inter.usuario_oferta || { nombre: "Usuario" } 
+    : inter.usuario_demanda || { nombre: "Usuario" };
+
   setUsuarioEvaluado({
     id_intercambio: inter.id_intercambio,
-    nombre:
-      inter.usuario_demanda?.nombre ||
-      inter.usuario_demandante?.nombre ||
-      inter.usuario_oferta?.nombre ||
-      "Usuario",
+    nombre: usuarioDestino?.nombre || "Usuario",
   });
+
   setMostrarModalPuntuacion(true);
 };
 
