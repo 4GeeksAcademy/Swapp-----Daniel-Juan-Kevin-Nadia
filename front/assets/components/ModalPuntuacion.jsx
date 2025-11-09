@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "../styles/ModalPuntuacion.css";
 import { env } from "../../environ";
 
-// Helper para limpiar el token
+// helper token
 const getTokenLimpio = () => {
   const raw = localStorage.getItem("token");
   return raw ? raw.replace(/^"|"$/g, "") : null;
@@ -17,11 +17,13 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
   if (!mostrar) return null;
 
   const handleSubmit = async () => {
-    if (puntuacion === 0) {
-      setMensaje({
-        tipo: "error",
-        texto: "Por favor selecciona una puntuación antes de enviar.",
-      });
+    // validación local mínima
+    if (!usuarioEvaluado || !usuarioEvaluado.id_intercambio) {
+      setMensaje({ tipo: "error", texto: "Falta el id del intercambio." });
+      return;
+    }
+    if (!puntuacion || Number(puntuacion) < 1 || Number(puntuacion) > 5) {
+      setMensaje({ tipo: "error", texto: "Selecciona una puntuación válida (1-5)." });
       return;
     }
 
@@ -30,59 +32,59 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
       const token = getTokenLimpio();
       if (!token) throw new Error("Token no encontrado");
 
-      // ✅ Obtener usuario autenticado desde /api/autorizacion
-      const resUser = await fetch(`${env.api}/api/autorizacion`, {
+      // usuario autenticado
+      const rUser = await fetch(`${env.api}/api/autorizacion`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (!rUser.ok) throw new Error("No se pudo obtener usuario autenticado");
+      const yo = await rUser.json();
 
-      if (!resUser.ok) throw new Error("No se pudo obtener usuario autenticado");
-      const yo = await resUser.json();
+      const id_puntuador = yo?.id_usuario ?? yo?.id;
+      if (!id_puntuador) throw new Error("Falta id del usuario autenticado");
 
-      // ✅ Enviar puntuación al backend
+      // cuerpo EXACTO que pide el backend
+      const body = {
+        id_intercambio: usuarioEvaluado.id_intercambio,
+        id_puntuador,
+        puntos: Number(puntuacion),
+        comentario,
+      };
+
       const res = await fetch(`${env.api}/api/puntuaciones`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          id_intercambio: usuarioEvaluado?.id_intercambio,
-          id_puntuador: yo.id_usuario,
-          puntos: puntuacion,
-          comentario,
-        }),
+        body: JSON.stringify(body),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Error al enviar puntuación");
+      // manejo de errores del backend
+      let data = null;
+      try { data = await res.json(); } catch (_) {}
+      if (!res.ok) {
+        const msg = (data && (data.error || data.mensaje)) || "Error al enviar puntuación";
+        throw new Error(msg);
+      }
 
-      setMensaje({
-        tipo: "success",
-        texto: "✅ ¡Puntuación enviada correctamente!",
-      });
+      setMensaje({ tipo: "success", texto: "Puntuación enviada correctamente." });
 
-      // Llamar callback del padre (PerfilUsuario)
+      // notificar al padre (el padre hará el PUT /finalizar y refrescará)
       onSubmit?.({
-        id_intercambio: usuarioEvaluado?.id_intercambio,
-        id_usuario_evaluado: usuarioEvaluado?.id_usuario,
-        puntos: puntuacion,
+        puntuacion: Number(puntuacion),
         comentario,
       });
 
-      // Reset y cerrar modal
       setTimeout(() => {
         setPuntuacion(0);
         setComentario("");
         setMensaje(null);
         setCargando(false);
         onClose();
-      }, 1500);
-    } catch (error) {
-      console.error("Error al enviar puntuación:", error);
-      setMensaje({
-        tipo: "error",
-        texto: "❌ Hubo un error al enviar la puntuación.",
-      });
+      }, 800);
+    } catch (err) {
+      console.error("Error al enviar puntuación:", err);
+      setMensaje({ tipo: "error", texto: "Hubo un error al enviar la puntuación." });
       setCargando(false);
     }
   };
@@ -91,13 +93,9 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
     <div className="modal-overlay">
       <div className="modal-contenido animate-fadeIn">
         <h3 className="modal-titulo">
-          Califica a{" "}
-          <span className="nombre-usuario">
-            {usuarioEvaluado?.nombre || "el usuario"}
-          </span>
+          Califica a <span className="nombre-usuario">{usuarioEvaluado?.nombre || "el usuario"}</span>
         </h3>
 
-        {/* Estrellas */}
         <div className="modal-estrellas">
           {[1, 2, 3, 4, 5].map((n) => (
             <span
@@ -110,7 +108,6 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
           ))}
         </div>
 
-        {/* Comentario */}
         <textarea
           className="modal-comentario"
           placeholder="Agrega un comentario (opcional)"
@@ -119,32 +116,17 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
           maxLength={250}
         />
 
-        {/* Mensaje de éxito o error */}
         {mensaje && (
-          <div
-            className={`alert mt-3 ${
-              mensaje.tipo === "success" ? "alert-success" : "alert-danger"
-            }`}
-            role="alert"
-          >
+          <div className={`alert mt-3 ${mensaje.tipo === "success" ? "alert-success" : "alert-danger"}`} role="alert">
             {mensaje.texto}
           </div>
         )}
 
-        {/* Botones */}
         <div className="modal-puntuacion-botones mt-4">
-          <button
-            className="btn-cancelar-puntuacion"
-            onClick={onClose}
-            disabled={cargando}
-          >
+          <button className="btn-cancelar-puntuacion" onClick={onClose} disabled={cargando}>
             Cancelar
           </button>
-          <button
-            className="btn-guardar-puntuacion"
-            onClick={handleSubmit}
-            disabled={cargando}
-          >
+          <button className="btn-guardar-puntuacion" onClick={handleSubmit} disabled={cargando}>
             {cargando ? "Guardando..." : "Enviar"}
           </button>
         </div>
