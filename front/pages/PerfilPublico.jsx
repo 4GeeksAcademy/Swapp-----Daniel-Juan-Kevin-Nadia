@@ -11,7 +11,7 @@ import { env } from "../environ";
     const { id_usuario } = useParams();
     const navigate = useNavigate();
 
-    // === Estados principales ===
+    // Estados principales
     const [usuario, setUsuario] = useState(null);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState(null);
@@ -20,7 +20,7 @@ import { env } from "../environ";
     const [msg, setMsg] = useState(null);
 
 
-    // === Helper para obtener usuario autenticado ===
+    // Helper para obtener usuario autenticado 
     const getUsuarioActual = async () => {
       const rawToken = localStorage.getItem("token");
       const token = rawToken ? rawToken.replace(/^"|"$/g, "") : null;
@@ -36,7 +36,7 @@ import { env } from "../environ";
         });
         if (!res.ok) return null;
         const data = await res.json();
-        return data; // <-- este objeto contiene id_usuario
+        return data; 
       } catch (err) {
         console.error("Error obteniendo usuario actual:", err);
         return null;
@@ -47,7 +47,7 @@ import { env } from "../environ";
     //  Intercambios creados por el usuario público
     const [intercambios, setIntercambios] = useState([]);
 
-    // === Obtener datos del usuario ===
+    // Obtener datos del usuario
     useEffect(() => {
       const fetchUsuario = async () => {
         try {
@@ -68,24 +68,45 @@ import { env } from "../environ";
     // Obtener intercambios creados por este usuario (postulante)
     useEffect(() => {
       if (!id_usuario) return;
+
       const obtenerIntercambios = async () => {
         try {
           const res = await fetch(
             `${env.api}/api/intercambios/postulante/${id_usuario}`,
-            { headers: { "Content-Type": "application/json" } }
+            {
+              method: "GET",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+            }
           );
-          if (!res.ok) throw new Error("Error al obtener los intercambios");
-          const data = await res.json();
+
+          const text = await res.text();
+
+          if (res.status === 404) {
+            console.warn(" Usuario sin intercambios.");
+            setIntercambios([]);
+            return;
+          }
+
+          if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
+
+          const data = JSON.parse(text);
           setIntercambios(Array.isArray(data) ? data : []);
         } catch (err) {
           console.error("Error al cargar intercambios:", err);
           setIntercambios([]);
         }
+
+
       };
+
       obtenerIntercambios();
     }, [id_usuario]);
 
-    // === Contactar ===
+
+    // Contactar
     const handleContactar = () => {
       const usuarioLocal = localStorage.getItem("usuario");
 
@@ -95,12 +116,12 @@ import { env } from "../environ";
         return;
       }
 
-      // ✅ abrir modal en lugar de alerta
+      // abrir modal en lugar de alerta
       setMostrarModal(true);
     };
 
 
-// === Unirse a un intercambio ===
+// Unirse a un intercambio 
     const handleUnirse = async (id_intercambio) => {
       try {
         const yo = await getUsuarioActual(); // obtiene usuario actual con /api/autorizacion
@@ -116,7 +137,7 @@ import { env } from "../environ";
 
         const token = localStorage.getItem("token")?.replace(/^"|"$/g, "");
 
-        // ✅ Campo correcto según tu backend
+        // Campo correcto según tu backend
         const body = {
           id_usuario: yo.id_usuario,
         };
@@ -134,7 +155,7 @@ import { env } from "../environ";
 
         if (!res.ok) throw new Error(data.error || "Error al unirse al intercambio");
 
-        // ✅ Mostrar mensaje real del backend
+        // Mostrar mensaje real del backend
         setMsg({
           tipo: "success",
           contenido: `✅ ${data.mensaje || "Intercambio concretado correctamente."}`,
@@ -204,7 +225,7 @@ import { env } from "../environ";
 
           {/* Contenido principal */}
           <div className="col-12 col-md-8 perfil-publico-content p-4 text-center">
-            {/* === Descripción === */}
+            {/*  Descripción */}
             <h2 className="text-dark fw-bold mb-4">Descripción</h2>
             <p>
               {usuario.descripcion ? (
@@ -216,7 +237,7 @@ import { env } from "../environ";
               )}
             </p>
 
-            {/* === Habilidades === */}
+            {/* Habilidades  */}
             <h2 className="text-dark fw-bold mb-4">Habilidades</h2>
             {usuario.habilidades && usuario.habilidades.length > 0 ? (
               <div className="habilidades-contenedor">
@@ -237,7 +258,7 @@ import { env } from "../environ";
               </p>
             )}
 
-            {/* === Intercambios creados por este usuario === */}
+            {/* Intercambios creados por este usuario */}
             <h2 className="text-dark fw-bold mb-4 mt-5">Intercambios</h2>
 
             {intercambios.length === 0 ? (
@@ -296,7 +317,7 @@ import { env } from "../environ";
         <ModalMensajeria
           mostrar={mostrarModal}
           cerrar={() => setMostrarModal(false)}
-          receptorId={usuario.id_usuario} // <-- PERFIL VISUALIZADO
+          receptorId={usuario.id_usuario} // PERFIL VISUALIZADO
         />
       )}
 
