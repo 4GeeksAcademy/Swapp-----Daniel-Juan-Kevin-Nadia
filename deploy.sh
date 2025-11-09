@@ -10,8 +10,10 @@ pipenv install --system --deploy
 
 # --- Frontend ---
 echo "🧩 Compilando frontend con Vite..."
+cd front
 npm install
 npm run build
+cd ..
 
 # --- Migraciones ---
 echo "🗄️ Aplicando migraciones de base de datos..."
