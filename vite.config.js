@@ -3,7 +3,8 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  root: "front",            
-  server: { port: 3000 },
-  build: { outDir: "dist" }, 
+  server: { 
+    port: 3000,
+    root: "front"          
+  }
 });
