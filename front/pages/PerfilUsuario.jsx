@@ -41,10 +41,12 @@ const [editandoHabilidades, setEditandoHabilidades] = useState(false);
   const [usuarioEvaluado, setUsuarioEvaluado] = useState(null);
   
   // Intercambios
-const [intercambios, setIntercambios] = useState([]);
-const [mostrarModalIntercambio, setMostrarModalIntercambio] = useState(false);
+  const [intercambios, setIntercambios] = useState([]);
+  const [mostrarModalIntercambio, setMostrarModalIntercambio] = useState(false);
 
   const navigate = useNavigate();
+
+  const yo = usuario;
 
   // Cargar usuario 
   useEffect(() => {
@@ -259,18 +261,68 @@ const handleGuardarCambiosHabilidades = () => {
 };
 
 
-// Intercambios
+// helpers
+const fetchUsuarioById = async (id) => {
+  if (!id) return null;
+  try {
+    const r = await fetch(`${env.api}/api/usuarios/${id}`, {
+      headers: { Accept: "application/json" },
+    });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch {
+    return null;
+  }
+};
 
-// === Obtener todos los intercambios del usuario autenticado ===
+// Intercambios - obtener todos del usuario autenticado (resuelve oferta/demanda)
 const obtenerIntercambios = async () => {
   try {
     if (!usuario?.id_usuario) return;
-    const res = await fetch(`${env.api}/api/intercambios/usuario/${usuario.id_usuario}`, {
-      headers: { "Content-Type": "application/json" },
+
+    const res = await fetch(
+      `${env.api}/api/intercambios/usuario/${usuario.id_usuario}`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (!res.ok) throw new Error("Error al obtener intercambios");
+
+    const raw = await res.json();
+    const lista = Array.isArray(raw) ? raw : [];
+
+    // recolectar ids únicos de usuarios para minimizar llamadas
+    const ids = new Set();
+    for (const it of lista) {
+      if (it.id_usuario_oferta) ids.add(it.id_usuario_oferta);
+      if (it.id_usuario_demanda) ids.add(it.id_usuario_demanda);
+    }
+
+    // fetch en paralelo de usuarios
+    const idsArr = Array.from(ids);
+    const usuarios = await Promise.all(idsArr.map((id) => fetchUsuarioById(id)));
+    const mapaUsuarios = new Map(idsArr.map((id, idx) => [id, usuarios[idx]]));
+
+    const normalizados = lista.map((it) => {
+      const oferta = it.id_usuario_oferta ? mapaUsuarios.get(it.id_usuario_oferta) : null;
+      const demanda = it.id_usuario_demanda ? mapaUsuarios.get(it.id_usuario_demanda) : null;
+
+      const nombreOferta = oferta
+        ? `${oferta.nombre || ""} ${oferta.apellido || ""}`.trim() || `#${it.id_usuario_oferta}`
+        : it.id_usuario_oferta ? `#${it.id_usuario_oferta}` : "—";
+
+      const nombreDemanda = demanda
+        ? `${demanda.nombre || ""} ${demanda.apellido || ""}`.trim() || `#${it.id_usuario_demanda}`
+        : it.id_usuario_demanda ? `#${it.id_usuario_demanda}` : "—";
+
+      return {
+        ...it,
+        usuario_oferta: oferta,
+        usuario_demanda: demanda,
+        nombre_oferta: nombreOferta,
+        nombre_demanda: nombreDemanda,
+      };
     });
-    if (!res.ok) throw new Error("Error al obtener los intercambios");
-    const data = await res.json();
-    setIntercambios(Array.isArray(data) ? data : []);
+
+    setIntercambios(normalizados);
   } catch (err) {
     console.error("Error al cargar intercambios:", err);
     setIntercambios([]);
@@ -278,27 +330,22 @@ const obtenerIntercambios = async () => {
 };
 
 
-
-
-// --- NUEVO: finalizar un intercambio ---
-const handleFinalizarIntercambio = async (intercambio) => {
-  try {
-    // Primero abrir modal de puntuación
-    abrirModalPuntuacion({
-      id_intercambio: intercambio.id_intercambio,
-      id_usuario:
-        intercambio.usuario_demandante?.id_usuario ||
-        intercambio.usuario_postulante?.id_usuario,
-      nombre:
-        intercambio.usuario_demandante?.nombre ||
-        intercambio.usuario_postulante?.nombre,
-    });
-  } catch (err) {
-    console.error("Error al finalizar intercambio:", err);
-  }
+// seccion intercambios
+const handleFinalizarIntercambio = (inter) => {
+  setUsuarioEvaluado({
+    id_intercambio: inter.id_intercambio,
+    nombre:
+      inter.usuario_demanda?.nombre ||
+      inter.usuario_demandante?.nombre ||
+      inter.usuario_oferta?.nombre ||
+      "Usuario",
+  });
+  setMostrarModalPuntuacion(true);
 };
 
-// === Eliminar un intercambio creado ===
+
+
+// Eliminar un intercambio creado
 const handleEliminarIntercambio = async (id_intercambio) => {
   try {
     const res = await fetch(`${env.api}/api/intercambios/${id_intercambio}`, {
@@ -308,7 +355,7 @@ const handleEliminarIntercambio = async (id_intercambio) => {
 
     if (!res.ok) throw new Error("Error al eliminar el intercambio");
 
-    // ✅ Mostrar mensaje visual en pantalla (sin alertas del navegador)
+    // Mostrar mensaje visual en pantalla (sin alertas del navegador)
     setMsg({
       tipo: "success",
       contenido: "✅ Intercambio eliminado correctamente.",
@@ -334,85 +381,49 @@ const handleEliminarIntercambio = async (id_intercambio) => {
   }
 };
 
+// finalizar y refrescar
+const handleEnviarPuntuacion = async (_payload) => {
+  try {
+    const token = getTokenLimpio();
+    const id = usuarioEvaluado?.id_intercambio;
+    if (!id) throw new Error("Falta id_intercambio");
 
+    const r = await fetch(`${env.api}/api/intercambios/${id}/finalizar`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
 
-//  Puntuaciones
-  const abrirModalPuntuacion = (userDestino) => {
-    setUsuarioEvaluado(userDestino);
-    setMostrarModalPuntuacion(true);
-  };
-
-  const handleEnviarPuntuacion = async (payload) => {
-    try {
-      const token = getTokenLimpio();
-
-      const body = {
-        id_intercambio: usuarioEvaluado?.id_intercambio,
-        id_puntuador: usuario.id_usuario,
-        puntos: payload.puntuacion,
-        comentario: payload.comentario,
-      };
-
-      // ✅ 1. Enviar la puntuación al backend
-      const res = await fetch(`${env.api}/api/puntuaciones`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(body),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Error al enviar la puntuación");
-
-      // ✅ 2. Finalizar el intercambio en el backend
-      const respFinalizar = await fetch(
-        `${env.api}/api/intercambios/${body.id_intercambio}/finalizar`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!respFinalizar.ok) {
-        const errText = await respFinalizar.text();
-        throw new Error(
-          `Error al finalizar intercambio: ${respFinalizar.status} ${errText}`
-        );
-      }
-
-      // ✅ 3. Actualizar la lista de intercambios en frontend
-      setIntercambios((prev) =>
-        prev.map((inter) =>
-          inter.id_intercambio === body.id_intercambio
-            ? { ...inter, intercambio_finalizado: true }
-            : inter
-        )
-      );
-
-      // ✅ 4. Mostrar mensaje de éxito
-      setMsg({
-        tipo: "success",
-        contenido: "✅ Puntuación enviada y el intercambio ha sido finalizado.",
-      });
-      setTimeout(() => setMsg(null), 4000);
-    } catch (err) {
-      console.error("Error enviando puntuación o finalizando intercambio:", err);
-      setMsg({
-        tipo: "danger",
-        contenido:
-          "❌ Error al enviar la puntuación o finalizar el intercambio.",
-      });
-      setTimeout(() => setMsg(null), 4000);
-    } finally {
-      setMostrarModalPuntuacion(false);
+    if (!r.ok) {
+      const txt = await r.text();
+      throw new Error(`Error al finalizar intercambio: ${r.status} ${txt}`);
     }
-  };
 
+    await obtenerIntercambios();
+    setMsg({ tipo: "success", contenido: "Intercambio finalizado correctamente." });
+    setTimeout(() => setMsg(null), 3000);
+  } catch (err) {
+    console.error(err);
+    setMsg({ tipo: "danger", contenido: "No se pudo finalizar el intercambio." });
+    setTimeout(() => setMsg(null), 3000);
+  } finally {
+    setMostrarModalPuntuacion(false);
+  }
+};
+
+
+const abrirModalPuntuacion = (inter) => {
+  setUsuarioEvaluado({
+    id_intercambio: inter.id_intercambio,
+    nombre:
+      inter.usuario_demandante?.nombre ||
+      inter.usuario_oferta?.nombre ||
+      "Usuario",
+  });
+  setMostrarModalPuntuacion(true);
+};
 
 
 
@@ -741,88 +752,89 @@ const handleEliminarIntercambio = async (id_intercambio) => {
                 </>
               ) : (
 
-              // Intercambios / Puntuaciones 
-              <div className="seccion-intercambios">
-                <h2 className="fw-bold mb-4 text-center">Intercambios</h2>
+                // Sección Intercambios
+                <div className="seccion-intercambios">
+                  <h2 className="fw-bold mb-4 text-center">Intercambios</h2>
 
-                {/* Botón para crear nuevo intercambio */}
-                <div className="text-center mb-4">
-                  <button
-                    className="btn-naranja"
-                    onClick={() => setMostrarModalIntercambio(true)}
-                  >
-                    ➕ Crear nuevo intercambio
-                  </button>
-                </div>
+                  <div className="text-center mb-4">
+                    <button
+                      className="btn-naranja"
+                      onClick={() => setMostrarModalIntercambio(true)}
+                    >
+                      Crear nuevo intercambio
+                    </button>
+                  </div>
 
-                {/* Tabla de intercambios */}
-                <div className="tabla-intercambios-container">
-                  <table className="tabla-intercambios">
-                    <thead>
-                      <tr>
-                        <th>ID</th>
-                        <th>Habilidad que busca</th>
-                        <th>Otro usuario</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {intercambios.length === 0 ? (
+                  <div className="tabla-intercambios-container">
+                    <table className="tabla-intercambios">
+                      <thead>
                         <tr>
-                          <td colSpan="5" className="text-center text-muted">
-                            No tienes intercambios creados todavía.
-                          </td>
+                          <th>ID</th>
+                          <th>Habilidad</th>
+                          <th>Usuario oferta</th>
+                          <th>Usuario demanda</th>
+                          <th>Estado</th>
+                          <th>Acción</th>
                         </tr>
-                      ) : (
-                        intercambios.map((inter) => (
-                          <tr key={inter.id_intercambio}>
-                            <td>#{inter.id_intercambio}</td>
-                            <td>{inter.habilidad?.nombre_habilidad || "—"}</td>
+                      </thead>
 
-                            {/* Mostrar el otro usuario si ya alguien se unió */}
-                            <td>
-                              {inter.usuario_demandante
-                                ? `${inter.usuario_demandante.nombre} ${inter.usuario_demandante.apellido || ""}`
-                                : inter.usuario_oferta
-                                ? `${inter.usuario_oferta.nombre} ${inter.usuario_oferta.apellido || ""}`
-                                : "—"}
-                            </td>
-
-                            <td>{inter.estado || "Activo"}</td>
-
-                            <td className="d-flex gap-2 justify-content-center flex-wrap">
-                              {!inter.intercambio_finalizado ? (
-                                <>
-                                  <button
-                                    className="btn btn-oscuro btn-sm"
-                                    onClick={() => handleFinalizarIntercambio(inter)}
-                                  >
-                                    Finalizar
-                                  </button>
-
-                                  <button
-                                    className="btn btn-outline-danger btn-sm"
-                                    onClick={() =>
-                                      handleEliminarIntercambio(inter.id_intercambio)
-                                    }
-                                  >
-                                    Eliminar
-                                  </button>
-                                </>
-                              ) : (
-                                <span className="text-success fw-semibold">Finalizado</span>
-                              )}
+                      <tbody>
+                        {intercambios.length === 0 ? (
+                          <tr>
+                            <td colSpan="6" className="text-center text-muted">
+                              No tienes intercambios registrados.
                             </td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                        ) : (
+                          intercambios.map((inter) => {
+                              const estaFinalizado = inter.intercambio_finalizado === true;
+                              const esDemandante =
+                                inter.usuario_demanda?.id_usuario === yo?.id_usuario ||
+                                inter.id_usuario_demanda === yo?.id_usuario;
 
+                            return (
+                              <tr key={inter.id_intercambio}>
+                                <td>#{inter.id_intercambio}</td>
+                                <td>{inter.habilidad?.nombre_habilidad || "—"}</td>
+                                <td>{inter.nombre_oferta || "—"}</td>
+                                <td>{inter.nombre_demanda || "—"}</td>
+                                <td>{estaFinalizado ? "Finalizado" : "Activo"}</td>
+
+                                <td className="d-flex gap-2 justify-content-center flex-wrap">
+                                  {estaFinalizado ? (
+                                    <span className="text-success fw-semibold">
+                                      Intercambio finalizado
+                                    </span>
+                                  ) : (
+                                    <>
+                                      {/* Solo el demandante puede finalizar */}
+                                      {esDemandante && (
+                                        <button
+                                          className="btn btn-oscuro btn-sm"
+                                          onClick={() => handleFinalizarIntercambio(inter)}
+                                        >
+                                          Finalizar
+                                        </button>
+                                      )}
+
+                                      {/* Todos pueden eliminar */}
+                                      <button
+                                        className="btn btn-outline-danger btn-sm"
+                                        onClick={() => handleEliminarIntercambio(inter.id_intercambio)}
+                                      >
+                                        Eliminar
+                                      </button>
+                                    </>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
 
 
@@ -889,6 +901,8 @@ const handleEliminarIntercambio = async (id_intercambio) => {
         />
       )}
 
+
+
       {/* Botón flotante + Mensajería */}
       <BotonMensajeria onClick={() => setMostrarModalMensajes(true)} />
       {mostrarModalMensajes && (
@@ -898,6 +912,7 @@ const handleEliminarIntercambio = async (id_intercambio) => {
         />
       )}
       
+
       {mostrarModalIntercambio && (
       <ModalIntercambio
         mostrar={mostrarModalIntercambio}
