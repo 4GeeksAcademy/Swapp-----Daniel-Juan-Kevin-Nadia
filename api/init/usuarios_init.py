@@ -14,7 +14,11 @@ USUARIOS = [
         "correo_electronico": "kevin@demo.com",
         "contrasena_plana": "kevin123",
         "foto_perfil": "/Hombre1.png",
-        "habilidades": ["Desarrollo web", "Bases de datos", "Java"]
+        "habilidades": [
+            "Desarrollo web",
+            "Ciberseguridad básica",
+            "Instalación de software"
+        ]
     },
     {
         "nombre": "Maddy",
@@ -24,7 +28,11 @@ USUARIOS = [
         "correo_electronico": "maddy@demo.com",
         "contrasena_plana": "maddy123",
         "foto_perfil": "/Mujer1.png",
-        "habilidades": ["Diseño gráfico", "Fotografía", "Ilustración"]
+        "habilidades": [
+            "Diseño gráfico",
+            "Fotografía de viajes",
+            "Publicidad digital"
+        ]
     },
     {
         "nombre": "Juan",
@@ -35,7 +43,7 @@ USUARIOS = [
         "correo_electronico": "juan@demo.com",
         "contrasena_plana": "juan123",
         "foto_perfil": "/Hombre2.png",
-        "habilidades": ["Redacción", "Marketing digital", "SEO"]
+        "habilidades": ["Branding", "Podcasting", "Mindfulness"]
     },
     {
         "nombre": "Nadia",
@@ -46,7 +54,11 @@ USUARIOS = [
             formas",
         "correo_electronico": "nadia@demo.com",
         "contrasena_plana": "nadia123",
-        "habilidades": ["Traducción", "Idiomas", "Comunicación"]
+        "habilidades": [
+            "Apoyo escolar",
+            "Aprendizaje de idiomas",
+            "Educación animal"
+        ]
     },
     {
         "nombre": "Daniel",
@@ -56,7 +68,11 @@ USUARIOS = [
         "correo_electronico": "daniel@demo.com",
         "contrasena_plana": "daniel123",
         "foto_perfil": "/Hombre3.png",
-        "habilidades": ["Ciberseguridad", "Administración de sistemas"]
+        "habilidades": [
+            "Ciberseguridad básica",
+            "Hablar en público",
+            "Asistencia virtual"
+        ]
     },
     {
         "nombre": "Lucía",
@@ -68,9 +84,9 @@ USUARIOS = [
         "contrasena_plana": "lucia123",
         "foto_perfil": "/Mujer3.png",
         "habilidades": [
-            "Diseño UX/UI",
-            "Prototipado",
-            "Investigación de usuarios"
+            "Decoración del hogar",
+            "Jardinería",
+            "Tareas domésticas"
         ]
     },
     {
@@ -82,7 +98,11 @@ USUARIOS = [
         "correo_electronico": "carlos@demo.com",
         "contrasena_plana": "carlos123",
         "foto_perfil": "/Hombre4.png",
-        "habilidades": ["Gestión de proyectos", "Liderazgo", "Scrum"]
+        "habilidades": [
+            "Acompañamiento fitness",
+            "Voluntariado",
+            "Nutrición saludable"
+        ]
     },
     {
         "nombre": "Sofía",
@@ -94,9 +114,9 @@ USUARIOS = [
         "contrasena_plana": "sofia123",
         "foto_perfil": "/Mujer4.png",
         "habilidades": [
-            "Atención al cliente",
-            "Ventas",
-            "Resolución de conflictos"
+            "Higiene y bienestar animal",
+            "DJ y eventos",
+            "Apoyo escolar"
         ]
     },
     {
@@ -107,17 +127,26 @@ USUARIOS = [
         "correo_electronico": "andres@demo.com",
         "contrasena_plana": "andres123",
         "foto_perfil": "/Hombre5.png",
-        "habilidades": ["Edición de video", "Animación", "Producción audiovisual"]
+        "habilidades": [
+            "Soporte técnico",
+            "Programación en Python, Java o C++",
+            "Animación infantil"
+        ]
     },
     {
         "nombre": "Valeria",
         "apellido": "Martínez",
         "estado": "ausente",
-        "descripcion": "Arquitecta enamorada del diseño minimalista y las plantas.",
+        "descripcion": "Arquitecta enamorada del diseño minimalista y \
+            las plantas.",
         "correo_electronico": "valeria@demo.com",
         "contrasena_plana": "valeria123",
         "foto_perfil": "/Mujer5.png",
-        "habilidades": ["Contabilidad", "Finanzas", "Análisis de datos"]
+        "habilidades": [
+            "Asesoría contable",
+            "Marketing digital",
+            "Maquillaje y peinados"
+        ]
     }
 ]
 
