@@ -53,7 +53,7 @@ const [mostrarModalIntercambio, setMostrarModalIntercambio] = useState(false);
     const usuarioGoogle = localStorage.getItem("user");
 
     if (!usuarioToken && !usuarioGoogle) {
-      alert("No hay sesión activa. Por favor inicia sesión.");
+      // alert("No hay sesión activa. Por favor inicia sesión.");
       navigate("/login");
       return;
     }
