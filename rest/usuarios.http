@@ -11,19 +11,15 @@ Accept: application/json
 ###
 
 ### Añadir un Usuario (POST)
-POST http://localhost:5000/api/usuarios
+POST https://swapp-app.onrender.com/api/usuarios
 Content-Type: application/json
 Accept: application/json
 
 {
-    "nombre": "Pedro",
-    "apellido": "Cisneros",
-    "correo_electronico": "pedro.cisneros@example.com",
-    "fecha_nacimiento": "1998-10-14",
-    "contrasena": "abc&123456789",
-    "genero": "masculino",
-    "descripcion": "Me defino como un hombre proactivo",
-    "id_habilidad": 2,
+    "nombre": "Mariel",
+    "apellido": "Urbina",
+    "correo_electronico": "mariel.urbina@example.com",
+    "contrasena": "mariel1234",
     "acepta_terminos": true
 }
 

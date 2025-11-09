@@ -12,7 +12,8 @@ from flask import send_from_directory
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from api.utils import APIException, generate_sitemap
+from api.utils import APIException
+# from api.utils import generate_sitemap
 from api.admin import setup_admin
 from api.models import db
 from api.urls.usuario import usuarios
@@ -25,7 +26,10 @@ from api.urls.auth import auth
 from api.cloudinary.routes import cloudinary_routes
 load_dotenv()
 
-app = Flask(__name__,  static_folder="static", static_url_path="/")
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "../dist")
+
+app = Flask(__name__,  static_folder=STATIC_DIR, static_url_path="/")
 app.url_map.strict_slashes = False
 
 DB_URL = os.getenv("DATABASE_URL")
@@ -67,10 +71,10 @@ def handle_invalid_usage():
 @app.route('/<path:path>')
 def serve_frontend(path):
     """Front"""
-    if path != "" and os.path.exists(f"api/static/{path}"):
-        return send_from_directory('static', path)
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
     else:
-        return send_from_directory('static', 'index.html')
+        return send_from_directory(app.static_folder, "index.html")
 
 
 oauth = OAuth(app)
