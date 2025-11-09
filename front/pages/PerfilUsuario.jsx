@@ -28,9 +28,7 @@ function PerfilUsuario() {
 
   // Habilidades
   const [mostrarModalHabilidad, setMostrarModalHabilidad] = useState(false);
- 
-  // otros estados habilidades
-const [editandoHabilidades, setEditandoHabilidades] = useState(false);
+  const [editandoHabilidades, setEditandoHabilidades] = useState(false);
 
 
   // Mensajería
