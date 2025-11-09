@@ -69,7 +69,7 @@ const ModalPuntuacion = ({ mostrar, onClose, usuarioEvaluado, onSubmit }) => {
 
       setMensaje({ tipo: "success", texto: "Puntuación enviada correctamente." });
 
-      // notificar al padre (el padre hará el PUT /finalizar y refrescará)
+      // notificar finalizar y refrescar
       onSubmit?.({
         puntuacion: Number(puntuacion),
         comentario,
