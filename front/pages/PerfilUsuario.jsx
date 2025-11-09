@@ -337,55 +337,82 @@ const handleEliminarIntercambio = async (id_intercambio) => {
 
 
 //  Puntuaciones
-const abrirModalPuntuacion = (userDestino) => {
-  setUsuarioEvaluado(userDestino);
-  setMostrarModalPuntuacion(true);
-};
+  const abrirModalPuntuacion = (userDestino) => {
+    setUsuarioEvaluado(userDestino);
+    setMostrarModalPuntuacion(true);
+  };
 
-const handleEnviarPuntuacion = async (payload) => {
-  try {
-    const token = getTokenLimpio();
+  const handleEnviarPuntuacion = async (payload) => {
+    try {
+      const token = getTokenLimpio();
 
-    const body = {
-      id_intercambio: usuarioEvaluado?.id_intercambio,
-      id_puntuador: usuario.id_usuario,
-      puntos: payload.puntuacion,
-      comentario: payload.comentario,
-    };
+      const body = {
+        id_intercambio: usuarioEvaluado?.id_intercambio,
+        id_puntuador: usuario.id_usuario,
+        puntos: payload.puntuacion,
+        comentario: payload.comentario,
+      };
 
-    //  Enviar la puntuación
-    const res = await fetch(`${env.api}/api/puntuaciones`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
+      // ✅ 1. Enviar la puntuación al backend
+      const res = await fetch(`${env.api}/api/puntuaciones`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
 
-    if (!res.ok) throw new Error("Error al enviar la puntuación");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Error al enviar la puntuación");
 
-    //  Finalizar el intercambio
-    await fetch(`${env.api}/api/intercambios/${body.id_intercambio}/finalizar`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      // ✅ 2. Finalizar el intercambio en el backend
+      const respFinalizar = await fetch(
+        `${env.api}/api/intercambios/${body.id_intercambio}/finalizar`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    //  Mostrar confirmación
-    alert("✅ Puntuación enviada y el intercambio ha sido finalizado.");
+      if (!respFinalizar.ok) {
+        const errText = await respFinalizar.text();
+        throw new Error(
+          `Error al finalizar intercambio: ${respFinalizar.status} ${errText}`
+        );
+      }
 
-    //  Refrescar la lista
-    obtenerIntercambios();
-  } catch (err) {
-    console.error("Error enviando puntuación:", err);
-    alert("❌ Error al enviar la puntuación o finalizar el intercambio.");
-  } finally {
-    setMostrarModalPuntuacion(false);
-  }
-};
+      // ✅ 3. Actualizar la lista de intercambios en frontend
+      setIntercambios((prev) =>
+        prev.map((inter) =>
+          inter.id_intercambio === body.id_intercambio
+            ? { ...inter, intercambio_finalizado: true }
+            : inter
+        )
+      );
+
+      // ✅ 4. Mostrar mensaje de éxito
+      setMsg({
+        tipo: "success",
+        contenido: "✅ Puntuación enviada y el intercambio ha sido finalizado.",
+      });
+      setTimeout(() => setMsg(null), 4000);
+    } catch (err) {
+      console.error("Error enviando puntuación o finalizando intercambio:", err);
+      setMsg({
+        tipo: "danger",
+        contenido:
+          "❌ Error al enviar la puntuación o finalizar el intercambio.",
+      });
+      setTimeout(() => setMsg(null), 4000);
+    } finally {
+      setMostrarModalPuntuacion(false);
+    }
+  };
+
 
 
 
