@@ -81,7 +81,7 @@ def google_callback():
 
         print("Userinfo recibido:", userinfo)
 
-        frontend_url = "https://swapp-app.onrender.com/auth/google/callback"
+        frontend_url = "https://swapp-app.onrender.com/google/callback"
         params = {
                 "token": access_token,
                 "id_usuario": usuario_db.id_usuario,
