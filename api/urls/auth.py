@@ -28,18 +28,18 @@ def google_callback():
 
         if "error" in request.args:
             print("Usuario canceló el acceso a Google o no concedió permisos.")
-            return redirect("http://localhost:3000/login")
+            return redirect("https://swapp-app.onrender.com")
 
         token = current_app.oauth.google.authorize_access_token()
         if not token:
             print("No se pudo obtener el token de Google")
-            return redirect("http://localhost:3000/login")
+            return redirect("https://swapp-app.onrender.com")
 
         userinfo = token.get(
             "userinfo") or current_app.oauth.google.parse_id_token(token)
         if not userinfo:
             print("No se pudo obtener información del usuario")
-            return redirect("http://localhost:3000/login")
+            return redirect("https://swapp-app.onrender.com")
 
         nombre_completo = userinfo.get("name", "")
         partes = nombre_completo.split(" ", 1)
@@ -81,7 +81,7 @@ def google_callback():
 
         print("Userinfo recibido:", userinfo)
 
-        frontend_url = "http://localhost:3000/auth/google/callback"
+        frontend_url = "https://swapp-app.onrender.com/auth/google/callback"
         params = {
                 "token": access_token,
                 "id_usuario": usuario_db.id_usuario,
@@ -96,7 +96,7 @@ def google_callback():
 
     except Exception as e:
         print("Error en google_callback:", e)
-        return redirect("http://localhost:3000/login")
+        return redirect("https://swapp-app.onrender.com")
 
 
 @auth.route("/logout", methods=["POST", "GET"])
