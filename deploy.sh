@@ -19,12 +19,7 @@ mkdir -p api/static/
 cp -r dist/* api/static/
 
 # --- Migraciones ---
-echo "🗄️ Ejecutando migraciones de base de datos..."
-if [ ! -d "migrations" ]; then
-  pipenv run flask db init
-  pipenv run flask db migrate
-fi
-
+echo "🗄️ Aplicando migraciones de base de datos..."
 pipenv run flask db upgrade
 
 # --- Datos Iniciales ---

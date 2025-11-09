@@ -84,4 +84,4 @@ dist-ssr
 *-lock.json
 
 diagrams/
-migrations/
+# migrations/

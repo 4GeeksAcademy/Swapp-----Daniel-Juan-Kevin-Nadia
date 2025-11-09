@@ -29,12 +29,15 @@ copy_env() {
 migrations() {
     echo -e "\e[34mINFO Iniciando migraciones...\e[0m"
 
-    [[ -d "migrations" ]] && rm -rf migrations && echo -e "\e[36mINFO Eliminado directorio migrations/\e[0m"
+    # [[ -d "migrations" ]] && rm -rf migrations && echo -e "\e[36mINFO Eliminado directorio migrations/\e[0m"
     [[ -d "diagrams" ]] && rm -rf diagrams && echo -e "\e[36mINFO Eliminado directorio diagrams/\e[0m"
     [[ -f "local.db" ]] && rm -f local.db && echo -e "\e[36mINFO Eliminado archivo local.db\e[0m"
 
-    pipenv_run init
-    pipenv_run migrate
+    if [ ! -d "migrations" ]; then
+        pipenv_run init
+        pipenv_run migrate -m "initial_migration"
+    fi
+
     pipenv_run upgrade
     pipenv_run diagram
 
