@@ -24,6 +24,8 @@ from api.urls.intercambio import intercambios
 from api.urls.puntuacion import puntuaciones
 from api.urls.auth import auth
 from api.cloudinary.routes import cloudinary_routes
+from flask_session import Session
+
 load_dotenv()
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -46,6 +48,10 @@ print(f" * Base de datos usada: {DB_URL}")
 app.config["SQLALCHEMY_DATABASE_URI"] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=6)
+app.config["SESSION_TYPE"] = "filesystem"  # o 'redis' si usas Redis
+app.config["SECRET_KEY"] = os.getenv("FLASK_APP_KEY", "clave_segura")
+
+Session(app)
 
 
 MIGRATE = Migrate(app, db)
