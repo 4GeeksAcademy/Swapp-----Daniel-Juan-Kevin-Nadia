@@ -27,7 +27,6 @@ oauthlib = "*"
 requests = "*"
 gunicorn = "*"
 cloudinary = "*"
-flask-session = "*"
 
 [requires]
 python_version = "3.13"
