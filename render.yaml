@@ -29,9 +29,9 @@ services:
       - key: GOOGLE_CLIENT_SECRET
         sync: false
       - key: OAUTH_REDIRECT_URI
-        value: false
+        sync: false
       - key: FRONTEND_URL
-        value: false
+        sync: false
       - key: VITE_APP_NAME
         value: Swapp
       - key: VITE_BACKEND_URL
