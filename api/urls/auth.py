@@ -1,10 +1,10 @@
-# api/urls/auth.py
+"""Autenticación con Google"""
 import os
-from flask import Blueprint, current_app, request, session, url_for, jsonify
-from flask import redirect
-from flask_jwt_extended import create_access_token
-import requests
 import urllib.parse
+from flask import Blueprint, current_app, request, session, jsonify
+from flask import redirect
+from flask_jwt_extended import create_access_token, create_refresh_token
+import requests
 from api.models import db, Usuario
 
 
@@ -13,94 +13,93 @@ auth = Blueprint("auth", __name__)
 
 @auth.route("/google/login", methods=["GET"])
 def google_login():
-
+    """Inicia sesión con google"""
     session["post_auth_redirect"] = request.args.get("next", "/auth/me")
 
-    redirect_uri = os.getenv("OAUTH_REDIRECT_URI") or url_for(
-        "auth.google_callback", _external=True
-    )
+    # redirect_uri = os.getenv("OAUTH_REDIRECT_URI") or url_for(
+    #     "auth.google_callback", _external=True
+    # )
+    redirect_uri = os.getenv("OAUTH_REDIRECT_URI")
     return current_app.oauth.google.authorize_redirect(redirect_uri)
 
 
 @auth.route("/google/callback", methods=["GET"])
 def google_callback():
+    """Autenticación con Google"""
     try:
-
         if "error" in request.args:
-            print("Usuario canceló el acceso a Google o no concedió permisos.")
-            return redirect("https://swapp-app.onrender.com")
+            print("❌ Usuario canceló acceso o no concedió permisos.")
+            return redirect(
+                os.getenv("FRONTEND_URL", "https://swapp-app.onrender.com"))
 
         token = current_app.oauth.google.authorize_access_token()
         if not token:
-            print("No se pudo obtener el token de Google")
-            return redirect("https://swapp-app.onrender.com")
+            print("❌ No se pudo obtener el token de Google")
+            return redirect(
+                os.getenv("FRONTEND_URL", "https://swapp-app.onrender.com"))
 
-        userinfo = token.get(
-            "userinfo") or current_app.oauth.google.parse_id_token(token)
+        userinfo = token.get("userinfo") \
+            or current_app.oauth.google.parse_id_token(token)
+
         if not userinfo:
-            print("No se pudo obtener información del usuario")
-            return redirect("https://swapp-app.onrender.com")
+            print("❌ No se pudo obtener información del usuario")
+            return redirect(
+                os.getenv("FRONTEND_URL", "https://swapp-app.onrender.com"))
 
         nombre_completo = userinfo.get("name", "")
         partes = nombre_completo.split(" ", 1)
         nombre = partes[0]
         apellido = partes[1] if len(partes) > 1 else ""
 
-        userinfo["nombre"] = nombre
-        userinfo["apellido"] = apellido
         usuario_db = Usuario.query.filter_by(
             correo_electronico=userinfo.get("email")).first()
 
         if not usuario_db:
             usuario_db = Usuario(
-                    nombre=userinfo.get("nombre"),
-                    apellido=userinfo.get("apellido"),
-                    correo_electronico=userinfo.get("email"),
-                    foto_perfil=userinfo.get("picture"),
-                )
+                nombre=nombre,
+                apellido=apellido,
+                correo_electronico=userinfo.get("email"),
+                foto_perfil=userinfo.get("picture"),
+                contrasena="google_oauth_dummy",
+            )
             db.session.add(usuario_db)
             db.session.commit()
         else:
-            usuario_db.nombre = userinfo.get("nombre")
-            usuario_db.apellido = userinfo.get("apellido")
+            usuario_db.nombre = nombre
+            usuario_db.apellido = apellido
             if not usuario_db.foto_perfil:
                 usuario_db.foto_perfil = userinfo.get("picture")
             db.session.commit()
 
-        session["google_access_token"] = token.get("access_token")
-        session["google_id_token"] = token.get("id_token")
-
         access_token = create_access_token(
-            identity=userinfo.get("email"),
-            additional_claims={
-                "name": userinfo.get("name"),
-                "picture": userinfo.get("picture"),
-                "provider": "google",
-            },
-        )
+            identity=usuario_db.correo_electronico)
+        refresh_token = create_refresh_token(
+            identity=usuario_db.correo_electronico)
 
-        print("Userinfo recibido:", userinfo)
-
-        frontend_url = "https://swapp-app.onrender.com/google/callback"
+        frontend_url = os.getenv(
+            "FRONTEND_URL", "https://swapp-app.onrender.com")
         params = {
-                "token": access_token,
-                "id_usuario": usuario_db.id_usuario,
-                "nombre": userinfo.get("nombre", ""),
-                "apellido": userinfo.get("apellido", ""),
-                "email": userinfo.get("email", ""),
-                "picture": userinfo.get("picture", "")
-                }
+            "token": access_token,
+            "refresh_token": refresh_token,
+            "id_usuario": usuario_db.id_usuario,
+        }
 
-        redirect_url = f"{frontend_url}?{urllib.parse.urlencode(params)}"
+        redirect_url = (
+            f"{frontend_url}/google/callback?"
+            f"{urllib.parse.urlencode(params)}"
+            )
         return redirect(redirect_url)
 
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-exception-caught
         print("Error en google_callback:", e)
-        return redirect("https://swapp-app.onrender.com")
+        return redirect(
+            os.getenv(
+                "FRONTEND_URL", "https://swapp-app.onrender.com"))
 
 
 @auth.route("/logout", methods=["POST", "GET"])
 def logout():
+    """Cerrar sesión de Google"""
     access_token = session.pop("google_access_token", None)
     revoked = False
     if access_token:
@@ -112,7 +111,7 @@ def logout():
                 timeout=5,
             )
             revoked = True
-        except Exception:
+        except Exception:  # pylint: disable=broad-exception-caught
             revoked = False
 
     session.clear()
@@ -121,4 +120,5 @@ def logout():
 
 @auth.route("/me", methods=["GET"])
 def me():
+    """Estado de la Autenticación"""
     return jsonify({"status": "ok"})

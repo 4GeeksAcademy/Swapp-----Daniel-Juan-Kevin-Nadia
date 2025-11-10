@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import jwtDecode from "jwt-decode";
 
 const GoogleCallback = () => {
   const navigate = useNavigate();
@@ -24,21 +25,38 @@ const GoogleCallback = () => {
     });
 
     if (token) {
-      localStorage.setItem("token", token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          id_usuario,
-          nombre,
-          apellido,
-          correo_electronico: email,
-          foto_perfil: picture,
-        })
-      );
+      try {
+        const decoded = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
 
-      setTimeout(() => navigate("/perfil"), 200);
+        if (decoded.exp && decoded.exp < currentTime) {
+          alert("⚠️ El token de autenticación ha expirado. Por favor, inicia sesión de nuevo.");
+          navigate("/login");
+          return;
+        }
+
+        localStorage.setItem("token", token);
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            id_usuario,
+            nombre,
+            apellido,
+            correo_electronico: email,
+            foto_perfil: picture,
+          })
+        );
+
+        console.log("✅ Token válido, redirigiendo al perfil...");
+
+        setTimeout(() => navigate("/perfil"), 300);
+      } catch (err) {
+        console.error("❌ Error al decodificar el token:", err);
+        alert("Error al procesar el token de Google. Intenta de nuevo.");
+        navigate("/login");
+      }
     } else {
-      alert("Error al autenticar con Google. Intenta de nuevo.");
+      alert("❌ No se recibió token de autenticación. Intenta de nuevo.");
       navigate("/login");
     }
   }, [navigate]);
@@ -46,6 +64,7 @@ const GoogleCallback = () => {
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
       <h4>Autenticando con Google...</h4>
+      <p>Por favor, espera un momento...</p>
     </div>
   );
 };
