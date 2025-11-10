@@ -25,13 +25,23 @@ from api.urls.puntuacion import puntuaciones
 from api.urls.auth import auth
 from api.cloudinary.routes import cloudinary_routes
 
+
 load_dotenv()
+
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "../dist")
 
 app = Flask(__name__,  static_folder=STATIC_DIR, static_url_path="/")
 app.url_map.strict_slashes = False
+
+ROOT_DIR = Path(__file__).resolve().parent.parent  # carpeta raíz del proyecto
+
+
+@app.route("/google/callback")
+def react_google_callback():
+    return send_from_directory(ROOT_DIR, "index.html")
+
 
 DB_URL = os.getenv("DATABASE_URL")
 
