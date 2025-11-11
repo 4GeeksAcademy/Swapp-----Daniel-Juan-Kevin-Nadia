@@ -22,6 +22,7 @@ from api.urls.categorias import categorias
 from api.urls.mensaje import mensajes
 from api.urls.intercambio import intercambios
 from api.urls.puntuacion import puntuaciones
+from api.extensions import oauth, google
 from api.urls.auth import auth
 from api.cloudinary.routes import cloudinary_routes
 
@@ -60,7 +61,7 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 jwt = JWTManager(app)
-oauth = OAuth(app)
+oauth.init_app(app)
 
 
 @app.errorhandler(APIException)

@@ -6,7 +6,7 @@ from flask import redirect, url_for
 from flask_jwt_extended import create_access_token, create_refresh_token
 import requests
 from api.models import db, Usuario
-from api.app import google
+from api.extensions import google
 
 
 auth = Blueprint("auth", __name__)
