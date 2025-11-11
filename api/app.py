@@ -27,9 +27,6 @@ from api.cloudinary.routes import cloudinary_routes
 
 
 load_dotenv()
-print("GOOGLE_CLIENT_ID:", os.getenv("GOOGLE_CLIENT_ID"))
-print("GOOGLE_CLIENT_SECRET:", os.getenv("GOOGLE_CLIENT_SECRET"))
-print("OAUTH_REDIRECT_URI:", os.getenv("OAUTH_REDIRECT_URI"))
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -52,8 +49,11 @@ print(f" * Base de datos usada: {DB_URL}")
 app.config["SQLALCHEMY_DATABASE_URI"] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=6)
-app.config["SESSION_TYPE"] = "filesystem"  # o 'redis' si usas Redis
-app.config["SECRET_KEY"] = os.getenv("FLASK_APP_KEY", "clave_segura")
+app.config["SESSION_TYPE"] = "filesystem"
+app.config["SECRET_KEY"] = os.getenv("FLASK_APP_KEY")
+app.config["SESSION_COOKIE_SAMESITE"] = "None"
+app.config["SESSION_COOKIE_SECURE"] = True
+
 
 MIGRATE = Migrate(app, db)
 db.init_app(app)
