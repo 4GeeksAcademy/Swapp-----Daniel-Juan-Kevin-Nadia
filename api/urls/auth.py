@@ -23,7 +23,7 @@ google = oauth.register(
 )
 
 
-@auth.route("auth/google/login", methods=["GET"])
+@auth.route("/auth/google/login", methods=["GET"])
 def google_login():
     """Inicia sesión con google"""
     # session["post_auth_redirect"] = request.args.get("next", "/auth/me")
@@ -34,7 +34,7 @@ def google_login():
     return google.authorize_redirect(redirect_uri)
 
 
-@auth.route("auth/google/callback", methods=["GET"])
+@auth.route("/auth/google/callback", methods=["GET"])
 def google_callback():
     """Autenticación con Google"""
     try:
@@ -108,7 +108,7 @@ def google_callback():
                 "FRONTEND_URL", "https://swapp-app.onrender.com"))
 
 
-@auth.route("auth/logout", methods=["POST", "GET"])
+@auth.route("/auth/logout", methods=["POST", "GET"])
 def logout():
     """Cerrar sesión de Google"""
     access_token = session.pop("google_access_token", None)
@@ -129,7 +129,7 @@ def logout():
     return jsonify({"ok": True, "google_token_revoked": revoked})
 
 
-@auth.route("auth/me", methods=["GET"])
+@auth.route("/auth/me", methods=["GET"])
 def me():
     """Estado de la Autenticación"""
     return jsonify({"status": "ok"})
