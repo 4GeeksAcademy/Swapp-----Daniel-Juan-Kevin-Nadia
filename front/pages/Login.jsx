@@ -79,8 +79,20 @@ const Login = () => {
             <button
               type="button"
               className="btn-google-swapp mb-3 w-100 d-flex align-items-center justify-content-center gap-2"
-              onClick={() => {
-                window.location.href = `${env.api}/auth/google/login`;
+              onClick={async () => {
+                try {
+                  const res = await fetch(`${env.api}/auth/google/login`, {
+                    method: "GET",
+                    credentials: "include",
+                  });
+                  const data = await res.json();
+                  
+                  if (data?.url) {
+                    window.location.href = data.url;
+                  }
+                } catch (err) {
+                  console.error("Error iniciando login con Google:", err);
+                }
               }}
             >
               <img
