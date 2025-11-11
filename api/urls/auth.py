@@ -16,9 +16,6 @@ def google_login():
     """Inicia sesión con google"""
     session["post_auth_redirect"] = request.args.get("next", "/auth/me")
 
-    # redirect_uri = os.getenv("OAUTH_REDIRECT_URI") or url_for(
-    #     "auth.google_callback", _external=True
-    # )
     redirect_uri = os.getenv("OAUTH_REDIRECT_URI")
     return current_app.oauth.google.authorize_redirect(redirect_uri)
 
