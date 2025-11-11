@@ -4,23 +4,12 @@ import urllib.parse
 from flask import Blueprint, current_app, request, session, jsonify
 from flask import redirect, url_for
 from flask_jwt_extended import create_access_token, create_refresh_token
-from authlib.integrations.flask_client import OAuth
 import requests
 from api.models import db, Usuario
+from api.app import google
 
 
 auth = Blueprint("auth", __name__)
-
-
-oauth = OAuth()
-google = oauth.register(
-    name="google",
-    client_id=os.getenv("GOOGLE_CLIENT_ID"),
-    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
-    access_token_url="https://oauth2.googleapis.com/token",
-    authorize_url="https://accounts.google.com/o/oauth2/v2/auth",
-    client_kwargs={"scope": "openid email profile"},
-)
 
 
 @auth.route("/auth/google/login", methods=["GET"])

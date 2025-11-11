@@ -85,6 +85,15 @@ def serve_frontend(path):
         return send_from_directory(app.static_folder, "index.html")
 
 
+google = oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    access_token_url="https://oauth2.googleapis.com/token",
+    authorize_url="https://accounts.google.com/o/oauth2/v2/auth",
+    client_kwargs={"scope": "openid email profile"},
+)
+
 app.register_blueprint(auth)
 app.register_blueprint(cloudinary_routes)
 app.register_blueprint(usuarios)
