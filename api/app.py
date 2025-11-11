@@ -6,7 +6,6 @@ import os
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
-from authlib.integrations.flask_client import OAuth
 from flask import Flask
 from flask import send_from_directory
 from flask_migrate import Migrate
@@ -84,20 +83,7 @@ def serve_frontend(path):
         return send_from_directory(app.static_folder, "index.html")
 
 
-oauth = OAuth(app)
-app.oauth = oauth
-google = oauth.register(
-    name="google",
-    client_id=os.getenv("GOOGLE_CLIENT_ID"),
-    server_metadata_url=(
-        "https://accounts.google.com/.well-known/openid-configuration"),
-    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
-    access_token_url="https://oauth2.googleapis.com/token",
-    authorize_url="https://accounts.google.com/o/oauth2/v2/auth",
-    client_kwargs={"scope": "openid email profile"},
-)
-
-app.register_blueprint(auth, url_prefix="/auth")
+app.register_blueprint(auth)
 app.register_blueprint(cloudinary_routes)
 app.register_blueprint(usuarios)
 app.register_blueprint(habilidades)

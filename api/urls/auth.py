@@ -4,15 +4,26 @@ import urllib.parse
 from flask import Blueprint, current_app, request, session, jsonify
 from flask import redirect, url_for
 from flask_jwt_extended import create_access_token, create_refresh_token
+from authlib.integrations.flask_client import OAuth
 import requests
 from api.models import db, Usuario
-from api.app import google
 
 
 auth = Blueprint("auth", __name__)
 
 
-@auth.route("/google/login", methods=["GET"])
+oauth = OAuth()
+google = oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    access_token_url="https://oauth2.googleapis.com/token",
+    authorize_url="https://accounts.google.com/o/oauth2/v2/auth",
+    client_kwargs={"scope": "openid email profile"},
+)
+
+
+@auth.route("auth/google/login", methods=["GET"])
 def google_login():
     """Inicia sesión con google"""
     # session["post_auth_redirect"] = request.args.get("next", "/auth/me")
@@ -23,7 +34,7 @@ def google_login():
     return google.authorize_redirect(redirect_uri)
 
 
-@auth.route("/google/callback", methods=["GET"])
+@auth.route("auth/google/callback", methods=["GET"])
 def google_callback():
     """Autenticación con Google"""
     try:
@@ -97,7 +108,7 @@ def google_callback():
                 "FRONTEND_URL", "https://swapp-app.onrender.com"))
 
 
-@auth.route("/logout", methods=["POST", "GET"])
+@auth.route("auth/logout", methods=["POST", "GET"])
 def logout():
     """Cerrar sesión de Google"""
     access_token = session.pop("google_access_token", None)
@@ -118,7 +129,7 @@ def logout():
     return jsonify({"ok": True, "google_token_revoked": revoked})
 
 
-@auth.route("/me", methods=["GET"])
+@auth.route("auth/me", methods=["GET"])
 def me():
     """Estado de la Autenticación"""
     return jsonify({"status": "ok"})
