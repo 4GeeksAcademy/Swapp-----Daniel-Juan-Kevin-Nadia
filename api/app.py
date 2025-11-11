@@ -11,6 +11,7 @@ from flask import send_from_directory
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from authlib.integrations.flask_client import OAuth
 from api.utils import APIException
 # from api.utils import generate_sitemap
 from api.admin import setup_admin
@@ -59,6 +60,7 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 jwt = JWTManager(app)
+oauth = OAuth(app)
 
 
 @app.errorhandler(APIException)

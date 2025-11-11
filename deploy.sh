@@ -5,6 +5,7 @@ echo "🚀 Iniciando build de Render..."
 
 # --- Backend ---
 echo "📦 Instalando dependencias de Python..."
+pip install --upgrade pip
 pip install pipenv
 pipenv install --system --deploy
 

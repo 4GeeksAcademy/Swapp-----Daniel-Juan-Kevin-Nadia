@@ -7,15 +7,12 @@ from flask_jwt_extended import create_access_token, create_refresh_token
 from authlib.integrations.flask_client import OAuth
 import requests
 from api.models import db, Usuario
-from api.app import app
 
 
 auth = Blueprint("auth", __name__)
 
 
 oauth = OAuth()
-oauth.init_app(app)
-
 google = oauth.register(
     name="google",
     client_id=os.getenv("GOOGLE_CLIENT_ID"),
