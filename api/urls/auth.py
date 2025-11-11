@@ -2,10 +2,11 @@
 import os
 import urllib.parse
 from flask import Blueprint, current_app, request, session, jsonify
-from flask import redirect
+from flask import redirect, url_for
 from flask_jwt_extended import create_access_token, create_refresh_token
 import requests
 from api.models import db, Usuario
+from api.app import google
 
 
 auth = Blueprint("auth", __name__)
@@ -14,10 +15,12 @@ auth = Blueprint("auth", __name__)
 @auth.route("/google/login", methods=["GET"])
 def google_login():
     """Inicia sesión con google"""
-    session["post_auth_redirect"] = request.args.get("next", "/auth/me")
+    # session["post_auth_redirect"] = request.args.get("next", "/auth/me")
 
-    redirect_uri = os.getenv("OAUTH_REDIRECT_URI")
-    return current_app.oauth.google.authorize_redirect(redirect_uri)
+    # redirect_uri = os.getenv("OAUTH_REDIRECT_URI")
+    # return current_app.oauth.google.authorize_redirect(redirect_uri)
+    redirect_uri = url_for("auth.google_callback", _external=True)
+    return google.authorize_redirect(redirect_uri)
 
 
 @auth.route("/google/callback", methods=["GET"])
