@@ -82,7 +82,7 @@ def google_callback():
         }
 
         redirect_url = (
-            f"{frontend_url}/google/callback?"
+            f"{frontend_url}/auth/google/callback?"
             f"{urllib.parse.urlencode(params)}"
             )
         return redirect(redirect_url)
