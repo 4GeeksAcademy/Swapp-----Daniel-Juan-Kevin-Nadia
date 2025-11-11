@@ -8,6 +8,6 @@ export default defineConfig({
     port: 3000,
   },
   build: {
-    outDir: "../dist",   // 👈 genera dist al mismo nivel que api
+    outDir: "../dist",
   },
 });
