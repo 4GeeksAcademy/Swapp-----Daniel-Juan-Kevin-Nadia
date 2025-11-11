@@ -19,7 +19,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/perfil" element={<PerfilUsuario />} />
         <Route path="/usuario/:id_usuario" element={<PerfilPublico />} />
-        {/* <Route path="/auth/google/callback" element={<GoogleCallback />} /> */}
+        <Route path="/auth/google/callback" element={<GoogleCallback />} />
         <Route path="/google/callback" element={<GoogleCallback />} />
         <Route
           path="/usuarios/categoria/:id_categoria"
