@@ -7,4 +7,7 @@ export default defineConfig({
     root: "front",
     port: 3000,
   },
+  build: {
+    outDir: "../dist",   // 👈 genera dist al mismo nivel que api
+  },
 });
