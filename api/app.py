@@ -27,6 +27,9 @@ from api.cloudinary.routes import cloudinary_routes
 
 
 load_dotenv()
+print("GOOGLE_CLIENT_ID:", os.getenv("GOOGLE_CLIENT_ID"))
+print("GOOGLE_CLIENT_SECRET:", os.getenv("GOOGLE_CLIENT_SECRET"))
+print("OAUTH_REDIRECT_URI:", os.getenv("OAUTH_REDIRECT_URI"))
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
