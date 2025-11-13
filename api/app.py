@@ -1,94 +1,51 @@
-"""
-    This module takes care of starting the API Server,
-    Loading the DB and Adding the endpoints
-"""
 import os
-from datetime import timedelta
-from pathlib import Path
-from dotenv import load_dotenv
 from flask import Flask
-from flask import send_from_directory
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from api.utils import APIException
-# from api.utils import generate_sitemap
-from api.admin import setup_admin
+
 from api.models import db
 from api.urls.usuario import usuarios
 from api.urls.habilidades import habilidades
 from api.urls.categorias import categorias
 from api.urls.mensaje import mensajes
-from api.urls.intercambio import intercambios
-from api.urls.puntuacion import puntuaciones
-from api.cloudinary.routes import cloudinary_routes
-from api.urls.auth_google import auth_google
-from api.urls.auth_google import oauth
+from api.urls.google_oauth import google_oauth
 
-load_dotenv()
+# ⬅️ IMPORTA AQUI EL oauth Y blueprint
+from api.urls.auth_google import auth_google, oauth
 
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "../dist")
+def create_app():
+    app = Flask(__name__)
+    
+    # Configuración
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 
-app = Flask(__name__,  static_folder=STATIC_DIR, static_url_path="/")
-oauth.init_app(app)
-app.url_map.strict_slashes = False
+    # Inicializar extensiones
+    db.init_app(app)
+    Migrate(app, db)
+    JWTManager(app)
+    CORS(app)
 
-DB_URL = os.getenv("DATABASE_URL")
+    # ⬅️ **MUY IMPORTANTE**
+    oauth.init_app(app)
 
-if DB_URL:
-    if DB_URL.startswith("postgres://"):
-        DB_URL = DB_URL.replace("postgres://", "postgresql://", 1)
-else:
-    BASE_DIR = Path(__file__).resolve().parent.parent
-    db_path = BASE_DIR / "local.db"
-    DB_URL = f"sqlite:///{db_path}"
+    # Registrar Blueprints
+    app.register_blueprint(usuarios)
+    app.register_blueprint(habilidades)
+    app.register_blueprint(categorias)
+    app.register_blueprint(mensajes)
+    app.register_blueprint(google_oauth)
 
-print(f" * Base de datos usada: {DB_URL}")
-app.config["SQLALCHEMY_DATABASE_URI"] = DB_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=6)
-app.config["SESSION_TYPE"] = "filesystem"
-app.config["SECRET_KEY"] = os.getenv("FLASK_APP_KEY")
-app.config["SESSION_COOKIE_SAMESITE"] = "None"
-app.config["SESSION_COOKIE_SECURE"] = True
+    # ⬅️ REGISTRA EL NUEVO AUTH DE GOOGLE
+    app.register_blueprint(auth_google)
 
-
-MIGRATE = Migrate(app, db)
-db.init_app(app)
-CORS(app)
-setup_admin(app)
-jwt = JWTManager(app)
+    return app
 
 
-@app.errorhandler(APIException)
-def handle_invalid_usage():
-    """ Handle/serialize errors like a JSON object """
-    return {}
+app = create_app()
 
-
-# @app.route('/')
-# def sitemap():
-    #  """ generate sitemap with all your endpoints """
-    # return generate_sitemap(app)
-
-
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def serve_frontend(path):
-    """Front"""
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, "index.html")
-
-
-app.register_blueprint(cloudinary_routes)
-app.register_blueprint(usuarios)
-app.register_blueprint(habilidades)
-app.register_blueprint(categorias)
-app.register_blueprint(mensajes)
-app.register_blueprint(intercambios)
-app.register_blueprint(puntuaciones)
-app.register_blueprint(auth_google)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
