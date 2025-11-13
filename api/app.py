@@ -23,6 +23,7 @@ from api.urls.intercambio import intercambios
 from api.urls.puntuacion import puntuaciones
 from api.cloudinary.routes import cloudinary_routes
 from api.urls.auth_google import auth_google
+from api.urls.auth_google import oauth
 
 load_dotenv()
 
@@ -31,6 +32,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "../dist")
 
 app = Flask(__name__,  static_folder=STATIC_DIR, static_url_path="/")
+oauth.init_app(app)
 app.url_map.strict_slashes = False
 
 DB_URL = os.getenv("DATABASE_URL")
