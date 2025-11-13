@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, redirect, url_for
+from flask import Blueprint, redirect
 from flask_jwt_extended import create_access_token
 from authlib.integrations.flask_client import OAuth
 from api.models import db, Usuario
@@ -7,7 +7,6 @@ from datetime import timedelta
 
 auth_google = Blueprint("auth_google", __name__)
 
-# Configurar OAuth
 oauth = OAuth()
 google = oauth.register(
     name="google",
@@ -19,24 +18,23 @@ google = oauth.register(
     client_kwargs={"scope": "openid email profile"},
 )
 
-# Ruta para iniciar sesión con Google
+RENDER_URL = "https://swapp-app-nw6o.onrender.com"
+FRONT_URL = "https://swapp-app-nw6o.onrender.com"   # frontend en Render
 
 
 @auth_google.route("/auth/google/login")
 def google_login():
-    redirect_uri = "http://localhost:5000/auth/google/callback"
+    redirect_uri = f"{RENDER_URL}/auth/google/callback"
     return google.authorize_redirect(redirect_uri)
-
-# Callback de Google
 
 
 @auth_google.route("/auth/google/callback")
 def google_callback():
-    token = google.authorize_access_token()
+    google.authorize_access_token()
     user_info = google.get("userinfo").json()
 
     if not user_info or "email" not in user_info:
-        return redirect("http://localhost:3000/login")
+        return redirect(f"{FRONT_URL}/login")
 
     correo = user_info["email"]
     nombre = user_info.get("name", "")
@@ -55,4 +53,4 @@ def google_callback():
 
     access_token = create_access_token(
         identity=usuario.id, expires_delta=timedelta(days=1))
-    return redirect(f"http://localhost:3000/login?token={access_token}")
+    return redirect(f"{FRONT_URL}/login?token={access_token}")
