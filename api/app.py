@@ -11,7 +11,6 @@ from flask import send_from_directory
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from authlib.integrations.flask_client import OAuth
 from api.utils import APIException
 # from api.utils import generate_sitemap
 from api.admin import setup_admin
@@ -22,10 +21,8 @@ from api.urls.categorias import categorias
 from api.urls.mensaje import mensajes
 from api.urls.intercambio import intercambios
 from api.urls.puntuacion import puntuaciones
-from api.extensions import oauth, google
-from api.urls.auth import auth
 from api.cloudinary.routes import cloudinary_routes
-
+from api.urls.auth_google import auth_google
 
 load_dotenv()
 
@@ -61,7 +58,6 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 jwt = JWTManager(app)
-oauth.init_app(app)
 
 
 @app.errorhandler(APIException)
@@ -86,16 +82,6 @@ def serve_frontend(path):
         return send_from_directory(app.static_folder, "index.html")
 
 
-google = oauth.register(
-    name="google",
-    client_id=os.getenv("GOOGLE_CLIENT_ID"),
-    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
-    access_token_url="https://oauth2.googleapis.com/token",
-    authorize_url="https://accounts.google.com/o/oauth2/v2/auth",
-    client_kwargs={"scope": "openid email profile"},
-)
-
-app.register_blueprint(auth)
 app.register_blueprint(cloudinary_routes)
 app.register_blueprint(usuarios)
 app.register_blueprint(habilidades)
@@ -103,3 +89,4 @@ app.register_blueprint(categorias)
 app.register_blueprint(mensajes)
 app.register_blueprint(intercambios)
 app.register_blueprint(puntuaciones)
+app.register_blueprint(auth_google)

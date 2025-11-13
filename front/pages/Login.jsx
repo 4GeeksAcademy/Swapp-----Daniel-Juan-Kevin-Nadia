@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../assets/styles/Login.css";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { env } from "../environ";
 import { useStore } from "../hooks/useStore";
+import BotonGoogle from "../assets/components/BotonGoogle";
 
 const Login = () => {
   const { _, dispatch } = useStore();
@@ -37,11 +39,12 @@ const Login = () => {
       if (!response.ok) {
         throw new Error("Error al conectar con el servidor");
       }
+
       const data = await response.json();
 
-      if (data) {
-        localStorage.setItem("token", JSON.stringify(data?.token));
-        dispatch({ type: "SET_TOKEN", payload: data?.token });
+      if (data?.token) {
+        localStorage.setItem("token", JSON.stringify(data.token));
+        dispatch({ type: "SET_TOKEN", payload: data.token });
         navigate("/perfil");
       } else {
         setError("Correo o contraseña incorrectos.");
@@ -51,6 +54,18 @@ const Login = () => {
       setError("Error al iniciar sesión");
     }
   };
+
+  // ✅ Capturar token si viene desde Google
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+
+    if (token) {
+      localStorage.setItem("token", JSON.stringify(token));
+      dispatch({ type: "SET_TOKEN", payload: token });
+      navigate("/perfil");
+    }
+  }, [navigate, dispatch]);
 
   return (
     <div className="login-page-swapp container-fluid">
@@ -64,7 +79,6 @@ const Login = () => {
               className="logo-login"
             />
           </Link>
-
           <h4 className="slogan-login">¡Donde todo, tiene otro valor!</h4>
         </div>
 
@@ -75,22 +89,10 @@ const Login = () => {
               Inicia sesión en <span className="text-naranja">Swapp</span>
             </h5>
 
-            {/* Botón Google */}
-            <button
-              type="button"
-              className="btn-google-swapp mb-3 w-100 d-flex align-items-center justify-content-center gap-2"
-              onClick={async () => {
-                window.location.href = `${env.api}/auth/google/login`;
-              }}
-            >
-              <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                alt="Google logo"
-                width="20"
-                height="20"
-              />
-              Iniciar sesión con Google
-            </button>
+            {/* 🔹 Botón de Google */}
+            <div className="mb-4">
+              <BotonGoogle />
+            </div>
 
             <form onSubmit={handleSubmit}>
               {/* Correo */}
@@ -123,7 +125,6 @@ const Login = () => {
                 </div>
               )}
 
-              {/* Botón principal */}
               <button type="submit" className="btn-login-swapp fw-bold w-100">
                 Iniciar sesión
               </button>
