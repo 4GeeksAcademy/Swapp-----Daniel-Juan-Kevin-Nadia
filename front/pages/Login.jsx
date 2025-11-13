@@ -1,7 +1,7 @@
+// front/pages/Login.jsx
 import React, { useState, useEffect } from "react";
 import "../assets/styles/Login.css";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { env } from "../environ";
 import { useStore } from "../hooks/useStore";
 import BotonGoogle from "../assets/components/BotonGoogle";
@@ -55,7 +55,7 @@ const Login = () => {
     }
   };
 
-  // ✅ Capturar token si viene desde Google
+  // ✅ Capturar token cuando Google redirige: /login?token=xxxxx
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
@@ -65,7 +65,7 @@ const Login = () => {
       dispatch({ type: "SET_TOKEN", payload: token });
       navigate("/perfil");
     }
-  }, [navigate, dispatch]);
+  }, [dispatch, navigate]);
 
   return (
     <div className="login-page-swapp container-fluid">
@@ -89,10 +89,8 @@ const Login = () => {
               Inicia sesión en <span className="text-naranja">Swapp</span>
             </h5>
 
-            {/* 🔹 Botón de Google */}
-            <div className="mb-4">
-              <BotonGoogle />
-            </div>
+            {/* Botón Google */}
+            <BotonGoogle />
 
             <form onSubmit={handleSubmit}>
               {/* Correo */}
