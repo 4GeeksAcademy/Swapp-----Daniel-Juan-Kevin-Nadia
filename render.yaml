@@ -3,19 +3,26 @@ services:
     name: swapp-app
     env: python
     plan: free
-    buildCommand: "./deploy.sh"
-    startCommand: "gunicorn api.wsgi:app"
-    numInstances: 1
     region: ohio
+
+    # Construcción (backend + frontend)
+    buildCommand: |
+      pip install -r requirements.txt
+      cd front && npm install && npm run build
+
+    # Inicio solo del BACKEND
+    startCommand: "gunicorn api.app:app"
+
+    # Variables de entorno
     envVars:
       - key: FLASK_APP
         value: api/app
       - key: FLASK_ENV
         value: production
-      - key: FLASK_RUN_PORT
-        value: 5000
       - key: FLASK_RUN_HOST
         value: 0.0.0.0
+      - key: FLASK_RUN_PORT
+        value: 5000
       - key: JWT_SECRET_KEY
         sync: false
       - key: CLOUD_NAME
@@ -32,17 +39,16 @@ services:
         sync: false
       - key: FRONTEND_URL
         sync: false
-      - key: VITE_APP_NAME
-        value: Swapp
       - key: VITE_BACKEND_URL
         sync: false
+      - key: VITE_APP_NAME
+        value: Swapp
       - key: DATABASE_URL
         fromDatabase:
           name: swapp-db
           property: connectionString
 
 databases:
-    - name: swapp-db
-      region: ohio
-      ipAllowList: []
-      plan: free
+  - name: swapp-db
+    region: ohio
+    plan: free
