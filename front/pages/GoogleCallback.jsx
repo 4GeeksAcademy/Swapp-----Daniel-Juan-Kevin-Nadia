@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 
 const GoogleCallback = () => {
   const navigate = useNavigate();
@@ -9,56 +8,53 @@ const GoogleCallback = () => {
     const params = new URLSearchParams(window.location.search);
 
     const token = params.get("token");
+    const refresh = params.get("refresh_token");
     const id_usuario = params.get("id_usuario");
-    const nombre = params.get("nombre") || "";
-    const apellido = params.get("apellido") || "";
-    const email = params.get("email") || "";
-    const picture = params.get("picture") || "";
 
-    console.log("👉 Parámetros que llegan desde Google:", {
+    console.log("👉 Parámetros recibidos desde backend:", {
       token,
+      refresh,
       id_usuario,
-      nombre,
-      apellido,
-      email,
-      picture,
     });
 
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
+    if (!token || !id_usuario) {
+      alert("❌ No se recibió la información necesaria. Intenta de nuevo.");
+      navigate("/login");
+      return;
+    }
 
-        if (decoded.exp && decoded.exp < currentTime) {
-          alert("⚠️ El token de autenticación ha expirado. Por favor, inicia sesión de nuevo.");
+    // Guardar tokens
+    localStorage.setItem("token", token);
+    if (refresh) {
+      localStorage.setItem("refresh_token", refresh);
+    }
+
+    // Guardamos temporalmente el id_usuario
+    localStorage.setItem("id_usuario", id_usuario);
+
+    // 🧠 Ahora obtenemos el usuario REAL desde el backend
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/api/usuarios/${id_usuario}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data || data.error) {
+          console.error("❌ Error al obtener user:", data);
+          alert("No se pudo obtener tu información. Intenta de nuevo.");
           navigate("/login");
           return;
         }
 
-        localStorage.setItem("token", token);
-        localStorage.setItem(
-          "user",
-          JSON.stringify({
-            id_usuario,
-            nombre,
-            apellido,
-            correo_electronico: email,
-            foto_perfil: picture,
-          })
-        );
+        // Guardamos toda la info en localStorage
+        localStorage.setItem("user", JSON.stringify(data));
 
-        console.log("✅ Token válido, redirigiendo al perfil...");
+        console.log("✅ Usuario cargado correctamente:", data);
 
         setTimeout(() => navigate("/perfil"), 300);
-      } catch (err) {
-        console.error("❌ Error al decodificar el token:", err);
-        alert("Error al procesar el token de Google. Intenta de nuevo.");
+      })
+      .catch((err) => {
+        console.error("❌ Error en fetch usuario:", err);
+        alert("Hubo un problema obteniendo tus datos.");
         navigate("/login");
-      }
-    } else {
-      alert("❌ No se recibió token de autenticación. Intenta de nuevo.");
-      navigate("/login");
-    }
+      });
   }, [navigate]);
 
   return (
