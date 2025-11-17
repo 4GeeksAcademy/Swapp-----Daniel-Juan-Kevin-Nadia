@@ -5,7 +5,8 @@ FLASK_RUN_PORT=5000
 FLASK_DEBUG=1
 JWT_SECRET_KEY=clave_secreta
 
-VITE_BACKEND_URL=http://localhost:5000
+VITE_BACKEND_URL=https://swapp-app-fwep.onrender.com
+
 VITE_APP_NAME=Swapp
 VITE_GOOGLE_CLIENT_ID=1024723839431-tlsahi877lj357mbhj3s6a1m2ni9edal.apps.googleusercontent.com
 
@@ -14,6 +15,5 @@ API_KEY=334438165399756
 API_SECRET=ZeY_5bT1VBBNFsWc06A25QDKMlg
 
 FRONTEND_URL=https://swapp-front.onrender.com
+SQLALCHEMY_DATABASE_URI=sqlite:///local.db
 
-DATABASE_URL=postgresql://swapp_db_f94d_user:FpHK0gDSJ2XiAx8jiRnAk4v9EcGfmr9K@dpg-d48gcvruibrs739808jg-a/swapp_db_f94d
-SQLALCHEMY_DATABASE_URI=sqlite:///database.db
