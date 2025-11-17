@@ -5,15 +5,13 @@ services:
     plan: free
     region: ohio
 
-    # Construcción (backend + frontend)
     buildCommand: |
       pip install -r requirements.txt
-      cd front && npm install && npm run build
+      npm install
+      npm run build
 
-    # Inicio solo del BACKEND
     startCommand: "gunicorn api.app:app"
 
-    # Variables de entorno
     envVars:
       - key: FLASK_APP
         value: api/app
