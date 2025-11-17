@@ -14,12 +14,17 @@ from api.urls.categorias import categorias
 from api.urls.mensaje import mensajes
 from api.urls.auth_google import auth_google, oauth
 
+# Seeds
+from api.init.usuarios_init import usuarios_prueba
+from api.init.ins_hab_categ import poblar_datos
+
 
 def create_app():
     app = Flask(__name__)
     app.url_map.strict_slashes = False
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
+        "SQLALCHEMY_DATABASE_URI")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY", "clave_secreta")
 
@@ -28,10 +33,13 @@ def create_app():
     JWTManager(app)
     CORS(app)
 
-    # ⬅️ INICIALIZAR OAUTH CON FLASK
     oauth.init_app(app)
-
     setup_admin(app)
+
+    # Seeds (solo una vez)
+    with app.app_context():
+        usuarios_prueba()
+        poblar_datos()
 
     # Blueprints
     app.register_blueprint(usuarios)
@@ -49,9 +57,3 @@ def create_app():
         return generate_sitemap(app)
 
     return app
-
-
-app = create_app()
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
