@@ -22,8 +22,6 @@ from api.urls.categorias import categorias
 from api.urls.mensaje import mensajes
 from api.urls.intercambio import intercambios
 from api.urls.puntuacion import puntuaciones
-from api.extensions import oauth, google
-from api.urls.auth import auth
 from api.cloudinary.routes import cloudinary_routes
 
 
@@ -50,10 +48,7 @@ print(f" * Base de datos usada: {DB_URL}")
 app.config["SQLALCHEMY_DATABASE_URI"] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=6)
-app.config["SESSION_TYPE"] = "filesystem"
 app.config["SECRET_KEY"] = os.getenv("FLASK_APP_KEY")
-app.config["SESSION_COOKIE_SAMESITE"] = "None"
-app.config["SESSION_COOKIE_SECURE"] = True
 
 
 MIGRATE = Migrate(app, db)
@@ -61,7 +56,7 @@ db.init_app(app)
 CORS(app)
 setup_admin(app)
 jwt = JWTManager(app)
-oauth.init_app(app)
+oauth = OAuth()
 
 
 @app.errorhandler(APIException)
@@ -82,20 +77,9 @@ def serve_frontend(path):
     """Front"""
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
-    else:
-        return send_from_directory(app.static_folder, "index.html")
+    return send_from_directory(app.static_folder, "index.html")
 
 
-google = oauth.register(
-    name="google",
-    client_id=os.getenv("GOOGLE_CLIENT_ID"),
-    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
-    access_token_url="https://oauth2.googleapis.com/token",
-    authorize_url="https://accounts.google.com/o/oauth2/v2/auth",
-    client_kwargs={"scope": "openid email profile"},
-)
-
-app.register_blueprint(auth)
 app.register_blueprint(cloudinary_routes)
 app.register_blueprint(usuarios)
 app.register_blueprint(habilidades)

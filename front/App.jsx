@@ -7,7 +7,6 @@ import Registro from "./pages/Registro";
 import Login from "./pages/Login";
 import PerfilUsuario from "./pages/PerfilUsuario";
 import PerfilPublico from "./pages/PerfilPublico";
-import GoogleCallback from "./pages/GoogleCallback.jsx";
 import UsuariosCategoria from "./pages/UsuariosCategoria.jsx";
 
 export default function App() {
@@ -19,8 +18,6 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/perfil" element={<PerfilUsuario />} />
         <Route path="/usuario/:id_usuario" element={<PerfilPublico />} />
-        <Route path="/auth/google/callback" element={<GoogleCallback />} />
-        <Route path="/google/callback" element={<GoogleCallback />} />
         <Route
           path="/usuarios/categoria/:id_categoria"
           element={<UsuariosCategoria />}

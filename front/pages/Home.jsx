@@ -4,7 +4,7 @@ import CardUsuario from "../assets/components/CardUsuario";
 import Footer from "../assets/components/Footer";
 import ModalMensajeria from "../assets/components/ModalMensajeria";
 import BotonMensajeria from "../assets/components/BotonMensajeria";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { env } from "../environ";
 import { useStore } from "../hooks/useStore";
 

@@ -75,23 +75,6 @@ const Login = () => {
               Inicia sesión en <span className="text-naranja">Swapp</span>
             </h5>
 
-            {/* Botón Google */}
-            <button
-              type="button"
-              className="btn-google-swapp mb-3 w-100 d-flex align-items-center justify-content-center gap-2"
-              onClick={async () => {
-                window.location.href = `${env.api}/auth/google/login`;
-              }}
-            >
-              <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg"
-                alt="Google logo"
-                width="20"
-                height="20"
-              />
-              Iniciar sesión con Google
-            </button>
-
             <form onSubmit={handleSubmit}>
               {/* Correo */}
               <div className="mb-3">
