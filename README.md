@@ -5,12 +5,12 @@
 
 
 ## 🌐 Tecnologías usadas
-    * **React**: para frontend
-    * **Flask**: framework web de Python
-    * **Consumo de Api externa**: cloudinary para fotos de los perfiles de las personas 
+- **React**: para frontend
+- **Flask**: framework web de Python y ORM de SQLAlchemy
+- **Consumo de Api externa**: cloudinary para fotos de los perfiles de las personas 
 
 
-## Estructura de directorios del proyecto
+## 📦 Estructura de directorios del proyecto
 En todo el desarrollo usamos docker containers, usando esta estructura de directorios
 
 ```
@@ -139,5 +139,5 @@ En todo el desarrollo usamos docker containers, usando esta estructura de direct
 
 ## 🚀 Sitio web
 El sitio web está desplegado en la plataforma `https://render.com/`, y el enlace
-de este proyecto rs el siguiente:
-`https://swapp-app.onrender.com`
+de este proyecto es el siguiente:
+[Swapp App](https://swapp-app.onrender.com)
